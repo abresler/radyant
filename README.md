@@ -10,7 +10,8 @@ Interactive data analytics using [R](http://www.r-project.org/) and [Shiny](http
 
 ### Run the development version of the marketing app locally
 
-- Required: [R](http://cran.rstudio.com/)
+- Required: [R](http://cran.rstudio.com/), version 3.0.1 or later
+- Required: Shiny, version 0.6.0 or later
 - Required: A modern browser (e.g., Chrome, Firefox, or Safari). Internet Explorer is not supported.
 - Suggested: [Rstudio](http://www.rstudio.com/ide/download/)
 

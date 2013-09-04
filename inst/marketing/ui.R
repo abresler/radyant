@@ -43,10 +43,8 @@ shinyUI(
         conditionalPanel(condition = "input.datatabs == 'View' && input.datasets != ''",
           wellPanel(
             uiOutput("columns"), 
-            tags$style(type='text/css', "#columns { height: 200px; padding-bottom: 35px;}"),
-            textInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), actionButton("sub_select", "Go"),
-            tags$style(type='text/css', "#dv_select { max-width: 135px; }"),
-            tags$style(type='text/css', "#sub_select { vertical-align: top; width: 45px; }"),
+            textInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
+            actionButton("sub_select", "Go"),
             uiOutput("nrRows")
           ),
           helpModal('View','view',includeRmd("tools/help/example.Rmd"))
@@ -66,6 +64,12 @@ shinyUI(
       )
 
     ),
+
+    # Dataview changes
+    # View --> Manage -- focus on loading, saving, removing data 
+    # Transform --> Change -- Change the variables and the data (e.g., keeping/removing variables) 
+    # Summarize --> Explore -- Put a sortable table in here. Also subset commands etc. and 
+    # Visualize as is but with more plotting options
     
     mainPanel(
       conditionalPanel(condition = "input.datasets != ''",
@@ -73,13 +77,13 @@ shinyUI(
           tabsetPanel(id = "datatabs",
             tabPanel("View", 
               selectInput("saveAs", "", choices = c('rda','csv','dta'), selected = NULL, multiple = FALSE),
-              tags$style(type='text/css', "#saveAs { width: 85px;}"),
               downloadButton('downloadData', 'Save data'),
-              tags$style(type='text/css', "#downloadData { vertical-align: top; height: 18.5px; width: 70px;}"),
               tableOutput("dataviewer")
             ),
             # uiOutput("tab_transform"),
             tabPanel("Transform", 
+              textInput("tr_recode", "Recode (e.g., ...))", ''), 
+              actionButton("tr_recode_sub", "Go"),
               tableOutput("transform_data"), br(),
               verbatimTextOutput("transform_summary")
             ),
@@ -89,10 +93,7 @@ shinyUI(
           )
         ),
         conditionalPanel(condition = "input.tool != 'dataview'",
-          tabsetPanel(id = "analysistabs",
-            tabPanel("Summary", verbatimTextOutput("summary")),
-            tabPanel("Plots", plotOutput("plots", height = "100%"))
-          )
+          uiOutput("ui_analysis_tabs")
         )
       )
     )

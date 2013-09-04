@@ -1,4 +1,4 @@
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
 
 	# source base functions
 	source('radyant.R', local = TRUE)
@@ -18,4 +18,17 @@ shinyServer(function(input, output) {
  	#  	if(input$tool != "dataview") return()
 	#   get(paste('ui_',input$datatabs, sep=""))()
 	# })
+
+	output$ui_analysis_tabs <- renderUI({
+
+	  tabs <- try(get(paste('ui_',input$tool,'_tabs', sep=""))(), silent = TRUE)
+  	if(is(tabs, 'try-error')) {
+	    tabsetPanel(id = "analysistabs",
+  	    tabPanel("Summary", verbatimTextOutput("summary")),
+    	  tabPanel("Plots", plotOutput("plots", height = "100%"))
+	    )
+	  } else {
+
+	  }
+	})
 })

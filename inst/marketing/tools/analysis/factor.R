@@ -58,7 +58,8 @@ summary.preFactor <- function(result) {
 	ev.cvar <- cumsum(ev.var)
 	df <- data.frame(1:length(ev),ev,ev.var,ev.cvar)
 	colnames(df) <- c("Factor","Eigen Values","% of variance","Cumulative %") 
-	print(df, digits = 3, row.names = FALSE)
+	# print(df, digits = 3, row.names = FALSE)
+	df
 }
 
 plot.preFactor <- function(result) {

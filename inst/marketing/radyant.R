@@ -12,7 +12,8 @@ varnames <- function() {
 
 changedata <- function(addCol = NULL, addColName = "") {
 	# function that changes data as needed
-	if(is.null(addCol) || addColName == "") return()
+	# if(is.null(addCol) || addColName == "") return()
+	if(addColName == "") return()
   # isolate ensures that no reactive dependencies are used
   isolate({
   	values[[input$datasets]][,addColName] <- addCol
@@ -194,6 +195,7 @@ output$dataviewer <- renderTable({
 ################################################################
 
 # Generate output for the summary tab
+# output$summary <- renderText({
 output$summary <- renderPrint({
 	if(is.null(input$datasets) || input$tool == 'dataview') return()
 
@@ -204,14 +206,22 @@ output$summary <- renderPrint({
 
 	# call analysis reactive
 	result <- get(input$tool)()
+
 	if(is.character(result)) {
 		# used when no analysis is conducted (e.g., no variables selected yet)
-		cat(result,"\n")
+		# ret <- cat(result,"\n")
+		return(cat(result))
 	} else {
 		# pass analysis results to the summary function
 		f <- get(paste("summary",input$tool,sep = '.'))
-		f(result)
+		ret <- f(result)
 	}
+
+	# query <- parseQueryString(session$clientData$url_search)
+  # print(query)
+
+	ret
+
 })
 
 # Generate output for the plots tab

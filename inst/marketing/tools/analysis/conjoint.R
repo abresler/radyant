@@ -163,7 +163,7 @@ ca_plots <- list("Part-worths" = "pw", "Importance-weights" = "iw")
 
 ui_conjoint <- function() {
   wellPanel(
-  	tags$head(tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")),
+  	# tags$head(tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")),
     uiOutput("ca_var1"),
     uiOutput("ca_var2"),
 	  checkboxInput("ca_rev", label = "Reverse evaluation scores", value = FALSE),

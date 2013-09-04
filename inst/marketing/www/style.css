@@ -38,6 +38,30 @@ textarea {
   width: 750px; 
 }
 
+#columns { 
+  height: 200px; 
+  margin-bottom: 35px;
+}
+
+#dv_select, #tr_recode { 
+  max-width: 135px; 
+}
+
+#sub_select, #tr_recode_sub { 
+  vertical-align: top; 
+  width: 45px; 
+}
+
+#saveAs { 
+  width: 85px;
+}
+
+#downloadData { 
+  vertical-align: top; 
+  height: 18.5px; 
+  width: 70px;
+}
+
 /*.chart_container {
   position: relative;
   display: inline-block;

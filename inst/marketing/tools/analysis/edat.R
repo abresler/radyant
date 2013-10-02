@@ -5,6 +5,8 @@
 output$sm_var <- renderUI({
   vars <- varnames()
   if(is.null(vars)) return()
+  isFct <- sapply(getdata(), is.factor)
+ 	vars <- vars[!isFct]
   selectInput(inputId = "sm_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -14,7 +16,7 @@ alt <- list("Two sided" = "two.sided", "Less than" = "less", "Greater than" = "g
 ui_singleMean <- function() {
   wellPanel(
     uiOutput("sm_var"),
-    selectInput(inputId = "sm_alternative", label = "Alternative hypothesis", choices = alt, selected = "Two sided"),
+    selectInput(inputId = "sm_alternative", label = "Alternative hypothesis:", choices = alt, selected = "Two sided"),
     sliderInput('sm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01),
     numericInput("sm_compValue", "Comparison value:", 0),
   	helpModal('Single mean','singleMean',includeRmd("tools/help/singleMean.Rmd"))
@@ -175,7 +177,8 @@ singleProp <- reactive({
 	dat <- getdata()[,var]
 	lev <- levels(dat)
 	if(length(lev) >2) return("")
-	prop.test(sum(dat == rev(lev)[1]), n = length(dat), 
+	prop <- sum(dat == rev(lev)[1])
+	prop.test(prop, n = length(dat), 
 		p = input$sp_compValue, alternative = input$sp_alternative, conf.level = input$sp_sigLevel, correct = FALSE)
 
 })
@@ -214,6 +217,7 @@ ui_compareProps <- function() {
 	 	helpModal('Compare proportions','compareProps',includeRmd("tools/help/compareProps.Rmd"))
   )
 }
+
 summary.compareProps <- function(result) {
 	print(result$test)
 	prop.table(result$tab, 1)

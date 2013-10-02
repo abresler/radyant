@@ -60,7 +60,7 @@ summary.regression <- function(result) {
 	print(summary(result), digits = 3)
 	if(input$reg_vif) {
 		print(vif.regression(result))
-		cat("\n")
+		# cat("\n")
 	} 
 	if(!is.null(input$reg_var3)) {
 		if(!input$reg_stepwise) {

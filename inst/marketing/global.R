@@ -1,6 +1,6 @@
 # avoid breaks in R-output print and show JSON packets transferred
 # over websockets
-options(width = 150, shiny.trace=TRUE)
+options(width = 150, shiny.trace=TRUE, digits = 3)
 
 if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)
 

@@ -1,0 +1,13 @@
+
+## Single Mean Test
+
+The single mean t-test is used when we want to know whether our sample comes from a particular population but we do not have full population information available to us. The single mean t-test is used only for testing the sample mean against some hypothesized mean (see 'Comparsion value'). Thus, we test whether the average of our sample suggests that our sample comes from a population with a known mean or whether it comes from a different population. We can perform one-tailed test or two-tailed test (see 'Alternative hypotheses') depending on whether only one direction is considered extreme or both directions are considered extreme.
+
+
+## Example:
+Using Markets dataset, we test whether the average weekly sales is greater than $190K.
+
+![Single Mean Test Example](figures/SingleMeanHelp.png)
+
+
+Since the p-value is greater than the conventional level of significance (i.e. 0.05), using our sample data of weekly sales, we cannot reject the "null hypothesis" that the average weekly sales is no greater than $190K.

@@ -210,17 +210,18 @@ output$summary <- renderPrint({
 	if(is.character(result)) {
 		# used when no analysis is conducted (e.g., no variables selected yet)
 		# ret <- cat(result,"\n")
-		return(cat(result))
+		cat(result,"\n")
 	} else {
 		# pass analysis results to the summary function
 		f <- get(paste("summary",input$tool,sep = '.'))
-		ret <- f(result)
+		# ret <- f(result)
+		f(result)
 	}
 
 	# query <- parseQueryString(session$clientData$url_search)
   # print(query)
 
-	ret
+	# ret
 
 })
 
@@ -240,4 +241,4 @@ output$plots <- renderPlot({
 		# used when no analysis is conducted (e.g., no variables selected yet)
 		plot(x = 1, type = 'n', main="No variable selection made", axes = FALSE, xlab = "", ylab = "")
 	}
-}, width=700, height=700)
+}, width=650, height=650)

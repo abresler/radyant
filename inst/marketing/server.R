@@ -25,7 +25,10 @@ shinyServer(function(input, output, session) {
   	if(is(tabs, 'try-error')) {
 	    tabsetPanel(id = "analysistabs",
   	    tabPanel("Summary", verbatimTextOutput("summary")),
-    	  tabPanel("Plots", plotOutput("plots", height = "100%"))
+    	  # tabPanel("Plots", plotOutput("plots", height = "100%"))
+    	  tabPanel("Plots", plotOutput("plots", height = "auto"))
+    	  # tabPanel("Plots", plotOutput("plots", width=650, height='auto'))
+    	  # tabPanel("Plots", plotOutput("plots", height='auto'))
 	    )
 	  } else {
 

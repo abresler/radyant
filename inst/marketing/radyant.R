@@ -33,7 +33,7 @@ loadUserData <- function(filename, uFile, type) {
 	if(ext == 'rda' || ext == 'rdata') {
 		# objname will hold the name of the object inside the R datafile
 	  objname <- robjname <- load(uFile)
-		values[[robjname]] <- get(robjname)
+		values[[robjname]] <- data.frame(get(robjname)) 	# only work with data.frames
 	}
 
 	if(datasets[1] == '') {
@@ -225,6 +225,20 @@ output$summary <- renderPrint({
 
 })
 
+plotHeight <- function(height = 650) {
+
+	# tabs <- try(get(paste('ui_',input$tool,'_plotHeight', sep=""))(), silent = TRUE)
+ #  if(!is(tabs, 'try-error')) {
+
+ #  }
+
+ 	height <- get(input$tool)()[['plotHeight']]
+	if(is.null(height)) return(650)
+
+	height
+}
+
+
 # Generate output for the plots tab
 output$plots <- renderPlot({
 
@@ -241,4 +255,6 @@ output$plots <- renderPlot({
 		# used when no analysis is conducted (e.g., no variables selected yet)
 		plot(x = 1, type = 'n', main="No variable selection made", axes = FALSE, xlab = "", ylab = "")
 	}
-}, width=650, height=650)
+
+	x <- 1000
+}, width=650, height=plotHeight)

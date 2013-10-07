@@ -64,6 +64,8 @@ download <- function(url, ...) {
 }
 
 # setwd("/Users/vnijs/Dropbox/radyant/inst/marketing")
+# dbox_remote <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
+# save(dbox_remote, file = "dbox_remote.rda")
 
 sync_shiny_app <- function() {
 
@@ -71,7 +73,7 @@ sync_shiny_app <- function() {
 
   if(!is(try_remote, 'try-error')) {
 
-    dbox_local <- file.info(list.files(recursive = TRUE))
+    dbox_local <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
     # dbox_remote <- dbox_local
     # save(dbox_remote, file = "dbox_remote.rda")
     load('dbox_remote.rda')

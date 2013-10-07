@@ -13,9 +13,6 @@ if(length(inst.libs) != 0) {
 	suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
 }
 
-dbox_remote <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
-save(dbox_remote, file = "dbox_remote.rda")
-
 # setting up a few standard datasets to play with 
 mtcars$vs <- as.factor(mtcars$vs)
 mtcars$am <- as.factor(mtcars$am)

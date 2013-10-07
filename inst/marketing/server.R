@@ -1,3 +1,6 @@
+dbox_remote <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
+save(dbox_remote, file = "dbox_remote.rda")
+
 shinyServer(function(input, output, session) {
 
 	# source base functions

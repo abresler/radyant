@@ -17,12 +17,25 @@ output$mds_dis <- renderUI({
   selectInput(inputId = "mds_dis", label = "Dissimilarity:", choices = vars[-which(vars %in% c(input$mds_id1,input$mds_id2))], selected = NULL, multiple = FALSE)
 })
 
+output$mds_dim_number <- renderUI({
+  radioButtons(inputId = "mds_dim_number", label = "", c("2-dims" = 2, "3-dims" = 3), selected = "2-dims")
+})
+
+output$mds_rev_dim <- renderUI({
+	rev_list <- list()
+	rev_list[paste("Dimension",1:input$mds_dim_number)] <- 1:input$mds_dim_number
+	checkboxGroupInput("mds_rev_dim", "Reverse:", rev_list)
+})
+
 ui_mds <- function() {
   wellPanel(
   	uiOutput("mds_id1"),
   	uiOutput("mds_id2"),
   	uiOutput("mds_dis"),
-    radioButtons(inputId = "mds_dim_number", label = "", c("2-dims" = 2, "3-dims" = 3), selected = "2-dims")
+  	uiOutput("mds_dim_number"),
+ 	 	conditionalPanel(condition = "input.analysistabs == 'Plots'",
+	  	uiOutput("mds_rev_dim")
+    )
  	)
 }
 
@@ -36,10 +49,6 @@ summary.mds <- function(result) {
 }
 
 plot.mds <- function(result) {
-	# prefac <- result$prefac
-	# ev <- prefac$Eigenvalues[,'0']
-	# plot(ev, type = 'b', col = 'blue', main = "Screeplot of Eigenvalues", ylab = "Eigenvalues", xlab = "# of factors")
-	# abline(1,0, col = 'red')
 
 	out <- result$out
 
@@ -49,17 +58,26 @@ plot.mds <- function(result) {
 		op <- par(mfrow=c(1,1))
 	}
 
+	if(!is.null(input$mds_rev_dim)) {
+		dim2rev <- as.numeric(input$mds_rev_dim)
+		out$points[,dim2rev] <- -1 * out$points[,dim2rev]
+	}
 
 	for(i in 1:(out$nr.dim-1)) {
 		for(j in (i+1):out$nr.dim) {
-			plot(c(-out$lim,out$lim),type = "n",xlab=paste("Dimension",i), ylab=paste("Dimension",j), axes = F, asp = 1, yaxt = 'n', xaxt = 'n', ylim=c(-out$lim, out$lim), xlim=c(-out$lim,out$lim))
+			plot(c(-out$lim,out$lim),type = "n",xlab='', ylab='', axes = F, asp = 1, yaxt = 'n', xaxt = 'n', ylim=c(-out$lim, out$lim), xlim=c(-out$lim,out$lim))
 			title(paste("Perceptual Map for",input$datasets,"data\nDimension",i,"vs Dimsension",j))
 			points(out$points[,i], out$points[,j], col="darkgreen", pch = 16)
 			text(out$points[,i], out$points[,j], out$labels, col=rainbow(out$nr.lev,start=.6,end=.1), cex = out$fsize, adj = c(0.4,-.4))
 			abline(v=0, h=0)
 		}
 	}
+
 	par(op)
+
+	###############################################
+	# move this over to ggplot when you have time
+	###############################################
 
 	# plots <- list()
 	# for(var in input$km_vars) {
@@ -112,6 +130,10 @@ mds <- reactive({
 
 	set.seed(1234)
 
+	###############################################
+	# Might try metaMDS at some point
+	###############################################
+	
 	# co.mds <- suppressWarnings(metaMDS(co.dist.mat, k = nr.dim, trymax = 500))
 	# if(co.mds$converged == FALSE) return("The MDS algorithm did not converge. Please try again.")
 

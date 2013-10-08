@@ -89,7 +89,6 @@ update_app <- function(url) {
 }
 
 # url <- 'https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/'
-setwd('~/Desktop/test/')
 update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/')
 shiny::runApp('.')
 

@@ -89,4 +89,5 @@ update_app <- function(url) {
 }
 
 update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/')
+shiny::runApp('.')
 

@@ -23,7 +23,7 @@ Start R(studio) and copy-and-paste the commands below:
 	dir.create('../Desktop/radyant/', showWarnings = FALSE)
 	setwd('../Desktop/radyant/')
 	source('http://vnijs.rady.ucsd.edu/site_media/R/update.R')
-	shiny::runApp('../Desktop/radyant/')
+	shiny::runApp('~/../Desktop/radyant/')
 
 #### on mac
 

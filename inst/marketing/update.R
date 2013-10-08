@@ -55,11 +55,10 @@ update_app <- function(url) {
     files2get <- c(files2get, existing_files[dbox_remote[existing_files,]$mtime > dbox_local[existing_files,]$mtime])
 
     for(f in files2get) {
+      cat(paste("Getting file",f,"\n"))
       download(url,f)
     }
   }
 }
 
-# url <- 'https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/'
 update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/')
-shiny::runApp('.')

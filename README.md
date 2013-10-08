@@ -8,17 +8,30 @@ Interactive data analytics using [R](http://www.r-project.org/) and [Shiny](http
 - Create help files
 - etc. etc.
 
-### Run the development version of the marketing app locally
+### Install the marketing app locally
 
-- Required: [R](http://cran.rstudio.com/), version 3.0.1 or later
-- Required: Shiny, version 0.6.0 or later
+- Required: [R](http://cran.rstudio.com/), version 3.0.2 or later
+- Required: Shiny, version 0.7.0 or later
 - Required: A modern browser (e.g., Chrome, Firefox, or Safari). Internet Explorer is not supported.
 - Suggested: [Rstudio](http://www.rstudio.com/ide/download/)
 
 Start R(studio) and copy-and-paste the commands below:
 
-	install.packages('shiny', repos = "http://cran.rstudio.com")
-	shiny::runGitHub('radyant','mostly-harmless', subdir = 'inst/marketing')
+#### on windows
+
+	install.packages('shiny', repos = "http://cran.rstudio.com/")
+	dir.create('../Desktop/radyant/')
+	setwd('../Desktop/radyant/')
+	source('http://vnijs.rady.ucsd.edu/site_media/R/update.R')
+	shiny::runApp('../Desktop/radyant/')
+
+#### on mac
+
+	install.packages('shiny', repos = "http://cran.rstudio.com/")
+	dir.create('~/Desktop/radyant/')
+	setwd('~/Desktop/radyant/')
+	source('http://vnijs.rady.ucsd.edu/site_media/R/update.R')
+	shiny::runApp('~/Desktop/radyant/')
 
 ### License
 The radyant package is licensed under the GPLv3. See the files listed below for additional details.

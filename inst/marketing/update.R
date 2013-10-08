@@ -30,6 +30,8 @@ update_app <- function(url) {
     dbox_local <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
     load(f)
 
+    dbox_remote
+
     if(dim(dbox_remote)[1] == dim(dbox_local)[1]) {
       if(sum(dbox_remote$mtime == dbox_local$mtime) == dim(dbox_local)[1]) stop
     }

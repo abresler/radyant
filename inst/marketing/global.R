@@ -13,7 +13,7 @@ if(length(inst.libs) != 0) {
 	suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
 }
 
-source('update.R', local = TRUE)
+# source('update.R', local = TRUE)
 
 # setting up a few standard datasets to play with 
 mtcars$vs <- as.factor(mtcars$vs)

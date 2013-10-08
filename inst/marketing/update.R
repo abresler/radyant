@@ -59,7 +59,7 @@ update_app <- function(url) {
     load(mtime_file)
 
     if(dim(dbox_remote)[1] == dim(dbox_local)[1]) {
-      if(dbox_remote$mtime == dbox_local$mtime) break
+      if(dbox_remote$mtime == dbox_local$mtime) stop
     }
 
     # new dirs
@@ -88,6 +88,8 @@ update_app <- function(url) {
   }
 }
 
+# url <- 'https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/'
+setwd('~/Desktop/test/')
 update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/')
 shiny::runApp('.')
 

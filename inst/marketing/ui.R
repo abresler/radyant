@@ -56,6 +56,9 @@ shinyUI(
         conditionalPanel(condition = "input.datatabs == 'Transform'",
           uiOutput("ui_transform"),
           helpModal('Transform','transform',includeRmd("tools/help/example.Rmd"))
+        ),
+        conditionalPanel(condition = "input.datatabs == 'About'",
+          actionButton("update", "Update")
         )
       ),
       conditionalPanel(condition = "input.tool != 'dataview'",

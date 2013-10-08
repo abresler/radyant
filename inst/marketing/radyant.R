@@ -182,6 +182,19 @@ output$dataviewer <- renderTable({
 
 })
 
+update_radyant <- reactive({
+
+	if(!is.null(input$update)) {
+		isolate({
+			source('update.R')
+			# source('ui.R')
+			# source('server.R')
+			# source('global.R')
+		})
+	}
+
+})
+
 ################################################################
 # Output controls for the Summary and Plots tabs
 # The tabs are re-used for various tools. Depending on the tool

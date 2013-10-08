@@ -186,6 +186,7 @@ update_radyant <- reactive({
 
 	if(!is.null(input$update)) {
 		isolate({
+			# testing
 			source('update.R')
 			# source('ui.R')
 			# source('server.R')

@@ -5,7 +5,7 @@ options(width = 150, shiny.trace=TRUE, digits = 3)
 if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)
 
 options(repos = c("http://cran.rstudio.com/"))
-# libs <- c("shiny", "car", "AER", "Ecdat", "foreign", "tools", "ggplot2", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape", "vegan")
+# libs <- c("AER")
 libs <- c("shiny", "car", "foreign", "tools", "ggplot2", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape", "vegan")
 available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
 inst.libs <- libs[available == FALSE]
@@ -13,8 +13,6 @@ if(length(inst.libs) != 0) {
 	install.packages(inst.libs, dependencies = TRUE)
 	suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
 }
-
-# source('update.R', local = TRUE)
 
 # setting up a few standard datasets to play with 
 mtcars$vs <- as.factor(mtcars$vs)
@@ -33,7 +31,6 @@ values$morley <- morley
 values$rock <- rock
 
 n <- nrow(diamonds)
-
 values$diamonds <- diamonds[sample(1:n,3000),]
 
 datasets <- c("mtcars", "diamonds", "rock")
@@ -67,7 +64,6 @@ datasets <- c("mtcars", "diamonds", "rock")
 # save(packDataSets, file = '~/Desktop/packDataSets.rda')
 
 load('data/packDataSets.rda')
-
 lastLoaded <- "" 		
 
 getTool <- function(inputId) {
@@ -103,10 +99,10 @@ helpPopup <- function(title, content, placement=c('right', 'top', 'left', 'botto
 
 helpModal <- function(title, link, content) {
   html <- sprintf("<div id='%s' class='modal hide fade in' style='display: none; '>
-                   <div class='modal-header'><a class='close' data-dismiss='modal'>×</a>
-                   <h3>%s</h3>
-                   </div>
-                   <div class='modal-body'>%s</div>
+                     <div class='modal-header'><a class='close' data-dismiss='modal'>×</a>
+                       <h3>%s</h3>
+                     </div>
+                     <div class='modal-body'>%s</div>
                    </div>
                    <a data-toggle='modal' href='#%s' class='icon-question-sign'></a>", link, title, content, link)
   HTML(html)

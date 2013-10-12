@@ -20,8 +20,8 @@ Start R(studio) and copy-and-paste the commands below:
 #### on windows
 
 	install.packages('shiny', repos = "http://cran.rstudio.com/")
-	dir.create('../Desktop/radyant/', showWarnings = FALSE)
-	setwd('../Desktop/radyant/')
+	dir.create('~/../Desktop/radyant/', showWarnings = FALSE)
+	setwd('~/../Desktop/radyant/')
 	source('http://vnijs.rady.ucsd.edu/site_media/R/update.R')
 	shiny::runApp('~/../Desktop/radyant/')
 

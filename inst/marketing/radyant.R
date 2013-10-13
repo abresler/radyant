@@ -240,15 +240,15 @@ output$summary <- renderPrint({
 
 plotHeight <- function(height = 650) {
 
-	# tabs <- try(get(paste('ui_',input$tool,'_plotHeight', sep=""))(), silent = TRUE)
- #  if(!is(tabs, 'try-error')) {
+ 	height <- try(get(input$tool)()[['plotHeight']], silent = TRUE)
+	if(is(height, 'try-error')) {
+		return(650)
+	} else {
+		return(height)
+	}
 
- #  }
-
- 	height <- get(input$tool)()[['plotHeight']]
-	if(is.null(height)) return(650)
-
-	height
+	# if(is.null(height)) return(650)
+	# height
 }
 
 
@@ -270,4 +270,5 @@ output$plots <- renderPlot({
 	}
 
 	x <- 1000
-}, width=650, height=plotHeight)
+}, width=650, height=650)
+# }, width=650, height=plotHeight)

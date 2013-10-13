@@ -233,7 +233,6 @@ output$summary <- renderPrint({
 
 	# query <- parseQueryString(session$clientData$url_search)
   # print(query)
-
 	# ret
 
 })
@@ -241,14 +240,11 @@ output$summary <- renderPrint({
 plotHeight <- function(height = 650) {
 
  	height <- try(get(input$tool)()[['plotHeight']], silent = TRUE)
-	if(is(height, 'try-error')) {
+	if(is(height, 'try-error') || is.null(height)) {
 		return(650)
 	} else {
 		return(height)
 	}
-
-	# if(is.null(height)) return(650)
-	# height
 }
 
 
@@ -266,9 +262,7 @@ output$plots <- renderPlot({
 		f(result)
 	} else {
 		# used when no analysis is conducted (e.g., no variables selected yet)
-		plot(x = 1, type = 'n', main="No variable selection made", axes = FALSE, xlab = "", ylab = "")
+		plot(x = 1, type = 'n', main=result, axes = FALSE, xlab = "", ylab = "")
 	}
 
-	x <- 1000
-}, width=650, height=650)
-# }, width=650, height=plotHeight)
+}, width=650, height=plotHeight)

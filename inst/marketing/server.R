@@ -24,26 +24,17 @@ shinyServer(function(input, output, session) {
 
 	output$ui_analysis_tabs <- renderUI({
 
-    tabsetPanel(id = "analysistabs",
- 	    tabPanel("Summary", verbatimTextOutput("summary")),
-   	  tabPanel("Plots", plotOutput("plots", height = "100%"))
-    )
-
+	  tabs <- try(get(paste('ui_',input$tool,'_tabs', sep=""))(), silent = TRUE)
+  	if(is(tabs, 'try-error')) {
+  		return(
+		    tabsetPanel(id = "analysistabs",
+	  	    tabPanel("Summary", verbatimTextOutput("summary")),
+	    	  tabPanel("Plots", plotOutput("plots", height = "100%"))
+		    )
+		  )
+	  } else {
+  		return(tabs)
+	  }
 	})
-
-	# output$ui_analysis_tabs <- renderUI({
-
-	#   tabs <- try(get(paste('ui_',input$tool,'_tabs', sep=""))(), silent = TRUE)
- #  	if(is(tabs, 'try-error')) {
- #  		return(
-	# 	    tabsetPanel(id = "analysistabs",
-	#   	    tabPanel("Summary", verbatimTextOutput("summary")),
-	#     	  tabPanel("Plots", plotOutput("plots", height = "100%"))
-	# 	    )
-	# 	  )
-	#   } else {
- #  		return(tabs)
-	#   }
-	# })
 
 })

@@ -118,10 +118,14 @@ plot.regression <- function(result) {
 regression <- reactive({
 	vars <- input$reg_var2
 	if(is.null(vars)) return("Please select one or more independent variables")
+
 	if(!is.null(input$reg_intsel) && input$reg_interactions != 'none') vars <- c(vars,input$reg_intsel)
 
 	formula <- paste(input$reg_var1, "~", paste(vars, collapse = " + "))
 	dat <- getdata()
+
+	# if(is.character(dat[,input$reg_var1])) return("The dependent variable is of type character. Please choose a numeric variable instead.")
+
 	if(input$reg_standardize) dat <- data.frame(lapply(dat,rescale))
 	if(input$reg_stepwise) {
 		mod <- step(lm(as.formula(paste(input$reg_var1, "~ 1")), data = dat), scope = list(upper = formula), direction = 'forward')

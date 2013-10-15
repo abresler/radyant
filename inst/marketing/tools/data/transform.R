@@ -22,6 +22,10 @@ centerVar <- function(x) {
 	return(x)
 }
 
+makeDate <- function(x) {
+	as.Date(ymd(x))
+}
+
 sq <<- function(x) x^2
 inv <<- function(x) 1/x
 st1 <<- standardize_1sd
@@ -33,7 +37,9 @@ fct <<- as.factor
 rfct <<- revFactorOrder
 num <<- as.numeric
 ch <<- as.character
-d <<- as.Date
+# d <<- as.Date
+d <<- makeDate
+
 # trans_options <- list("None" = "none", "Remove" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 trans_options <- list("None" = "", "Remove" = "remove", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 	"Standardize (2-sd)" = "st2","Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
@@ -138,6 +144,8 @@ output$transform_data <- renderTable({
 	dat <- transform()
 	if(is.null(dat)) return()
 
+	dat <- date2character(dat)
+
 	nr <- min(nrow(dat),10)
 	dat <- data.frame(dat)
 	dat[1:nr,, drop = FALSE]
@@ -151,7 +159,7 @@ output$transform_summary <- renderPrint({
 
 	isFct <- sapply(dat, is.factor)
 	isNum <- sapply(dat, is.numeric)
-	# isDate <- sapply(getdata(), is.Date)
+	isDate <- sapply(dat, is.Date)
 	# isChar <- sapply(getdata(), is.character)
 
 	if(sum(isNum) > 0) {
@@ -161,6 +169,10 @@ output$transform_summary <- renderPrint({
 	if(sum(isFct) > 0) {
 		cat("\nSummarize factors:\n")
 		summary(dat[isFct])
+	}
+	if(sum(isDate) > 0) {
+		cat("\nSummarize date variables:\n")
+		print(summary(dat[isDate]))
 	}
 })
 

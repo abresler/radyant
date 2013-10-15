@@ -23,6 +23,12 @@ getdata <- function(dataset = input$datasets) {
   values[[dataset]]
 }	
 
+date2character <- function(dat = NULL) {
+	isDate <- sapply(dat, is.Date)
+	if(sum(isDate) > 0) dat[,isDate] <- sapply(dat[,isDate], as.character)
+	dat
+}
+
 loadUserData <- function(filename, uFile, type) {
 
 	ext <- file_ext(filename)
@@ -100,8 +106,8 @@ output$datasets <- renderUI({
 
   # if(input$xls_paste != '') {
   if(!is.null(input$xls_paste) && input$xls_paste != '') {
-		values[['xls-data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
-    values[['datasetlist']] <- unique(c('xls-data',values[['datasetlist']]))
+		values[['xls_data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
+    values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
 	}
 
 	# clean out the copy-and-paste box once the data has been stored
@@ -143,13 +149,15 @@ output$nrRows <- renderUI({
 	sliderInput("nrRows", "Rows to show:", min = 1, max = nr, value = c(1,min(15,nr)), step = 1)
 })
 
+
+
 ################################################################
 # Data reactives - view, plot, transform data, and log your work
 ################################################################
 output$dataexample <- renderTable({
 	if(is.null(input$datasets)) return()
 
-	dat <- getdata()
+	dat <- date2character(getdata())
 
 	# Show only the first 20 rows
 	nr <- min(20,nrow(dat))
@@ -159,7 +167,8 @@ output$dataexample <- renderTable({
 output$dataviewer <- renderTable({
 	if(is.null(input$datasets) || is.null(input$columns)) return()
 
-	dat <- getdata()
+	# dat <- getdata()
+	dat <- date2character(getdata())
 
 	# not sure why this is needed when files change ... but it is
 	# without it you will get errors the invalid columns have been

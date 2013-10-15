@@ -5,7 +5,7 @@ options(width = 150, shiny.trace=TRUE, digits = 3)
 if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)
 
 # options(repos = c("http:/cran.rstudio.com/"))
-libs <- c("shiny", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape", "vegan", "ggplot2")
+libs <- c("shiny", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2","lubridate")
 # libs <- c("shiny", "car", "foreign", "tools", "ggplot2", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape", "vegan")
 available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
 inst.libs <- libs[available == FALSE]

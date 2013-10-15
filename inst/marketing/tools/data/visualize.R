@@ -2,7 +2,6 @@
 output$vizvars1 <- renderUI({
 	cols <- varnames()
 	if(is.null(cols)) return()
-
 	selectInput(inputId = "vizvars1", label = "X-variable", choices = as.list(cols), selected = NULL, multiple = FALSE)
 })
 
@@ -10,18 +9,26 @@ output$vizvars1 <- renderUI({
 output$vizvars2 <- renderUI({
 	cols <- varnames()
 	if(is.null(cols)) return()
-	selectInput(inputId = "vizvars2", label = "Y-variable", choices = c("None" = "",as.list(cols[-which(cols == input$vizvars1)])), selected = "", multiple = FALSE)
+
+	dat <- getdata()
+	if(is.Date(dat[,input$vizvars1])) {
+		selectInput(inputId = "vizvars2", label = "Y-variable", choices = as.list(cols[-which(cols == input$vizvars1)]), selected = "", multiple = TRUE)
+	} else {
+		selectInput(inputId = "vizvars2", label = "Y-variable", choices = c("None" = "",as.list(cols[-which(cols == input$vizvars1)])), selected = "", multiple = FALSE)
+	}
 })
 
 output$viz_color <- renderUI({
 	cols <- varnames()
 	if(is.null(cols)) return()
+	if(length(input$vizvars2) > 1) return()
 	selectInput('viz_color', 'Color', c('None'="", as.list(cols)))
 })
 
 output$viz_facet_row <- renderUI({
 	cols <- varnames()
 	if(is.null(cols)) return()
+	if(length(input$vizvars2) > 1) return()
 	# isFct <- sapply(getdata(), is.factor || is.integer)
 	isFct <- sapply(getdata(), is.factor)
  	cols <- cols[isFct]
@@ -31,6 +38,7 @@ output$viz_facet_row <- renderUI({
 output$viz_facet_col <- renderUI({
 	cols <- varnames()
 	if(is.null(cols)) return()
+	if(length(input$vizvars2) > 1) return()
 	# isFct <- sapply(getdata(), is.factor || is.integer)
 	isFct <- sapply(getdata(), is.factor)
  	cols <- cols[isFct]
@@ -45,10 +53,21 @@ output$visualize <- renderPlot({
 		dat <- getdata()
 
 		if(input$vizvars2 == "") {
-			p <- ggplot(dat, aes_string(x=input$vizvars1)) + geom_histogram(colour = 'black', fill = 'blue') 
+			p <- ggplot(dat, aes_string(x=input$vizvars1)) + geom_histogram(fill = 'blue', alpha=.3) 
 			return(print(p))
 		} else {
-		  p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2)) + geom_point()
+
+			if(is.Date(dat[,input$vizvars1])) {
+
+				if(length(input$vizvars2) > 1) {
+					mdat <- melt(dat[,c(input$vizvars1,input$vizvars2)],id="date")
+					p <- ggplot(mdat,aes(x=date,y=value,colour=variable,group=variable)) + geom_line()
+				} else {
+				  p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2)) + geom_line()
+				}
+			} else {
+			  p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2)) + geom_point()
+			}
 		}
 
     if (input$viz_color != '') {
@@ -64,7 +83,7 @@ output$visualize <- renderPlot({
     
     print(p)
 
-}, width = 700, height = 700)
+}, width = 650, height = 650)
 
 # used in ui.R. Structure relevant for (future) modularization
 output$ui_visualize <- renderUI({

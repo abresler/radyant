@@ -4,13 +4,6 @@ output$tr_columns <- renderUI({
 	selectInput("tr_columns", "Select column(s):", choices  = as.list(cols), selected = NULL, multiple = TRUE)
 })
 
-# output$tr_nrRows <- renderUI({
-# 	if(is.null(input$datasets)) return()
-# 	dat <- getdata()
-# 	nr <- nrow(dat)
-# 	sliderInput("tr_nrRows", "Rows to show (max 50):", min = 1, max = nr, value = min(15,nr), step = 1)
-# })
-
 revFactorOrder <- function(x) {
 	x <- as.factor(x)
 	x <- factor(x, levels=rev(levels(x)))
@@ -50,60 +43,32 @@ output$ui_transform <- renderUI({
 	ui_transform()
 })
 
-# output$tr_rename <- renderui({
-#  	if(input$tr_transfunction != "" || input$tr_copyandpaste != "") return()
-#  	textinput("tr_rename", "rename (separate by ',')", '')
-# })
-
-# output$tr_transfunction <- renderUI({
-#  	if(input$tr_rename != "" || input$tr_copyAndPaste != "") return()
-#   selectInput("tr_transfunction", "Change columns", trans_options)
-# })
-
-# output$tr_copyAndPaste <- renderUI({
-#  	if(input$tr_transfunction != "") return()
-#  	div(HTML("<label>Copy-and-paste data from Excel</label>"),
-#   tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, ""))
-# })
-
 ui_transform <- function() {
 	# Inspired by Ian Fellow's transform ui in JGR/Deducer
   wellPanel(
-  	# uiOutput("tr_nrRows"), 
     uiOutput("tr_columns"),
-    # uiOutput("tr_transfunction"),
-	  selectInput("tr_transfunction", "Change columns", trans_options),
-	 	textInput("tr_rename", "Rename (separate by ',')", ''),
-    # uiOutput("tr_rename"),
-    # uiOutput("tr_copyAndPaste"),
-	 	div(HTML("<label>Copy-and-paste data from Excel</label>"),
-  	tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")),
 
-   	# radioButtons("changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add"), selected = "Change"),
-    # conditionalPanel(condition = "input.changeType == 'change'",
-	   #  selectInput("tr_transfunction", "Change columns", trans_options)
-    # ),
-    # conditionalPanel(condition = "input.changeType == 'rename'",
-    # 	textInput("tr_rename", "Rename (separate by ',')", ''),
-	   # 	tags$style(type='text/css', "#tr_rename { max-width: 185px; }")
-    # ),
-    # conditionalPanel(condition = "input.changeType == 'add'",
-    # 	HTML("<label>Copy-and-paste data from Excel</label>"),
-	   #  tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
-    # ),
+   	radioButtons("changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode"), selected = "Change"),
+    conditionalPanel(condition = "input.changeType == 'change'",
+	    selectInput("tr_transfunction", "Change columns:", trans_options)
+    ),
+    conditionalPanel(condition = "input.changeType == 'rename'",
+    	textInput("tr_rename", "Rename (separate by ','):", ''),
+	   	tags$style(type='text/css', "#tr_rename { max-width: 185px; }")
+    ),
+    conditionalPanel(condition = "input.changeType == 'add'",
+    	HTML("<label>Copy-and-paste from Excel:</label>"),
+	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
+    ),
+    conditionalPanel(condition = "input.changeType == 'recode'",
+	    textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
+  	  actionButton("tr_recode_sub", "Go")
+    ),
 
-    # textInput("tr_recode", "Recode (e.g., ...))", ''), 
-    # actionButton("tr_recode_sub", "Go"),
-
-    # tags$style(type='text/css', "#tr_copyAndPaste { onfocus=\"if(this.value != '') this.value='';\" onblur=\"if(this.value != '') this.value='';\""),
     # actionButton("transfix", "Edit variables in place") # using the 'fix(mtcars)' to edit the data 'inplace'. Looks great from R-ui, not so great from Rstudio
     actionButton("addtrans", "Save changes")
   )
 }
-
-# output$tab_transform <- renderUI({
-# 		tabPanel("Transform",tableOutput("transform_data"))
-# })
 
 transform <- reactive({
 	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return()
@@ -114,7 +79,6 @@ transform <- reactive({
 
 		if(!all(input$tr_columns %in% colnames(dat))) return()
 		dat <- data.frame(dat[, input$tr_columns, drop = FALSE])
-		# if(input$tr_transfunction != 'none') {
 		if(input$tr_transfunction != '' && input$tr_transfunction != 'remove') {
 			cn <- c(colnames(dat),paste(input$tr_transfunction,colnames(dat), sep="."))
 			dat <- cbind(dat,colwise(input$tr_transfunction)(dat))
@@ -130,11 +94,12 @@ transform <- reactive({
 				if(nchar(recom) > 50) q()
 				if(length(grep("system",recom)) > 0) q()
 				if(length(grep("rm\\(list",recom)) > 0) q()
-					
+
 				parse_recom <- try(parse(text = recom)[[1]], silent = FALSE)
 				if(!is(parse_recom, 'try-error')) {
 
-					newvarcom <- parse(text = paste("recode(",input$tr_columns[1],",\"",recom,"\")"))
+					# newvarcom <- parse(text = paste0("recode(",input$datasets,"$",input$tr_columns[1],",\"",recom,"\")"))
+					newvarcom <- parse(text = paste0("recode(dat$",input$tr_columns[1],",\"",recom,"\")"))
 					newvar <- eval(newvarcom)
 					newvar <- try(eval(newvarcom), silent = FALSE)
 					if(!is(newvar, 'try-error')) {
@@ -159,7 +124,6 @@ transform <- reactive({
 	}
 
 	if(input$tr_rename != '') {
-		# cvars <- input$tr_rename
 		rcom <- unlist(strsplit(gsub(" ","",input$tr_rename), ","))
 		# names(dat)[names(dat)==input$tr_columns] <- rcom
 		names(dat)[1:length(rcom)] <- rcom
@@ -174,7 +138,6 @@ output$transform_data <- renderTable({
 	dat <- transform()
 	if(is.null(dat)) return()
 
-	# nr <- input$tr_nrRows
 	nr <- min(nrow(dat),10)
 	dat <- data.frame(dat)
 	dat[1:nr,, drop = FALSE]
@@ -210,8 +173,11 @@ observe({
 		} else {
 			changedata(dat, colnames(dat))
 		}
-		# updateTextInput(session, "tr_rename")
-	 	updateTextInput(session = session, inputId = "tr_rename", label = "Rename (separate by ',')", '')
+
+		# reset the values once the changes have been applied
+	 	updateTextInput(session = session, inputId = "tr_recode", label = "Recode (e.g., lo:20 = 1):", '')
+	 	updateTextInput(session = session, inputId = "tr_rename", label = "Rename (separate by ','):", '')
+	 	updateTextInput(session = session, inputId = "tr_copyAndPaste", label = "", '')
 		updateSelectInput(session = session, inputId = "tr_transfunction", choices = trans_options, selected = "None")
 	})
 })

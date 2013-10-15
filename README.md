@@ -3,9 +3,11 @@
 Interactive data analytics using [R](http://www.r-project.org/) and [Shiny](http://www.rstudio.com/shiny/) by [Rstudio](http://www.rstudio.com/). 
 
 ### Todo:
-- Add analysis-tools (e.g., perceptual maps, MDS)
-- Use knitr to log analysis output
+- Use ggplot2 for perceptual maps
 - Create help files
+- Timeseries plots in Visualize using ggplot2
+- Use dplyr to explore and summarize data
+- Use knitr to log analysis output
 - etc. etc.
 
 ### Install the marketing app locally

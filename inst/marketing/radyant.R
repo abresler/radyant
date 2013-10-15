@@ -100,9 +100,12 @@ output$datasets <- renderUI({
 
   # if(input$xls_paste != '') {
   if(!is.null(input$xls_paste) && input$xls_paste != '') {
-		values[['xls-data']] <- read.table(header=T, text=input$xls_paste, sep="\t")
+		values[['xls-data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
     values[['datasetlist']] <- unique(c('xls-data',values[['datasetlist']]))
 	}
+
+	# clean out the copy-and-paste box once the data has been stored
+ 	updateTextInput(session = session, inputId = "xls_paste", label = "", '')
 
 	# # loading package data
 	# if(input$packData != "") {
@@ -150,7 +153,7 @@ output$dataexample <- renderTable({
 
 	# Show only the first 20 rows
 	nr <- min(20,nrow(dat))
-	dat[1:nr, ]
+	data.frame(dat[1:nr,, drop = FALSE])
 })
 
 output$dataviewer <- renderTable({

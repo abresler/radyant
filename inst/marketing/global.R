@@ -33,7 +33,9 @@ values$rock <- rock
 n <- nrow(diamonds)
 values$diamonds <- diamonds[sample(1:n,3000),]
 
-datasets <- c("mtcars", "diamonds", "rock")
+# values$datasets <- c("mtcars", "diamonds", "rock")
+values$datasetlist <- c("mtcars", "diamonds", "rock")
+# datasets <- c("mtcars", "diamonds", "rock")
 
 # loading list of data.frame in the car package
 # listPackData <- function(packs) {

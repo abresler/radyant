@@ -24,15 +24,18 @@ output$factor_vars <- renderUI({
   selectInput(inputId = "factor_vars", label = "Variables:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
-fac_method <- list('Principal components' = 'PCA', 'Maximum Likelihood' = "maxlik")
-fac_rotation <- list('Varimax' = 'varimax', 'None' = 'none')
+# fac_method <- list('Principal components' = 'PCA', 'Maximum Likelihood' = "maxlik")
+fac_method <- c('Principal components' = 'PCA', 'Maximum Likelihood' = "maxlik")
+fac_rotation <- c('Varimax' = 'varimax', 'None' = 'none')
 
-ui_factor <- function() {
+ui_fullFactor <- function() {
   wellPanel(
     uiOutput("factor_vars"), 
     selectInput("fac_method", label = "Method:", choices = fac_method, selected = fac_method[1], multiple = FALSE),
-    selectInput("fac_rotation", label = "Rotation:", choices = fac_rotation, selected = fac_rotation[1], multiple = FALSE),
-    numericInput("fac_number", label = "Number of factors:", min = 1, value = 1)
+    # selectInput("fac_rotation", label = "Rotation:", choices = fac_rotation, selected = fac_rotation[1], multiple = FALSE),
+    radioButtons("fac_rotation", label = "Rotation:", fac_rotation, selected = 'Varimax'),
+    numericInput("fac_number", label = "Number of factors:", min = 1, value = 1),
+    actionButton("fac_savescores", "Save scores")
   )
 }
 
@@ -83,7 +86,7 @@ preFactor <- reactive({
 	return(list(btest = btest, prefac = prefac))
 })
 
-summary.factor <- function(result) {
+summary.fullFactor <- function(result) {
 
 	df <- as.data.frame(result$loadings[])
 	# df$Communality <- result$communality
@@ -97,46 +100,32 @@ summary.factor <- function(result) {
 	# print(str(result))
 }
 
-plot.factor <- function(result) {
+plot.fullFactor <- function(result) {
+
+	if(result$factors < 2) return()
 
 	df <- round(as.data.frame(result$loadings[]),3)
+	rnames <- rownames(df)
+	cnames <- colnames(df)
+	plots <- list()
+	pnr <- 1
+	ab_df <- data.frame(a=c(0,0), b=c(1, 0))
 
-	if(result$factors > 1) {
-		plot(df[,1:2], main = paste("Loadings plot for factors 1 and 2 (Rotation - ",result$rotation,")",sep = ""))
-		text(df, adj = c(.5,-.3), labels = rownames(df))
-		abline(v = 0, h = 0)
+
+	for(i in cnames[-ncol(df)]) {
+		for(j in cnames[c(-1,-which(cnames == i))]) {
+		  df2 <- cbind(df[, c(i,j)],rnames)
+  		plots[[pnr]] <- ggplot(df2, aes_string(x = i, y = j, color = 'rnames', label = 'rnames')) + geom_text() + theme(legend.position = "none") +
+  			xlim(-1,1) + ylim(-1,1) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0)
+  			# xlim(-1,1) + ylim(-1,1) + geom_abline(aes(intercept=a, slope=b), data=ab_df)
+  		pnr <- pnr + 1
+  	}
 	}
 
-	# if(result$factors > 1) {
-	if(result$factors < 1) {
-	# plot not done so not use yet
-
-		x = 1:ncol(df)
-		y = 1:nrow(df)
-
-		image(x,y, matrix(0, length(x), length(y)),
-	  col='white', xaxt='n', yaxt='n',
- 	 	ylim=c(max(y)+0.5, min(y)-0.5), xlab='', ylab='')
-
-		cols = rep('black', ncol(df)*nrow(df))
-		pvals <- unlist(df)
-		cols[pvals>0.3 & pvals<=0.7] = 'blue'
-		centers = expand.grid(y, x)
-		text(centers[,2], centers[,1], unlist(df), col=cols)
-		grid(length(x),length(y))
-
-		# x = 1:ncol(df)
-		# y = 1:nrow(df)
-		# image(x, y, t(as.matrix(df)), col = c('blue', 'white', 'red'),
-	 #      breaks = c(0, 0.3, 0.7, 1), xaxt='n', yaxt='n',
-	 #      ylim=c(max(y)+0.5, min(y)-0.5), xlab='', ylab='')
-		# centers = expand.grid(y, x)
-		# text(centers[,2], centers[,1], unlist(df))
-	}
-
+	print(do.call(grid.arrange, c(plots, list(ncol = 1))))
 }
 
-factor <- reactive({
+fullFactor <- reactive({
 	if(is.null(input$factor_vars) || length(input$factor_vars) < 2) return("Please select two or more variables")
 
 	dat <- getdata()[,input$factor_vars]
@@ -156,8 +145,21 @@ factor <- reactive({
 		fres$rotation <- input$fac_rotation
 	}
 
+	nr.plots <- factorial(c(nrFac,2))
+	# plotHeight = 650 * (nr.plots[1] / nr.plots[2])
+	fres$plotHeight <- 650 * (nr.plots[1] / nr.plots[2])
+
 	return(fres)
 
+})
+
+# save cluster membership when action button is pressed
+observe({
+	if(is.null(input$fac_savescores) || input$fac_savescores == 0) return()
+	isolate({
+		facscores <- data.frame(fullFactor()$scores)
+		changedata(facscores, paste0("fac",1:input$fac_number))
+	})
 })
 
 

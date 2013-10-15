@@ -42,7 +42,7 @@ num <<- as.numeric
 ch <<- as.character
 d <<- as.Date
 # trans_options <- list("None" = "none", "Remove" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
-trans_options <- list("None" = "", "Remove" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
+trans_options <- list("None" = "", "Remove" = "remove", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 	"Standardize (2-sd)" = "st2","Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
 	"As date" = "d")
 
@@ -50,16 +50,51 @@ output$ui_transform <- renderUI({
 	ui_transform()
 })
 
+# output$tr_rename <- renderui({
+#  	if(input$tr_transfunction != "" || input$tr_copyandpaste != "") return()
+#  	textinput("tr_rename", "rename (separate by ',')", '')
+# })
+
+# output$tr_transfunction <- renderUI({
+#  	if(input$tr_rename != "" || input$tr_copyAndPaste != "") return()
+#   selectInput("tr_transfunction", "Change columns", trans_options)
+# })
+
+# output$tr_copyAndPaste <- renderUI({
+#  	if(input$tr_transfunction != "") return()
+#  	div(HTML("<label>Copy-and-paste data from Excel</label>"),
+#   tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, ""))
+# })
+
 ui_transform <- function() {
 	# Inspired by Ian Fellow's transform ui in JGR/Deducer
   wellPanel(
   	# uiOutput("tr_nrRows"), 
     uiOutput("tr_columns"),
-    selectInput("tr_transfunction", "Change columns", trans_options),
-    textInput("tr_rename", "Rename (separate by ',')", ''),
-   	tags$style(type='text/css', "#tr_rename { max-width: 185px; }"),
-   	HTML("<label>Copy-and-paste data from Excel</label>"),
-    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, ""),
+    # uiOutput("tr_transfunction"),
+	  selectInput("tr_transfunction", "Change columns", trans_options),
+	 	textInput("tr_rename", "Rename (separate by ',')", ''),
+    # uiOutput("tr_rename"),
+    # uiOutput("tr_copyAndPaste"),
+	 	div(HTML("<label>Copy-and-paste data from Excel</label>"),
+  	tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")),
+
+   	# radioButtons("changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add"), selected = "Change"),
+    # conditionalPanel(condition = "input.changeType == 'change'",
+	   #  selectInput("tr_transfunction", "Change columns", trans_options)
+    # ),
+    # conditionalPanel(condition = "input.changeType == 'rename'",
+    # 	textInput("tr_rename", "Rename (separate by ',')", ''),
+	   # 	tags$style(type='text/css', "#tr_rename { max-width: 185px; }")
+    # ),
+    # conditionalPanel(condition = "input.changeType == 'add'",
+    # 	HTML("<label>Copy-and-paste data from Excel</label>"),
+	   #  tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
+    # ),
+
+    # textInput("tr_recode", "Recode (e.g., ...))", ''), 
+    # actionButton("tr_recode_sub", "Go"),
+
     # tags$style(type='text/css', "#tr_copyAndPaste { onfocus=\"if(this.value != '') this.value='';\" onblur=\"if(this.value != '') this.value='';\""),
     # actionButton("transfix", "Edit variables in place") # using the 'fix(mtcars)' to edit the data 'inplace'. Looks great from R-ui, not so great from Rstudio
     actionButton("addtrans", "Save changes")
@@ -80,7 +115,7 @@ transform <- reactive({
 		if(!all(input$tr_columns %in% colnames(dat))) return()
 		dat <- data.frame(dat[, input$tr_columns, drop = FALSE])
 		# if(input$tr_transfunction != 'none') {
-		if(input$tr_transfunction != '') {
+		if(input$tr_transfunction != '' && input$tr_transfunction != 'remove') {
 			cn <- c(colnames(dat),paste(input$tr_transfunction,colnames(dat), sep="."))
 			dat <- cbind(dat,colwise(input$tr_transfunction)(dat))
 			colnames(dat) <- cn
@@ -110,8 +145,6 @@ transform <- reactive({
 
 						return(dat)
 					}
-
-
 				} 
 			}
 		})
@@ -126,10 +159,10 @@ transform <- reactive({
 	}
 
 	if(input$tr_rename != '') {
-		cvars <- input$tr_rename
-
-		rcom <- unlist(strsplit(gsub(" ","",cvars), ","))
-		names(dat)[names(dat)==input$tr_columns] <- rcom
+		# cvars <- input$tr_rename
+		rcom <- unlist(strsplit(gsub(" ","",input$tr_rename), ","))
+		# names(dat)[names(dat)==input$tr_columns] <- rcom
+		names(dat)[1:length(rcom)] <- rcom
 	}
 
 	dat
@@ -138,10 +171,13 @@ transform <- reactive({
 output$transform_data <- renderTable({
 	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return()
 
+	dat <- transform()
+	if(is.null(dat)) return()
+
 	# nr <- input$tr_nrRows
-	nr <- 10
-	dat <- data.frame(transform())
-	dat[max(1,nr-50):nr,, drop = FALSE]
+	nr <- min(nrow(dat),10)
+	dat <- data.frame(dat)
+	dat[1:nr,, drop = FALSE]
 })
 
 output$transform_summary <- renderPrint({
@@ -169,6 +205,13 @@ observe({
 	if(is.null(input$addtrans) || input$addtrans == 0) return()
 	isolate({
 		dat <- transform()
-		changedata(dat, colnames(dat))
+		if(input$tr_transfunction == 'remove') {
+			changedata(addColName = colnames(dat))
+		} else {
+			changedata(dat, colnames(dat))
+		}
+		# updateTextInput(session, "tr_rename")
+	 	updateTextInput(session = session, inputId = "tr_rename", label = "Rename (separate by ',')", '')
+		updateSelectInput(session = session, inputId = "tr_transfunction", choices = trans_options, selected = "None")
 	})
 })

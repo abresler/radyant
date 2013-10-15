@@ -6,11 +6,23 @@ label.radio {
   float: none; 
 }
 
+label.checkbox  { 
+  display: inline-block; 
+}
+
+.checkbox input[type="checkbox"] { 
+  float: none; 
+}
+
 select { 
   max-width: 200px; 
 }
 
-textarea { 
+textarea, #tr_rename{ 
+  max-width: 185px; 
+}
+
+#fac_number, #km_nrClus { 
   max-width: 185px; 
 }
 
@@ -47,13 +59,18 @@ textarea {
   max-width: 135px; 
 }
 
+#view_order { 
+  max-width: 135px; 
+  display: inline;
+}
+
+#view_order_desc { 
+  vertical-align: top; 
+}
+
 #sub_select, #tr_recode_sub { 
   vertical-align: top; 
   width: 45px; 
-}
-
-#saveAs { 
-  width: 85px;
 }
 
 #downloadData { 

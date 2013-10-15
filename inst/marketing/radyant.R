@@ -10,14 +10,13 @@ varnames <- function() {
 	cols
 }
 
-changedata <- function(addCol = NULL, addColName = "") {
-	# function that changes data as needed
-	# if(is.null(addCol) || addColName == "") return()
+changedata <- function(addCol = list(NULL), addColName = "") {
+	# change data as specified
 	if(addColName == "") return()
-  # isolate ensures that no reactive dependencies are used
-  isolate({
-  	values[[input$datasets]][,addColName] <- addCol
-  })
+  # isolate ensures no reactive dependencies are used
+  # isolate({
+ 		values[[input$datasets]][,addColName] <- addCol
+  # })
 }
 
 getdata <- function(dataset = input$datasets) {
@@ -36,10 +35,10 @@ loadUserData <- function(filename, uFile, type) {
 		values[[robjname]] <- data.frame(get(robjname)) 	# only work with data.frames
 	}
 
-	if(datasets[1] == '') {
-		datasets <<- c(objname)
+	if(values[['datasetlist']][1] == '') {
+    values[['datasetlist']] <- c(objname)
 	} else {
-		datasets <<- unique(c(objname,datasets))
+    values[['datasetlist']] <- unique(c(objname,values[['datasetlist']]))
 	}
 
 	if(ext == 'sav') {
@@ -64,10 +63,10 @@ loadPackData <- function(pFile) {
 
 	values[[robjname]] <- dat
 
-	if(datasets[1] == '') {
-		datasets <<- c(robjname)
+	if(values[['datasetlist']][1] == '') {
+    values[['datasetlist']] <- c(robjname)
 	} else {
-		datasets <<- unique(c(robjname,datasets))
+    values[['datasetlist']] <- unique(c(robjname,values[['datasetlist']]))
 	}
 }
 
@@ -76,19 +75,18 @@ loadPackData <- function(pFile) {
 #################################################
 
 output$downloadData <- downloadHandler(
-	filename = function() { paste(input$datasets[1],'.',input$saveAs, sep='') },
+	filename = function() { paste(input$datasets,'.',input$saveAs, sep='') },
   content = function(file) {
 
 	  ext <- input$saveAs
-	  robj <- input$datasets[1]
+	  robj <- input$datasets
 
 	  # only save selected columns
-	  assign(robj, getdata()[,input$columns])
+	  # assign(robj, getdata()[,input$columns])
+	  assign(robj, getdata())
 
 		if(ext == 'rda') {
 	    save(list = robj, file = file)
-		} else if(ext == 'dta') {
-			write.dta(get(robj), file)
 		} else if(ext == 'csv') {
 			write.csv(get(robj), file)
 		}
@@ -98,18 +96,12 @@ output$downloadData <- downloadHandler(
 output$datasets <- renderUI({
 
   inFile <- input$uploadfile
+  if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
 
-  if(!is.null(inFile)) {
-		# print(str(inFile))
-		loadUserData(inFile$name, inFile$datapath, input$dataType)
-  }
-
-  # if(!is.null(input$xls_paste)) {
-  if(input$xls_paste != '') {
-		values[['xls-data']] <- read.table(header=T, text=input$xls_paste)
-
-		datasets <<- unique(c('xls-data',datasets))
-		# input[['xls_paste']] = ''
+  # if(input$xls_paste != '') {
+  if(!is.null(input$xls_paste) && input$xls_paste != '') {
+		values[['xls-data']] <- read.table(header=T, text=input$xls_paste, sep="\t")
+    values[['datasetlist']] <- unique(c('xls-data',values[['datasetlist']]))
 	}
 
 	# # loading package data
@@ -121,7 +113,13 @@ output$datasets <- renderUI({
 	# }
 
 	# Drop-down selection of data set
-	selectInput(inputId = "datasets", label = "Datasets:", choices = datasets, selected = datasets[1], multiple = FALSE)
+	# selectInput(inputId = "datasets", label = "Datasets:", choices = datasets, selected = datasets[1], multiple = FALSE)
+	selectInput(inputId = "datasets", label = "Datasets:", choices = values$datasetlist, selected = values$datasetlist[1], multiple = FALSE)
+})
+
+output$removeDataset <- renderUI({
+	# Drop-down selection of data set
+	selectInput(inputId = "removeDataset", label = "Remove data from memory:", choices = values$datasetlist, selected = NULL, multiple = TRUE)
 })
 
 output$packData <- renderUI({
@@ -139,12 +137,22 @@ output$nrRows <- renderUI({
 
 	# number of observations to show in dataview
 	nr <- nrow(dat)
-	sliderInput("nrRows", "Rows to show (max 50):", min = 1, max = nr, value = min(15,nr), step = 1)
+	sliderInput("nrRows", "Rows to show:", min = 1, max = nr, value = c(1,min(15,nr)), step = 1)
 })
 
 ################################################################
 # Data reactives - view, plot, transform data, and log your work
 ################################################################
+output$dataexample <- renderTable({
+	if(is.null(input$datasets)) return()
+
+	dat <- getdata()
+
+	# Show only the first 20 rows
+	nr <- min(20,nrow(dat))
+	dat[1:nr, ]
+})
+
 output$dataviewer <- renderTable({
 	if(is.null(input$datasets) || is.null(input$columns)) return()
 
@@ -169,16 +177,24 @@ output$dataviewer <- renderTable({
 				if(!is(parse_selcom, 'try-error')) {
 					seldat <- try(eval(parse(text = paste("subset(dat,",selcom,")")[[1]])), silent = TRUE)
 					if(is.data.frame(seldat)) {
-						return(seldat[, input$columns, drop = FALSE])
+						# return(seldat[, input$columns, drop = FALSE])
+						dat <- seldat
+						seldat <- NULL
 					}
 				} 
 			}
 		})
 	}
 
+	# order data
+	if(!is.null(input$view_order) && input$view_order != "None") {
+		indx <- order(dat[,input$view_order], decreasing = input$view_order_desc)
+		dat <- dat[indx,]
+	}
+
 	# Show only the selected columns and no more than 50 rows at a time
-	nr <- min(input$nrRows,nrow(dat))
-	data.frame(dat[max(1,nr-50):nr, input$columns, drop = FALSE])
+	nr <- min(input$nrRows[2],nrow(dat))
+	data.frame(dat[input$nrRows[1]:nr, input$columns, drop = FALSE])
 
 })
 
@@ -210,7 +226,7 @@ update_radyant <- reactive({
 # Generate output for the summary tab
 # output$summary <- renderText({
 output$summary <- renderPrint({
-	if(is.null(input$datasets) || input$tool == 'dataview') return()
+	if(is.null(input$datasets) || input$tool == 'data') return()
 
 	# get the summary function for currently selected tool and feed
 	# it the output from the related analysis reactives 
@@ -252,7 +268,7 @@ plotHeight <- function(height = 650) {
 output$plots <- renderPlot({
 
 	# plotting could be expensive so only done when tab is being viewed
-	if(input$tool == 'dataview' || input$analysistabs != 'Plots') return()
+	if(input$tool == 'data' || input$analysistabs != 'Plots') return()
 
 	# call analysis reactive
 	result <- get(input$tool)()

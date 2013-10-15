@@ -76,6 +76,9 @@ plot.pmap <- function(result) {
 					# add arrows
 					for (k in input$pmap_attr) 
 						arrows(0,0, x1=std.m[k,i], y1=std.m[k,j], col="orange", cex=1, length=.1)
+
+					# http://sape.inf.usi.ch/quick-reference/ggplot2/geom_segment
+					# http://docs.ggplot2.org/0.9.3.1/geom_abline.html
 				}
 
 				if("pref" %in% input$pmap_plot) {

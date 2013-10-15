@@ -17,17 +17,25 @@ shinyUI(
       getTool("tool"),
 
       wellPanel(
-        uiOutput("datasets")
+        # uiOutput("datasets")
+        uiOutput("columns"), 
+        textInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
+        actionButton("sub_select", "Go"),
+        uiOutput("nrRows")
       ),
 
       # only show data loading and selection options when in dataview
       conditionalPanel(condition = "input.tool == 'data'",
-        conditionalPanel(condition = "input.datatabs == 'Manage'",
-          uiOutput("ui_manage"),
-          helpModal('Manage','manage',includeRmd("tools/help/example.Rmd"))
-        ),
         conditionalPanel(condition = "input.datatabs == 'View'",
-          uiOutput("ui_view"),
+          uiOutput("ui_view")
+        ),
+        conditionalPanel(condition = "input.datatabs == 'View' && input.datasets != ''",
+          wellPanel(
+            uiOutput("columns"), 
+            textInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
+            actionButton("sub_select", "Go"),
+            uiOutput("nrRows")
+          ),
           helpModal('View','view',includeRmd("tools/help/example.Rmd"))
         ),
         conditionalPanel(condition = "input.datatabs == 'Visualize'",
@@ -59,16 +67,15 @@ shinyUI(
       conditionalPanel(condition = "input.datasets != ''",
         conditionalPanel(condition = "input.tool == 'data'", 
           tabsetPanel(id = "datatabs",
-            tabPanel("Manage", 
-              tableOutput("dataexample")
-            ),
             tabPanel("View", 
+              selectInput("saveAs", "", choices = c('rda','csv','dta'), selected = NULL, multiple = FALSE),
+              downloadButton('downloadData', 'Save data'),
               tableOutput("dataviewer")
             ),
-            # tabPanel("Merge", 
-            #   HTML('<label>Merge data.<br>In progress. Check back soon.</label>')
-            # ),
+            # uiOutput("tab_transform"),
             tabPanel("Transform", 
+              textInput("tr_recode", "Recode (e.g., ...))", ''), 
+              actionButton("tr_recode_sub", "Go"),
               tableOutput("transform_data"), br(),
               verbatimTextOutput("transform_summary")
             ),

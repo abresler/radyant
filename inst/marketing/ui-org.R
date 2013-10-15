@@ -21,13 +21,32 @@ shinyUI(
       ),
 
       # only show data loading and selection options when in dataview
-      conditionalPanel(condition = "input.tool == 'data'",
-        conditionalPanel(condition = "input.datatabs == 'Manage'",
-          uiOutput("ui_manage"),
-          helpModal('Manage','manage',includeRmd("tools/help/example.Rmd"))
-        ),
+      conditionalPanel(condition = "input.tool == 'dataview'",
         conditionalPanel(condition = "input.datatabs == 'View'",
-          uiOutput("ui_view"),
+          wellPanel(
+
+            radioButtons(inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", ".xls" = "xls"), selected = ".rda"),
+            conditionalPanel(condition = "input.dataType != 'xls'",
+              conditionalPanel(condition = "input.dataType == 'csv'",
+                checkboxInput('header', 'Header', TRUE),
+                radioButtons('sep', '', c(Comma=',', Semicolon=';', Tab='\t'), 'Comma')
+              ),
+              fileInput('uploadfile', '')
+            ),
+            conditionalPanel(condition = "input.dataType == 'xls'",
+              HTML("<label>Copy-and-paste data from Excel</label>"),
+              tags$textarea(id="xls_paste", rows=3, cols=40, "")
+            )
+            # selectInput(inputId = "packData", label = "Load package data:", choices = packDataSets, selected = '', multiple = FALSE)
+          )
+        ),
+        conditionalPanel(condition = "input.datatabs == 'View' && input.datasets != ''",
+          wellPanel(
+            uiOutput("columns"), 
+            textInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
+            actionButton("sub_select", "Go"),
+            uiOutput("nrRows")
+          ),
           helpModal('View','view',includeRmd("tools/help/example.Rmd"))
         ),
         conditionalPanel(condition = "input.datatabs == 'Visualize'",
@@ -42,7 +61,7 @@ shinyUI(
         #   actionButton("update", "Update")
         # )
       ),
-      conditionalPanel(condition = "input.tool != 'data'",
+      conditionalPanel(condition = "input.tool != 'dataview'",
         # the appropriate analysis code called based on the selection from the navbar
         uiOutput("ui_analysis")
       )
@@ -57,18 +76,17 @@ shinyUI(
     
     mainPanel(
       conditionalPanel(condition = "input.datasets != ''",
-        conditionalPanel(condition = "input.tool == 'data'", 
+        conditionalPanel(condition = "input.tool == 'dataview'", 
           tabsetPanel(id = "datatabs",
-            tabPanel("Manage", 
-              tableOutput("dataexample")
-            ),
             tabPanel("View", 
+              selectInput("saveAs", "", choices = c('rda','csv','dta'), selected = NULL, multiple = FALSE),
+              downloadButton('downloadData', 'Save data'),
               tableOutput("dataviewer")
             ),
-            # tabPanel("Merge", 
-            #   HTML('<label>Merge data.<br>In progress. Check back soon.</label>')
-            # ),
+            # uiOutput("tab_transform"),
             tabPanel("Transform", 
+              textInput("tr_recode", "Recode (e.g., ...))", ''), 
+              actionButton("tr_recode_sub", "Go"),
               tableOutput("transform_data"), br(),
               verbatimTextOutput("transform_summary")
             ),
@@ -77,7 +95,7 @@ shinyUI(
             tabPanel("About", includeRmd("about.Rmd"))
           )
         ),
-        conditionalPanel(condition = "input.tool != 'data'",
+        conditionalPanel(condition = "input.tool != 'dataview'",
           uiOutput("ui_analysis_tabs")
         )
       )

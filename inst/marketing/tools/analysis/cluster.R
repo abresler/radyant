@@ -86,7 +86,8 @@ ui_kmeansClustering <- function() {
   	conditionalPanel(condition = "input.km_hcinit == false", 
 	    numericInput("km_seed", "Set random seed:", 1234, min = 0)
 	  ),
-    selectInput(inputId = "km_nrClus", label = "Number of clusters", choices = 2:20, selected = NULL, multiple = FALSE),
+    # selectInput(inputId = "km_nrClus", label = "Number of clusters", choices = 2:20, selected = NULL, multiple = FALSE),
+    numericInput("km_nrClus", "Number of clusters", 2, min = 2),
     actionButton("km_saveclus", "Save cluster membership")
   )
 }
@@ -101,11 +102,11 @@ plot.kmeansClustering <- function(result) {
 	dat <- getdata()[,input$km_vars, drop = FALSE]
 	dat$clusvar <- as.factor(result$cluster)
 
-		plots <- list()
-		for(var in input$km_vars) {
-			plots[[var]] <- ggplot(dat, aes_string(x=var, fill='clusvar')) + geom_density(adjust=1.5, alpha=.3) 
-		}
-		print(do.call(grid.arrange, c(plots, list(ncol = min(length(plots),2)))))
+	plots <- list()
+	for(var in input$km_vars) {
+		plots[[var]] <- ggplot(dat, aes_string(x=var, fill='clusvar')) + geom_density(adjust=1.5, alpha=.3) 
+	}
+	print(do.call(grid.arrange, c(plots, list(ncol = min(length(plots),2)))))
 }
 
 # analysis reactives

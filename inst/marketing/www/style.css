@@ -79,6 +79,11 @@ textarea, #tr_rename{
   width: 70px;
 }
 
+#viz_plot_width, #viz_plot_height { 
+  max-width: 60px; 
+}
+
+
 /*.chart_container {
   position: relative;
   display: inline-block;

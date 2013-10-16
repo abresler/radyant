@@ -5,7 +5,6 @@ Interactive data analytics using [R](http://www.r-project.org/) and [Shiny](http
 ### Todo:
 - Use ggplot2 for perceptual maps
 - Create help files
-- Timeseries plots in Visualize using ggplot2
 - Use dplyr to explore and summarize data
 - Use knitr to log analysis output
 - etc. etc.

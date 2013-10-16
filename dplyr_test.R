@@ -1,14 +1,16 @@
-devtools::install_github("assertthat")
-devtools::install_github("dplyr")
- 
+require(devtools)
+install_github("assertthat")
+install_github("dplyr")
+
+require(assertthat)
+require(dplyr)
+
 filter(hflights, Month == 1, DayofMonth == 1, Dest == "DFW")
 head(select(hflights, Year:DayOfWeek))
 summarise(hflights, delay = mean(ArrDelay, na.rm = TRUE), n = length(ArrDelay))
  
- 
 by_dest <- group_by(hflights, Dest)
 filter(by_dest, ArrDelay == max(ArrDelay))
- 
  
 res <- summarise(group_by(hflights, Dest), arr = mean(ArrDelay, na.rm = TRUE))
  

@@ -275,7 +275,6 @@ plotHeight <- function(height = 650) {
 	}
 }
 
-
 # Generate output for the plots tab
 output$plots <- renderPlot({
 

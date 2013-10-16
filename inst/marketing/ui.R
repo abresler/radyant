@@ -34,6 +34,10 @@ shinyUI(
           uiOutput("ui_visualize"),
           helpModal('Visualize','visualize',includeRmd("tools/help/example.Rmd"))
         ),
+        conditionalPanel(condition = "input.datatabs == 'Explore'",
+          uiOutput("ui_explore"),
+          helpModal('Explore','explore',includeRmd("tools/help/example.Rmd"))
+        ),
         conditionalPanel(condition = "input.datatabs == 'Transform'",
           uiOutput("ui_transform"),
           helpModal('Transform','transform',includeRmd("tools/help/example.Rmd"))
@@ -59,21 +63,15 @@ shinyUI(
       conditionalPanel(condition = "input.datasets != ''",
         conditionalPanel(condition = "input.tool == 'data'", 
           tabsetPanel(id = "datatabs",
-            tabPanel("Manage", 
-              tableOutput("dataexample")
-            ),
-            tabPanel("View", 
-              tableOutput("dataviewer")
-            ),
-            # tabPanel("Merge", 
-            #   HTML('<label>Merge data.<br>In progress. Check back soon.</label>')
-            # ),
+            tabPanel("Manage", tableOutput("dataexample")),
+            tabPanel("View", tableOutput("dataviewer")),
+            tabPanel("Visualize", plotOutput("visualize", width = "100%", height = "100%")),
+            tabPanel("Explore", verbatimTextOutput("expl_data")),
+            # tabPanel("Merge", #   HTML('<label>Merge data.<br>In progress. Check back soon.</label>') # ),
             tabPanel("Transform", 
               tableOutput("transform_data"), br(),
               verbatimTextOutput("transform_summary")
             ),
-            tabPanel("Summarize", HTML('<label>Summarize and explore your data using plyr, reshape, etc.<br>In progress. Check back soon.</label>')),
-            tabPanel("Visualize", plotOutput("visualize", height = "100%")),
             tabPanel("About", includeRmd("about.Rmd"))
           )
         ),

@@ -22,9 +22,9 @@ centerVar <- function(x) {
 	return(x)
 }
 
-makeDate <- function(x) {
-	as.Date(ymd(x))
-}
+# makeDate <- function(x) {
+# 	as.Date(ymd(x))
+# }
 
 sq <<- function(x) x^2
 inv <<- function(x) 1/x
@@ -37,8 +37,8 @@ fct <<- as.factor
 rfct <<- revFactorOrder
 num <<- as.numeric
 ch <<- as.character
-# d <<- as.Date
-d <<- makeDate
+d <<- as.Date
+# d <<- makeDate
 
 # trans_options <- list("None" = "none", "Remove" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 trans_options <- list("None" = "", "Remove" = "remove", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 

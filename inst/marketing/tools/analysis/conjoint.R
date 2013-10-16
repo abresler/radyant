@@ -121,6 +121,7 @@ output$ca_var2 <- renderUI({
 plot.conjoint <- function(result) {
 
 	theTable <- ca_theTable(result)
+	plot_ylim <- theTable$plot_ylim
 
 	if(input$ca_plots == 'pw') {
 		PW.df <- theTable[['PW']]
@@ -131,23 +132,16 @@ plot.conjoint <- function(result) {
 
 			# setting the levels in the same order as in theTable. Without this
 			# ggplot would change the ordering of the price levels
+			PW.var$Levels <- factor(PW.var$Levels,levels=PW.var$Levels,ordered=FALSE)
 
-			# BROKEN!!! WTF!!! Try with MP3 data to see problem
-			# PW.var$Levels <- factor(PW.var$Levels,levels=PW.var$Levels,ordered=FALSE)
-			# from http://www.stat.berkeley.edu/classes/s133/factors.html
-
-			PW.var$Levels <- as.factor(PW.var$Levels)
-
-			# plot.ylim <- c(rangePW[var,'Min'],ceiling(rangePW[maxRangeInd,'Range']))
-			# plot.ylim[1] <- floor(plot.ylim[1])
-			# nr.ticks.max <- min(8, ceiling(rangePW[maxRangeInd,'Range']))
-			# plot.ylim[2] <- ceiling(plot.ylim[1] + plot.ylim[2])
-			# plots[[var]] <- ggplot(PW.var, aes_string(x='Levels', y='PW', group = 1)) +
-			nPW <- nrow(PW.var)
-			plots[[var]] <- ggplot(PW.var, aes(x=Levels, y=PW, group = 1)) +
+			p <- ggplot(PW.var, aes(x=Levels, y=PW, group = 1)) +
 				  geom_line(colour="blue", linetype = 'dotdash', size=.7) + 
 	  		  geom_point(colour="blue", size=4, shape=21, fill="white") +
 		  	  labs(list(title = paste("Part-worths for", var), x = ""))
+
+		  if(input$ca_scale_plot) p <- p + ylim(plot_ylim[var,'Min'],plot_ylim[var,'Max'])
+
+			plots[[var]] <- p
 		}
 		print(do.call(grid.arrange, c(plots, list(ncol = min(length(plots),2)))))
 	} else {
@@ -177,6 +171,7 @@ ui_conjoint <- function() {
   	# ),
   	# br(),
     conditionalPanel(condition = "input.analysistabs == 'Plots'",
+	    checkboxInput(inputId = "ca_scale_plot", label = "Scale PW plots", value = FALSE),
       selectInput("ca_plots", "Conjoint plots:", choices = ca_plots, selected = 'pw', multiple = FALSE)
     )
   )
@@ -276,8 +271,15 @@ ca_theTable <- function(result) {
 	colnames(rangePW) <- c("Max","Min","Range")
 	rownames(rangePW) <- vars
 
-	maxRangeInd <- which.max(rangePW$Range)
-	ylim <- rangePW[maxRangeInd,c("Min","Max")]
+	# maxRangeInd <- which.max(rangePW$Range)
+	# ylim <- rangePW[maxRangeInd,c("Min","Max")]
+
+	# for plot range if standardized
+	maxlim <- rangePW[,'Max'] > abs(rangePW[,'Min'])
+	maxrange <- max(rangePW[,'Range'])
+	plot_ylim <- rangePW[,c('Min','Max')]
+	plot_ylim[maxlim,'Max'] <- maxrange
+	plot_ylim[maxlim == FALSE,'Min'] <- -maxrange
 
 	IW <- data.frame(vars)
 	IW$IW <- rangePW$Range / sum(rangePW$Range)
@@ -291,5 +293,25 @@ ca_theTable <- function(result) {
 	PW.df[,'PW'] <- round(PW.df[,'PW'],3)
 	IW[,'IW'] <- round(IW[,'IW'],3)
 
-	list('PW' = PW.df, 'IW' = IW)
+	# con_lim <- list('PW' = PW.df, 'IW' = IW, 'ylim' = ylim, 'rangePW' = rangePW)
+	# save(con_lim, file = 'con_lim.rda')
+
+	list('PW' = PW.df, 'IW' = IW, 'plot_ylim' = plot_ylim)
 }
+
+
+# getwd()
+# load('con_lim.rda')
+# attach(con_lim)
+# rangePW
+
+# maxlim <- rangePW[,'Max'] > abs(rangePW[,'Min'])
+# maxrange <- max(rangePW[,'Range'])
+
+# ylim <- rangePW[,c('Min','Max')]
+# ylim[maxlim,'Max'] <- maxrange
+# ylim[maxlim == FALSE,'Min'] <- -maxrange
+# ylim
+
+# maxlim == FALSE
+

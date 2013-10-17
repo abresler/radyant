@@ -15,7 +15,7 @@ changedata <- function(addCol = list(NULL), addColName = "") {
 	if(addColName[1] == "") return()
   # isolate ensures no reactive dependencies are used
   isolate({
-  	if(length(addCol) == 1) return(values[[input$datasets]][,addColName] <- addCol)
+  	if(length(addCol) == 1 && is.null(addCol[[1]])) return(values[[input$datasets]][,addColName] <- addCol)
   	if(nrow(getdata()) == nrow(addCol)) return(values[[input$datasets]][,addColName] <- addCol)
   })
 }

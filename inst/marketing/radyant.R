@@ -19,9 +19,18 @@ changedata <- function(addCol = list(NULL), addColName = "") {
   })
 }
 
-getdata <- function(dataset = input$datasets) {
-  values[[dataset]]
-}	
+# getdata <- function(dataset = input$datasets) {
+#   values[[dataset]]
+# }	
+
+getdata <- reactive({
+	if(is.null(input$data_filter)) {
+		return(values[[input$datasets]])
+	} else {
+		dat <- values[[input$datasets]]
+		dat[dat[,input$data_filter], ]
+	}
+})
 
 date2character <- function(dat = NULL) {
 	isDate <- sapply(dat, is.Date)

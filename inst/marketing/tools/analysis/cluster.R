@@ -51,9 +51,11 @@ hclustering <- reactive({
 	} else {
 		dist.data <- dist(dat, method = input$hc_dist)
 	}
-	hclust(d = dist.data, method= input$hc_meth)
+	
+	res <- hclust(d = dist.data, method= input$hc_meth)
+	res$plotHeight = 650 * 2
+	res
 })
-
 
 observe({
 	if(is.null(input$hc_saveclus) || input$hc_saveclus == 0) return()

@@ -9,8 +9,10 @@ output$vizvars1 <- renderUI({
 output$vizvars2 <- renderUI({
 	cols <- varnames()
 	if(is.null(cols)) return()
+	if(is.null(input$vizvars1)) return()
 
 	dat <- getdata()
+	if(!input$vizvars1 %in% colnames(dat)) return()
 	if(is.Date(dat[,input$vizvars1])) {
 		selectInput(inputId = "vizvars2", label = "Y-variable", choices = as.list(cols[-which(cols == input$vizvars1)]), selected = "", multiple = TRUE)
 	} else {
@@ -45,7 +47,6 @@ output$viz_facet_col <- renderUI({
 	selectInput('viz_facet_col', 'Facet col', c(None='.', as.list(cols)))
 })
 
-
 viz_plot_width <- function() {
  	return(input$viz_plot_width)
 }
@@ -55,11 +56,12 @@ viz_plot_height <- function() {
 }
 
 output$visualize <- renderPlot({
-	if(is.null(input$datasets) || is.null(input$vizvars2)) return()
+	if(is.null(input$datasets) || is.null(input$vizvars1) || is.null(input$vizvars2)) return()
 	if(input$datatabs != 'Visualize') return()
 
 		# inspired by Joe Cheng's ggplot2 browser app http://www.youtube.com/watch?feature=player_embedded&v=o2B5yJeEl1A#!
 		dat <- getdata()
+		if(!input$vizvars1 %in% colnames(dat)) return()
 
 		if(input$vizvars2 == "") {
 			p <- ggplot(dat, aes_string(x=input$vizvars1)) + geom_histogram(fill = 'blue', alpha=.3) 
@@ -75,7 +77,14 @@ output$visualize <- renderPlot({
 				  p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2)) + geom_line()
 				}
 			} else {
-			  p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2)) + geom_point()
+
+				if(is.factor(dat[,input$vizvars1])) {
+				 	# updateCheckboxInput(session = session, inputId = "viz_jitter", label = "Jitter", value = TRUE)
+				 	updateCheckboxInput(session = session, inputId = "viz_smooth", label = "Smooth", value = FALSE)
+				  p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2, fill=input$vizvars1)) + geom_boxplot(alpha = .3)
+			  } else {
+			  	p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2)) + geom_point()
+			  }
 			}
 		}
 
@@ -107,7 +116,7 @@ ui_visualize <- function() {
 		  uiOutput("viz_color"),
 		  uiOutput("viz_facet_row"),
 		  uiOutput("viz_facet_col"),
-		  checkboxInput('viz_smooth', 'Smooth', value = TRUE),
+		  checkboxInput('viz_smooth', 'Smooth', value = FALSE),
 		  checkboxInput('viz_jitter', 'Jitter', value = FALSE)
 		),
 		div(class="row-fluid",

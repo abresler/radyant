@@ -4,24 +4,33 @@ output$expl_columns <- renderUI({
 	isFct <- sapply(getdata(), is.factor)
  	cols <- cols[!isFct]
   if(is.null(cols)) return()
+
 	selectInput("expl_columns", "Select column(s):", choices  = as.list(cols), selected = NULL, multiple = TRUE)
 })
 
 output$expl_byvar <- renderUI({
 	cols <- varnames()
+	# if(sum(input$expl_columns %in% cols) != length(input$expl_columns))  return()
+
   isFct <- sapply(getdata(), is.factor)
  	cols <- cols[isFct]
   if(is.null(cols)) return()
+
   selectInput(inputId = "expl_byvar", label = "Group by:", choices = cols, selected = NULL, multiple = TRUE)
 })
 
 # sq <<- function(x) x^2
-# inv <<- function(x) 1/x
-expl_functions <- list("Mean" = "mean", "Std. dev" = "sd", "N" = "length")
+expl_functions <- list("Mean" = "mean", "Std. dev" = "sd", "N" = "length", "Max" = "max", "Min" = "min", "Median" = "median", "Mode" = "mode")
 
 output$expl_function <- renderUI({
   if(is.null(input$expl_byvar)) return()
   selectInput(inputId = "expl_function", label = "Apply function(s):", choices = expl_functions, selected = "Mean", multiple = TRUE)
+
+})
+
+output$expl_show_viz <- renderUI({
+  if(is.null(input$expl_byvar)) return()
+  checkboxInput('expl_show_viz', 'Show plot', value = FALSE)
 })
 
 output$ui_explore <- renderUI({
@@ -33,23 +42,14 @@ ui_explore <- function() {
     uiOutput("expl_columns"),
     uiOutput("expl_byvar"),
     uiOutput("expl_function"),
-	  checkboxInput('expl_show_viz', 'Show plot:', value = FALSE)
+	  div(class="row-fluid",
+    	div(class="span6",checkboxInput('expl_show_tab', 'Show table', value = TRUE)),
+      div(class="span6", uiOutput("expl_show_viz"))
+    )
 
    	# radioButtons("changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode"), selected = "Change"),
     # conditionalPanel(condition = "input.changeType == 'change'",
 	   #  selectInput("tr_transfunction", "Change columns:", trans_options)
-    # ),
-    # conditionalPanel(condition = "input.changeType == 'rename'",
-    # 	textInput("tr_rename", "Rename (separate by ','):", ''),
-	   # 	tags$style(type='text/css', "#tr_rename { max-width: 185px; }")
-    # ),
-    # conditionalPanel(condition = "input.changeType == 'add'",
-    # 	HTML("<label>Copy-and-paste from Excel:</label>"),
-	   #  tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
-    # ),
-    # conditionalPanel(condition = "input.changeType == 'recode'",
-	   #  textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
-  	 #  actionButton("tr_recode_sub", "Go")
     # ),
     # actionButton("expl_button", "Run quiry")
   )
@@ -58,17 +58,35 @@ ui_explore <- function() {
 explore <- reactive({
 	if(input$datatabs != 'Explore') return()
 	if(is.null(input$datasets) || is.null(input$expl_columns)) return(invisible())
-	if(is.null(input$expl_byvar)) return(getdata()[,input$expl_columns])
-	getdata()[,c(input$expl_byvar,input$expl_columns)]
+
+	dat <- getdata()
+
+	# if(is.null(input$expl_byvar)) return(getdata()[,input$expl_columns])
+	if(sum(input$expl_columns %in% colnames(dat)) != length(input$expl_columns))  return()
+	if(is.null(input$expl_byvar)) return(dat[,input$expl_columns])
+
+	# if(is.null(input$expl_byvar)) return(getdata()[,input$expl_columns])
+	# getdata()[,c(input$expl_byvar,input$expl_columns)]
+	dat[,c(input$expl_byvar,input$expl_columns)]
 
 })
+
+explore_plyr <- reactive({
+
+	dat <- explore()
+	if(is.null(dat)) return() 
+
+	ply_list <- list()
+	for(func in input$expl_function) ply_list[[func]] <- ddply(dat, c(input$expl_byvar), colwise(func))
+	ply_list
+})
+
 
 output$expl_data <- renderPrint({
 	if(is.null(input$datasets) || is.null(input$expl_columns)) return(invisible())
 
 	dat <- explore()
-
-	if(is.null(dat)) return(invisible()) 			# ...
+	if(is.null(dat) || !input$expl_show_tab) return(invisible())
 
 	if(is.null(input$expl_byvar)) {
 		isFct <- sapply(dat, is.factor)
@@ -93,47 +111,66 @@ output$expl_data <- renderPrint({
 		
 			cat("Results grouped by: ", input$expl_byvar, "\n")
 			cat("Function used: ", names(which(expl_functions == func)), "\n")
-			print(ddply(dat, c(input$expl_byvar), colwise(func)))
+			print(explore_plyr()[[func]])
 			cat("\n")
 		}
 	}
 })
 
 expl_plot_width <- function() {
- 	# return(input$expl__plot_width)
+ 	# return(input$expl_plot_width)
  	650
 }
 
 expl_plot_height <- function() {
  	# return(input$expl_plot_height)
- 	650
+ 	400 * length(input$expl_function) * length(input$expl_columns)
 }
 
 output$expl_viz <- renderPlot({
 
-	# if(is.null(input$datasets) || is.null(input$expl_show_viz)) return()
 	if(is.null(input$datasets) || is.null(input$expl_show_viz)) return()
 	if(input$datatabs != 'Explore') return()
+	if(!input$expl_show_viz || is.null(input$expl_byvar)) return()
 
-		# inspired by Joe Cheng's ggplot2 browser app http://www.youtube.com/watch?feature=player_embedded&v=o2B5yJeEl1A#!
-		# dat <- getdata()
-  #   print(p)
+	dat <- explore()
+	if(sum(input$expl_columns %in% colnames(dat)) != length(input$expl_columns))  return()
 
-	if(input$expl_show_viz) plot(1:10)
+	plots <- list()
+	if(length(input$expl_byvar) >= 2) {
+		by_var <- input$expl_byvar[1]
+		fill_var <- input$expl_byvar[2]
+	} else {
+		by_var <- fill_var <- input$expl_byvar
+	} 
+
+	pnr <- 1
+	for(func in input$expl_function) {
+		dat_plyr <- explore_plyr()[[func]]
+		for(col_var in input$expl_columns) {
+			p <- ggplot(data = explore_plyr()[[func]], aes_string(x = by_var, y = col_var, fill = fill_var)) 
+			p <- p + geom_bar(alpha=.3, stat="identity") + ggtitle(paste("Function used:", names(which(expl_functions == func))))
+			plots[[pnr]] <- p
+			pnr <- pnr + 1
+		}
+	}
+
+	print(do.call(grid.arrange, c(plots, list(ncol = 1))))
 
 }, width = expl_plot_width, height = expl_plot_height)
 
 observe({
 	if(is.null(input$expl_button) || input$expl_button == 0) return()
 	isolate({
-
 		# reset the values once the changes have been applied
 	  # updateTextInput(session = session, inputId = "tr_recode", label = "Recode (e.g., lo:20 = 1):", '')
 		# updateSelectInput(session = session, inputId = "tr_transfunction", choices = trans_options, selected = "None")
 	})
 })
 
+#######################################
 ### For when we can move to dplyr
+#######################################
 
 # filter(hflights, Month == 1, DayofMonth == 1, Dest == "DFW")
 # head(select(hflights, Year:DayOfWeek))

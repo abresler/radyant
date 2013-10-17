@@ -13,3 +13,7 @@ Avoid eval(parse()).
 Using plyr until dplyr can be used as either (1) a substitute for plyr or (2) together with plyr
 
 To implement a filter on the data for all analyses put something in the getdata() function. By the way ... shouldn't that be a reactive function? Especially if you apply a filter right?
+
+Dataview changes:
+- Explore -- add subset commands etc. 
+- Visualize -- more plotting options

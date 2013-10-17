@@ -34,6 +34,24 @@ getdata <- reactive({
 	}
 })
 
+getdata_class <- reactive({
+	# sapply(values[[input$datasets]], class)
+	c <- sapply(values[[input$datasets]], function(x) class(x)[1])
+	gsub("ordered","factor", c)
+})
+
+# myfun <- function(data = mtcars) {
+# 	c <- sapply(data, function(x) class(x)[1])
+# 	gsub("ordered","factor", c)
+# }
+
+# myfun()
+# t <- myfun(diamonds)
+# 'factor' == t
+
+
+
+
 date2character <- function(dat = NULL) {
 	isDate <- sapply(dat, is.Date)
 	if(sum(isDate) > 0) dat[,isDate] <- sapply(dat[,isDate], as.character)

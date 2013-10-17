@@ -8,8 +8,8 @@ shinyUI(
     sidebarPanel(
 
       tags$head(
-        tags$link(rel="stylesheet", type="text/css", href="style.css"),
-        tags$script(src = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML', type = 'text/javascript')
+        tags$link(rel="stylesheet", type="text/css", href="style.css")
+        # tags$script(src = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML', type = 'text/javascript')
       ),
 
       includeHTML("www/js/sel2.js"),
@@ -53,12 +53,6 @@ shinyUI(
 
     ),
 
-    # Dataview changes
-    # View --> Manage -- focus on loading, saving, removing data 
-    # Transform --> Change -- Change the variables and the data (e.g., keeping/removing variables) 
-    # Summarize --> Explore -- Put a sortable table in here. Also subset commands etc. and 
-    # Visualize as is but with more plotting options
-    
     mainPanel(
       conditionalPanel(condition = "input.datasets != ''",
         conditionalPanel(condition = "input.tool == 'data'", 

@@ -2,16 +2,21 @@
 # over websockets
 options(width = 150, shiny.trace=TRUE, digits = 3)
 
-if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)
+# creating a reactivevalues store 
+values <- reactiveValues()
 
-# options(repos = c("http:/cran.rstudio.com/"))
-# libs <- c("shiny", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate")
+if(Sys.getenv('SHINY_PORT') == "") {
+  options(shiny.maxRequestSize=100000*1024^2)
+  values[['running_app_local']] <- TRUE
+}
+
+options(repos = c(CRAN = "http://cran.rstudio.com"))
 libs <- c("shiny", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate")
 # libs <- c("shiny", "car", "foreign", "tools", "ggplot2", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape", "vegan")
 available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
 inst.libs <- libs[available == FALSE]
 if(length(inst.libs) != 0) {
-	install.packages(inst.libs, repos = "http:/cran.rstudio.com/", dependencies = TRUE)
+  install.packages(inst.libs, dependencies = TRUE)
 	suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
 }
 
@@ -26,7 +31,6 @@ mtcars$am <- as.factor(mtcars$am)
 # Note that we never get or assign the "original" copies of mtcars, morley, 
 # or rock. This way, all user sessions are independent from each other 
 
-values <- reactiveValues()
 values$mtcars <- mtcars
 values$morley <- morley
 values$rock <- rock

@@ -5,8 +5,8 @@
 output$sm_var <- renderUI({
   vars <- varnames()
   if(is.null(vars)) return()
-  isFct <- sapply(getdata(), is.factor)
- 	vars <- vars[!isFct]
+  isNum <- sapply(getdata(), is.numeric)
+ 	vars <- vars[isNum]
   if(is.null(vars)) return()
   selectInput(inputId = "sm_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
 })
@@ -33,19 +33,23 @@ plot.singleMean <- function(result) {
 
 	dat <- getdata()
 	var <- input$sm_var
-	x <- dat[,var]
-	ifelse(is.factor(x), bw <- .1, bw <- diff(range(x)) / 12)
+	xvar <- dat[,var]
+
+	# should not ben need since factor are no longer allowed 'in'
+	# ifelse(is.factor(xvar), bw <- .1, bw <- diff(range(xvar)) / 12)
+
+	bw <- diff(range(xvar)) / 12
 
 	p <- ggplot(dat, aes_string(x=var)) + 
 			geom_histogram(colour = 'black', fill = 'blue', binwidth = bw, alpha = .1) + 
 			geom_vline(xintercept = input$sm_compValue, color = 'red', linetype = 'longdash', size = 1) +
-			geom_vline(xintercept = mean(x), color = 'black', linetype = 'solid', size = 1) +
+			geom_vline(xintercept = mean(xvar), color = 'black', linetype = 'solid', size = 1) +
 			geom_vline(xintercept = result$conf.int, color = 'black', linetype = 'longdash', size = .5)
 	print(p)
 }
 
 singleMean <- reactive({
-	if(is.null(input$sm_var)) return("Please select a variable")
+	if(is.null(input$sm_var)) return("Please select a numeric or integer variable")
 	var <- input$sm_var
 	dat <- getdata()[,var]
 	t.test(dat, mu = input$sm_compValue, alternative = input$sm_alternative, conf.level = input$sm_sigLevel)
@@ -59,19 +63,31 @@ singleMean <- reactive({
 output$cm_var1 <- renderUI({
   vars <- varnames()
   if(is.null(vars)) return()
+
+  dat <- getdata()
+  isNum <- sapply(dat, is.numeric)
+  isFct <- sapply(getdata(), is.factor)
+ 	vars <- c(vars[isFct],vars[isNum])
+  if(is.null(vars)) return()
+
   selectInput(inputId = "cm_var1", label = "Select a factor or numerical variable:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$cm_var2 <- renderUI({
   vars <- varnames()
+  if(is.null(vars) || is.null(input$cm_var1)) return()
+
+  dat <- getdata()
+  isNum <- sapply(dat, is.numeric)
+ 	vars <- vars[isNum]
   if(is.null(vars)) return()
-  isFct <- sapply(getdata(), is.factor)
- 	vars <- vars[!isFct]
-  sel <- which(vars == input$cm_var1)
-  if(length(sel) > 0) {
-  	vars <- vars[-sel]
-  }
-  selectInput(inputId = "cm_var2", label = "Variables (select one or more):", choices = vars, selected = NULL, multiple = TRUE)
+ 	if(input$cm_var1 %in% vars) {
+	 	vars <- vars[-which(vars == input$cm_var1)]
+	  if(is.null(vars)) return()
+	  selectInput(inputId = "cm_var2", label = "Variables (select one or more):", choices = vars, selected = NULL, multiple = TRUE)
+	} else {
+	  selectInput(inputId = "cm_var2", label = "Variables (select one):", choices = vars, selected = NULL, multiple = FALSE)
+	}
 })
 
 
@@ -83,8 +99,7 @@ ui_compareMeans <- function() {
     uiOutput("cm_var2"),
     conditionalPanel(condition = "input.analysistabs == 'Summary'",
       # selectInput(inputId = "cm_alternative", label = "Alternative hypothesis", choices = alt, selected = "Two sided"),
-      sliderInput('cm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01),
-    	helpText("If you select a factor only one numerical variable from the lower box can be used")
+      sliderInput('cm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01)
     ),
   	helpModal('Compare means','compareMeans',includeRmd("tools/help/compareMeans.Rmd"))
   )
@@ -140,7 +155,11 @@ compareMeans <- reactive({
 output$sp_var <- renderUI({
   vars <- varnames()
   if(is.null(vars)) return()
-  isFct <- sapply(getdata(), is.factor)
+  print(vars)
+  print(getdata_class())
+
+  isFct <- "factor" == getdata_class()
+  if(sum(isFct) == 0) return(HTML('<label>This dataset has no variables of type Factor.</label>'))
  	vars <- vars[isFct]
   selectInput(inputId = "sp_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
 })
@@ -163,13 +182,12 @@ summary.singleProp <- function(result) {
 
 plot.singleProp <- function(result) {
 
+  if(is.null(input$sp_var)) return()
 	var <- input$sp_var
 	dat <- as.factor(getdata()[,var])
-	p <- qplot(dat, fill = dat) + geom_bar(alpha = .5) + theme(legend.position = "none") +
-	# p <- qplot(factor(dat)) + geom_bar(fill = 'red', alpha=.1) + theme(legend.position = "none") +
+	p <- qplot(dat, fill = dat) + geom_bar(alpha=.3) + theme(legend.position = "none") +
 		labs(list(title = paste("Single proportion -",var), x = "Factor levels", y = "Count"))
 	print(p)
-
 }
 
 singleProp <- reactive({
@@ -177,7 +195,7 @@ singleProp <- reactive({
 	var <- input$sp_var
 	dat <- getdata()[,var]
 	lev <- levels(dat)
-	if(length(lev) >2) return("")
+	if(length(lev) >2) return("The select variable has more than two level. Try another variable or a cross-tab.")
 	prop <- sum(dat == rev(lev)[1])
 	prop.test(prop, n = length(dat), 
 		p = input$sp_compValue, alternative = input$sp_alternative, conf.level = input$sp_sigLevel, correct = FALSE)
@@ -228,7 +246,7 @@ plot.compareProps <- function(result) {
 
 	dat <- getdata()[,c(input$cp_var1,input$cp_var2)]
 	# p <- qplot(as.factor(dat[,1]), color = 'black', fill = as.factor(dat[,2])) + geom_bar(alpha = .5) + 
-	p <- qplot(as.factor(dat[,1]), fill = as.factor(dat[,2])) + geom_bar(alpha = .5) + 
+	p <- qplot(as.factor(dat[,1]), fill = as.factor(dat[,2])) + geom_bar(alpha=.3) + 
 		labs(list(title = paste("Comparing proportions of ",input$cp_var2,"$",levels(dat[,1])[1], " across levels of ",input$cp_var1, sep = ""), 
 							x = paste("Factor levels for ", input$cp_var1), y = "Count", fill = input$cp_var2))
 
@@ -340,7 +358,7 @@ plot.crosstab <- function(result) {
 		melt(cbind(lab,tab))
 	}
 
-	plots[['observed']] <- qplot(as.factor(dat[,1]), fill = as.factor(dat[,2])) + geom_bar(alpha = .5) + 
+	plots[['observed']] <- qplot(as.factor(dat[,1]), fill = as.factor(dat[,2])) + geom_bar(alpha=.3) + 
 							labs(list(title = paste("Crosstab of ",input$ct_var2," versus ",input$ct_var1, sep = ""), 
 							x = '', y = "Count", fill = input$ct_var2))
 

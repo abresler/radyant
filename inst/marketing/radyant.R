@@ -15,7 +15,8 @@ changedata <- function(addCol = list(NULL), addColName = "") {
 	if(addColName[1] == "") return()
   # isolate ensures no reactive dependencies are used
   isolate({
-  	if(nrow(getdata()) == nrow(addCol)) values[[input$datasets]][,addColName] <- addCol
+  	if(length(addCol) == 1) return(values[[input$datasets]][,addColName] <- addCol)
+  	if(nrow(getdata()) == nrow(addCol)) return(values[[input$datasets]][,addColName] <- addCol)
   })
 }
 
@@ -27,8 +28,9 @@ getdata <- reactive({
 	if(is.null(input$data_filter)) {
 		return(values[[input$datasets]])
 	} else {
-		dat <- values[[input$datasets]]
-		dat[dat[,input$data_filter], ]
+		return(values[[input$datasets]])
+		# dat <- values[[input$datasets]]
+		# dat[dat[,input$data_filter], ]
 	}
 })
 

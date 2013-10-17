@@ -12,11 +12,11 @@ varnames <- function() {
 
 changedata <- function(addCol = list(NULL), addColName = "") {
 	# change data as specified
-	if(addColName == "") return()
+	if(addColName[1] == "") return()
   # isolate ensures no reactive dependencies are used
-  # isolate({
- 		values[[input$datasets]][,addColName] <- addCol
-  # })
+  isolate({
+  	if(nrow(getdata()) == nrow(addCol)) values[[input$datasets]][,addColName] <- addCol
+  })
 }
 
 getdata <- function(dataset = input$datasets) {

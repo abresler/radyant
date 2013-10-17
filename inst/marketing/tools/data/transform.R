@@ -41,7 +41,8 @@ d <<- as.Date
 # d <<- makeDate
 
 # trans_options <- list("None" = "none", "Remove" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
-trans_options <- list("None" = "", "Remove" = "remove", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
+# trans_options <- list("None" = "", "Remove" = "remove", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
+trans_options <- list("None" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 	"Standardize (2-sd)" = "st2","Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
 	"As date" = "d")
 
@@ -54,19 +55,19 @@ ui_transform <- function() {
   wellPanel(
     uiOutput("tr_columns"),
 
-   	radioButtons("changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode"), selected = "Change"),
-    conditionalPanel(condition = "input.changeType == 'change'",
+   	radioButtons("tr_changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode", "Remove" = "remove"), selected = "Change"),
+    conditionalPanel(condition = "input.tr_changeType == 'change'",
 	    selectInput("tr_transfunction", "Change columns:", trans_options)
     ),
-    conditionalPanel(condition = "input.changeType == 'rename'",
+    conditionalPanel(condition = "input.tr_changeType == 'rename'",
     	textInput("tr_rename", "Rename (separate by ','):", ''),
 	   	tags$style(type='text/css', "#tr_rename { max-width: 185px; }")
     ),
-    conditionalPanel(condition = "input.changeType == 'add'",
+    conditionalPanel(condition = "input.tr_changeType == 'add'",
     	HTML("<label>Copy-and-paste from Excel:</label>"),
 	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
     ),
-    conditionalPanel(condition = "input.changeType == 'recode'",
+    conditionalPanel(condition = "input.tr_changeType == 'recode'",
 	    textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
   	  actionButton("tr_recode_sub", "Go")
     ),
@@ -97,23 +98,17 @@ transform <- reactive({
 			if(input$tr_recode != '') {
 				recom <- input$tr_recode
 				recom <- gsub(" ", "", recom)
-				if(nchar(recom) > 50) q()
-				if(length(grep("system",recom)) > 0) q()
-				if(length(grep("rm\\(list",recom)) > 0) q()
+				recom <- gsub("\"","\'", recom)
 
-				parse_recom <- try(parse(text = recom)[[1]], silent = FALSE)
-				if(!is(parse_recom, 'try-error')) {
+				newvarcom <- try(parse(text = paste0("recode(dat$",input$tr_columns[1],",\"",recom,"\")")), silent = TRUE)
+				if(!is(newvarcom, 'try-error')) {
 
-					# newvarcom <- parse(text = paste0("recode(",input$datasets,"$",input$tr_columns[1],",\"",recom,"\")"))
-					newvarcom <- parse(text = paste0("recode(dat$",input$tr_columns[1],",\"",recom,"\")"))
-					newvar <- eval(newvarcom)
-					newvar <- try(eval(newvarcom), silent = FALSE)
+					newvar <- try(eval(newvarcom), silent = TRUE)
 					if(!is(newvar, 'try-error')) {
 
 						cn <- c(colnames(dat),paste("rc",input$tr_columns[1], sep="."))
 						dat <- cbind(dat,newvar)
 						colnames(dat) <- cn
-
 						return(dat)
 					}
 				} 
@@ -124,9 +119,9 @@ transform <- reactive({
 	if(input$tr_copyAndPaste != '') {
 		cpdat <- read.table(header=T, text=input$tr_copyAndPaste)
 		cpname <- names(cpdat)
-		if(cpname %in% colnames(dat)) names(cpdat) <- paste('cp',cpname,sep = '.')
+		if(sum(cpname %in% colnames(dat)) > 0) names(cpdat) <- paste('cp',cpname,sep = '.')
 		if(is.null(input$tr_columns)) return(cpdat)
-		dat <- cbind(dat,cpdat)
+		if(nrow(cpdat) == nrow(dat)) dat <- cbind(dat,cpdat)
 	}
 
 	if(input$tr_rename != '') {
@@ -164,15 +159,15 @@ output$transform_summary <- renderPrint({
 
 	if(sum(isNum) > 0) {
 		cat("\nSummarize numeric variables:\n")
-		print(describe(dat[isNum]))
+		print(describe(dat[,isNum]))
 	}
 	if(sum(isFct) > 0) {
 		cat("\nSummarize factors:\n")
-		summary(dat[isFct])
+		print(summary(dat[,isFct]))
 	}
 	if(sum(isDate) > 0) {
 		cat("\nSummarize date variables:\n")
-		print(summary(dat[isDate]))
+		print(summary(dat[,isDate]))
 	}
 })
 
@@ -180,7 +175,8 @@ observe({
 	if(is.null(input$addtrans) || input$addtrans == 0) return()
 	isolate({
 		dat <- transform()
-		if(input$tr_transfunction == 'remove') {
+		# if(input$tr_transfunction == 'remove') {
+		if(input$tr_changeType == 'remove') {
 			changedata(addColName = colnames(dat))
 		} else {
 			changedata(dat, colnames(dat))

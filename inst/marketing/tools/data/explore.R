@@ -114,6 +114,7 @@ output$expl_data <- renderPrint({
 			print(explore_plyr()[[func]])
 			cat("\n")
 		}
+		if(length(input$expl_byvar) > 2 && input$expl_show_viz) cat("Plots will use only the first two 'Group by' variables")
 	}
 })
 

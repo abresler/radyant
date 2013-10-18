@@ -50,7 +50,7 @@ getdata_class <- reactive({
 	gsub("ordered","factor", cls)
 })
 
-date2character <- function(dat = NULL) {
+date2character <- reactive({
 
 	dat <- getdata()
   isDate <- "Date" == getdata_class()
@@ -59,7 +59,7 @@ date2character <- function(dat = NULL) {
 		dat[,isDate] <- sapply(dat[,isDate], as.character)
 	}
 	dat
-}
+})
 
 loadUserData <- function(filename, uFile, type) {
 
@@ -189,7 +189,7 @@ output$nrRows <- renderUI({
 output$dataexample <- renderTable({
 	if(is.null(input$datasets)) return()
 
-	dat <- date2character(getdata())
+	dat <- date2character()
 
 	# Show only the first 20 rows
 	nr <- min(20,nrow(dat))
@@ -200,7 +200,7 @@ output$dataviewer <- renderTable({
 	if(is.null(input$datasets) || is.null(input$columns)) return()
 
 	# dat <- getdata()
-	dat <- date2character(getdata())
+	dat <- date2character()
 
 	# not sure why this is needed when files change ... but it is
 	# without it you will get errors the invalid columns have been

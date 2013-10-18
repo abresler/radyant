@@ -61,7 +61,7 @@ observe({
 	if(is.null(input$hc_saveclus) || input$hc_saveclus == 0) return()
 	isolate({
 		clusmem <- cutree(hclustering(), k = input$hc_nrClus)
-		changedata(as.factor(clusmem), paste("hclus",input$hc_nrClus,sep=""))
+		changedata(data.frame(as.factor(clusmem)), paste("hclus",input$hc_nrClus,sep=""))
 	})
 })
 
@@ -142,6 +142,6 @@ observe({
 	if(is.null(input$km_saveclus) || input$km_saveclus == 0) return()
 	isolate({
 		clusmem <- kmeansClustering()$cluster
-		changedata(as.factor(clusmem), paste("kclus",input$km_nrClus,sep=""))
+		changedata(data.frame(as.factor(clusmem)), paste("kclus",input$km_nrClus,sep=""))
 	})
 })

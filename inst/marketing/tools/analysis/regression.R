@@ -139,7 +139,7 @@ regression <- reactive({
 observe({
 	if(is.null(input$saveres) || input$saveres == 0) return()
 	isolate({
-		changedata(regression()$residuals, "residuals")
+		changedata(data.frame(regression()$residuals), "residuals")
 	})
 })
 

@@ -61,6 +61,16 @@ date2character <- reactive({
 	dat
 })
 
+date2character_dat <- function(dat) {
+
+  isDate <- sapply(dat, is.Date)
+	if(sum(isDate) > 0) {
+		# needed because xtable doesn't like dates
+		dat[,isDate] <- sapply(dat[,isDate], as.character)
+	}
+	dat
+}
+
 loadUserData <- function(filename, uFile, type) {
 
 	ext <- file_ext(filename)

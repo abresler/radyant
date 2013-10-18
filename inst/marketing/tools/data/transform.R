@@ -6,25 +6,20 @@ output$tr_columns <- renderUI({
 
 revFactorOrder <- function(x) {
 	x <- as.factor(x)
-	x <- factor(x, levels=rev(levels(x)))
-	x
+	factor(x, levels=rev(levels(x)))
 }
 
 standardize_1sd <- function(x) {
 	if(is.factor(x)) return(rescale(x))
 	if(is.numeric(x)) return(scale(x))
-	return(x)
+	x
 }
 
 centerVar <- function(x) {
 	if(is.factor(x)) return(rescale(x))
 	if(is.numeric(x)) return(x - mean(x, na.rm = TRUE))
-	return(x)
+	x
 }
-
-# makeDate <- function(x) {
-# 	as.Date(ymd(x))
-# }
 
 sq <<- function(x) x^2
 inv <<- function(x) 1/x
@@ -37,14 +32,16 @@ fct <<- as.factor
 rfct <<- revFactorOrder
 num <<- as.numeric
 ch <<- as.character
-d <<- as.Date
-# d <<- makeDate
+# d <<- as.Date
+d_mdy <<- function(x) as.Date(mdy(as.character(x)))
+d_dmy <<- function(x) as.Date(dmy(as.character(x)))
+d_ymd <<- function(x) as.Date(ymd(as.character(x)))
 
 # trans_options <- list("None" = "none", "Remove" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 # trans_options <- list("None" = "", "Remove" = "remove", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 trans_options <- list("None" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize (1-sd)" = "st1", 
 	"Standardize (2-sd)" = "st2","Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
-	"As date" = "d")
+	"As date (mdy)" = "d_mdy", "As date (dmy)" = "d_dmy", "As date (ymd)" = "d_ymd")
 
 output$ui_transform <- renderUI({
 	ui_transform()

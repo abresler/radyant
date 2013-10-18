@@ -94,8 +94,8 @@ output$visualize <- renderPlot({
 			if(is.Date(dat[,input$vizvars1])) {
 
 				if(length(input$vizvars2) > 1) {
-					mdat <- melt(dat[,c(input$vizvars1,input$vizvars2)],id="date")
-					p <- ggplot(mdat,aes(x=date,y=value,colour=variable,group=variable)) + geom_line()
+					mdat <- melt(dat[,c(input$vizvars1,input$vizvars2)],id=input$vizvars1)
+					p <- ggplot(mdat,aes_string(x=input$vizvars1,y="value",colour="variable",group="variable")) + geom_line()
 				} else {
 				  p <- ggplot(dat, aes_string(x=input$vizvars1, y=input$vizvars2)) + geom_line()
 				}

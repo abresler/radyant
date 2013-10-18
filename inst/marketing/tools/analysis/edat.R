@@ -4,7 +4,7 @@
 
 output$sm_var <- renderUI({
   vars <- varnames()
-	isNum <- "numeric" == getdata_class()
+	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
  	vars <- vars[isNum]
   if(is.null(vars)) return()
   selectInput(inputId = "sm_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
@@ -34,12 +34,12 @@ plot.singleMean <- function(result) {
 	dat <- getdata()
 	var <- input$sm_var
 	xvar <- dat[,var]
-	bw <- diff(range(xvar)) / 12
+	bw <- diff(range(xvar, na.rm = TRUE)) / 12
 
 	p <- ggplot(dat, aes_string(x=var)) + 
 			geom_histogram(colour = 'black', fill = 'blue', binwidth = bw, alpha = .1) + 
 			geom_vline(xintercept = input$sm_compValue, color = 'red', linetype = 'longdash', size = 1) +
-			geom_vline(xintercept = mean(xvar), color = 'black', linetype = 'solid', size = 1) +
+			geom_vline(xintercept = mean(xvar, na.rm = TRUE), color = 'black', linetype = 'solid', size = 1) +
 			geom_vline(xintercept = result$conf.int, color = 'black', linetype = 'longdash', size = .5)
 	print(p)
 }

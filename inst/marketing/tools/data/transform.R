@@ -52,6 +52,7 @@ ui_transform <- function() {
   wellPanel(
     uiOutput("tr_columns"),
 
+   	# radioButtons("tr_changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Generate" = "gen", "Recode" = "recode", "Remove" = "remove"), selected = "Change"),
    	radioButtons("tr_changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode", "Remove" = "remove"), selected = "Change"),
     conditionalPanel(condition = "input.tr_changeType == 'change'",
 	    selectInput("tr_transfunction", "Change columns:", trans_options)
@@ -64,6 +65,10 @@ ui_transform <- function() {
     	HTML("<label>Copy-and-paste from Excel:</label>"),
 	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
     ),
+    # conditionalPanel(condition = "input.tr_changeType == 'gen'",
+	   #  textInput("tr_transform", "Generate (e.g., x = y - z):", ''), 
+  	 #  actionButton("tr_transform_sub", "Go")
+    # ),
     conditionalPanel(condition = "input.tr_changeType == 'recode'",
 	    textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
   	  actionButton("tr_recode_sub", "Go")
@@ -104,6 +109,36 @@ transform <- reactive({
 					if(!is(newvar, 'try-error')) {
 
 						cn <- c(colnames(dat),paste("rc",input$tr_columns[1], sep="."))
+						dat <- cbind(dat,newvar)
+						colnames(dat) <- cn
+						return(dat)
+					}
+				} 
+			}
+		})
+	}
+
+	if(!is.null(input$tr_transform_sub) && !input$tr_transform_sub == 0) {
+		isolate({
+			if(input$tr_transform != '') {
+				recom <- input$tr_transform
+				recom <- gsub(" ", "", recom)
+				recom <- gsub("\"","\'", recom)
+
+				all_dat <- getdata()
+
+				# newvarcom <- try(parse(text = paste0("transform(all_dat,",\"",recom,"\")")), silent = TRUE)
+
+				print(parse(text = paste0("transform(all_dat,",recom,")")))
+
+				newvarcom <- try(parse(text = paste0("transform(all_dat,",recom,")")), silent = TRUE)
+
+				if(!is(newvarcom, 'try-error')) {
+
+					newvar <- try(eval(newvarcom), silent = TRUE)
+					if(!is(newvar, 'try-error')) {
+
+						cn <- c(colnames(dat),paste("gen",input$tr_columns[1], sep="."))
 						dat <- cbind(dat,newvar)
 						colnames(dat) <- cn
 						return(dat)

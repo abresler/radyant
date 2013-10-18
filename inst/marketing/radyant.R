@@ -71,6 +71,11 @@ date2character_dat <- function(dat) {
 	dat
 }
 
+# xtable <- function(x, ...) {
+#    for (i in which(sapply(x, function(y) !all(is.na(match(c("POSIXt","Date"),class(y))))))) x[[i]] <- as.character(x[[i]])
+#    xtable::xtable(x, ...)
+# }
+
 loadUserData <- function(filename, uFile, type) {
 
 	ext <- file_ext(filename)

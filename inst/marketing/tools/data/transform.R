@@ -136,10 +136,9 @@ output$transform_data <- renderTable({
 	dat <- transform()
 	if(is.null(dat)) return()
 
-	dat <- date2character(dat)
-
+	dat <- data.frame(date2character())
 	nr <- min(nrow(dat),10)
-	dat <- data.frame(dat)
+	# dat <- data.frame(dat)
 	dat[1:nr,, drop = FALSE]
 })
 

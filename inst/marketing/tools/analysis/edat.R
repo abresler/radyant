@@ -4,8 +4,7 @@
 
 output$sm_var <- renderUI({
   vars <- varnames()
-  if(is.null(vars)) return()
-  isNum <- sapply(getdata(), is.numeric)
+	isNum <- "numeric" == getdata_class()
  	vars <- vars[isNum]
   if(is.null(vars)) return()
   selectInput(inputId = "sm_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
@@ -15,14 +14,15 @@ output$sm_var <- renderUI({
 alt <- list("Two sided" = "two.sided", "Less than" = "less", "Greater than" = "greater")
 
 ui_singleMean <- function() {
-  wellPanel(
-    uiOutput("sm_var"),
-    selectInput(inputId = "sm_alternative", label = "Alternative hypothesis:", choices = alt, selected = "Two sided"),
-    sliderInput('sm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01),
-    numericInput("sm_compValue", "Comparison value:", 0),
-  	helpModal('Single mean','singleMean',includeRmd("tools/help/singleMean.Rmd"))
-  )
-  # make a list here if you want the help file to fall outside the well-panel
+  list(
+  	wellPanel(
+ 	   	uiOutput("sm_var"),
+  	  selectInput(inputId = "sm_alternative", label = "Alternative hypothesis:", choices = alt, selected = "Two sided"),
+    	sliderInput('sm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01),
+    	numericInput("sm_compValue", "Comparison value:", 0)
+  	),
+ 		helpModal('Single mean','singleMean',includeRmd("tools/help/singleMean.Rmd"))
+ 	)
 }
 
 summary.singleMean <- function(result) {
@@ -34,10 +34,6 @@ plot.singleMean <- function(result) {
 	dat <- getdata()
 	var <- input$sm_var
 	xvar <- dat[,var]
-
-	# should not ben need since factor are no longer allowed 'in'
-	# ifelse(is.factor(xvar), bw <- .1, bw <- diff(range(xvar)) / 12)
-
 	bw <- diff(range(xvar)) / 12
 
 	p <- ggplot(dat, aes_string(x=var)) + 
@@ -50,11 +46,12 @@ plot.singleMean <- function(result) {
 
 singleMean <- reactive({
 	if(is.null(input$sm_var)) return("Please select a numeric or integer variable")
+	dat <- getdata()
 	var <- input$sm_var
-	dat <- getdata()[,var]
+	if(!var %in% names(getdata_class())) return("")
+	dat <- dat[,var]
 	t.test(dat, mu = input$sm_compValue, alternative = input$sm_alternative, conf.level = input$sm_sigLevel)
 })
-
 
 ###############################
 # Compare means
@@ -101,6 +98,9 @@ ui_compareMeans <- function() {
       # selectInput(inputId = "cm_alternative", label = "Alternative hypothesis", choices = alt, selected = "Two sided"),
       sliderInput('cm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01)
     ),
+    conditionalPanel(condition = "input.analysistabs == 'Plots'",
+		  checkboxInput('cm_jitter', 'Jitter', value = TRUE)
+		),
   	helpModal('Compare means','compareMeans',includeRmd("tools/help/compareMeans.Rmd"))
   )
 }
@@ -122,11 +122,12 @@ plot.compareMeans <- function(result) {
 	var2 <- colnames(dat)[-1]
 
 	plots <- list()
-	plots[["Boxplot"]] <- ggplot(dat, aes_string(x=var1, y=var2, fill=var1)) + 
-										geom_boxplot(alpha=.3) + geom_jitter()
 
-	plots[["Density"]] <- ggplot(dat, aes_string(x=var2, fill=var1)) +
-														geom_density(alpha=.3)
+	p <- ggplot(dat, aes_string(x=var1, y=var2, fill=var1)) + geom_boxplot(alpha=.3) 
+	if(input$cm_jitter)	p <- p + geom_jitter() 
+
+	plots[["Boxplot"]] <- p
+	plots[["Density"]] <- ggplot(dat, aes_string(x=var2, fill=var1)) + geom_density(alpha=.3)
 
 	print(do.call(grid.arrange, c(plots, list(ncol = 1))))
 }
@@ -155,8 +156,8 @@ compareMeans <- reactive({
 output$sp_var <- renderUI({
   vars <- varnames()
   if(is.null(vars)) return()
-  print(vars)
-  print(getdata_class())
+  # print(vars)
+  # print(getdata_class())
 
   isFct <- "factor" == getdata_class()
   if(sum(isFct) == 0) return(HTML('<label>This dataset has no variables of type Factor.</label>'))

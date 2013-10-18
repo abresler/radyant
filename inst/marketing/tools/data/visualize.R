@@ -47,6 +47,29 @@ output$viz_facet_col <- renderUI({
 	selectInput('viz_facet_col', 'Facet col', c(None='.', as.list(cols)))
 })
 
+# used in ui.R. Structure relevant for (future) modularization
+output$ui_visualize <- renderUI({
+	ui_visualize()
+})
+
+ui_visualize <- function() {
+	wellPanel(
+		uiOutput("vizvars1"),
+		uiOutput("vizvars2"),
+		conditionalPanel(condition = "input.vizvars2 != ''",
+		  uiOutput("viz_color"),
+		  uiOutput("viz_facet_row"),
+		  uiOutput("viz_facet_col"),
+		  checkboxInput('viz_smooth', 'Smooth', value = FALSE),
+		  checkboxInput('viz_jitter', 'Jitter', value = FALSE)
+		),
+		div(class="row-fluid",
+    	div(class="span6",numericInput("viz_plot_height", label = "Plot height:", min = 100, step = 50, value = 650)),
+      div(class="span6", numericInput("viz_plot_width", label = "Plot width:", min = 100, step = 50, value = 650))
+    )
+	)
+}
+
 viz_plot_width <- function() {
  	return(input$viz_plot_width)
 }
@@ -103,25 +126,3 @@ output$visualize <- renderPlot({
 
 }, width = viz_plot_width, height = viz_plot_height)
 
-# used in ui.R. Structure relevant for (future) modularization
-output$ui_visualize <- renderUI({
-	ui_visualize()
-})
-
-ui_visualize <- function() {
-	wellPanel(
-		uiOutput("vizvars1"),
-		uiOutput("vizvars2"),
-		conditionalPanel(condition = "input.vizvars2 != ''",
-		  uiOutput("viz_color"),
-		  uiOutput("viz_facet_row"),
-		  uiOutput("viz_facet_col"),
-		  checkboxInput('viz_smooth', 'Smooth', value = FALSE),
-		  checkboxInput('viz_jitter', 'Jitter', value = FALSE)
-		),
-		div(class="row-fluid",
-    	div(class="span6",numericInput("viz_plot_height", label = "Plot height:", min = 100, step = 50, value = 650)),
-      div(class="span6", numericInput("viz_plot_width", label = "Plot width:", min = 100, step = 50, value = 650))
-    )
-	)
-}

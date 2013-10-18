@@ -4,10 +4,15 @@
 varnames <- function() {
 	if(is.null(input$datasets)) return()
 
-	dat <- getdata()
-	cols <- colnames(dat)
-	names(cols) <- paste(cols, " {", sapply(dat,class), "}", sep = "")
-	cols
+	# dat <- getdata()
+	# cols <- colnames(dat)
+	# names(cols) <- paste(cols, " {", sapply(dat,class), "}", sep = "")
+	# cols
+
+	dat <- getdata_class()
+	vars <- names(dat)
+	names(vars) <- paste(vars, " {", dat, "}", sep = "")
+	vars
 }
 
 changedata <- function(addCol = list(NULL), addColName = "") {
@@ -28,36 +33,31 @@ changedata <- function(addCol = list(NULL), addColName = "") {
 # }	
 
 getdata <- reactive({
-	if(is.null(input$data_filter)) {
-		return(values[[input$datasets]])
-	} else {
-		return(values[[input$datasets]])
+	values[[input$datasets]]
+
+	# if(is.null(input$data_filter)) {
+	# 	return(values[[input$datasets]])
+	# } else {
+	# 	return(values[[input$datasets]])
 		# dat <- values[[input$datasets]]
 		# dat[dat[,input$data_filter], ]
-	}
+	# }
 })
 
 getdata_class <- reactive({
-	# sapply(values[[input$datasets]], class)
-	c <- sapply(values[[input$datasets]], function(x) class(x)[1])
-	gsub("ordered","factor", c)
+	# don't do 'isolate' here or values won't change when the dataset is changed
+	cls <- sapply(values[[input$datasets]], function(x) class(x)[1])
+	gsub("ordered","factor", cls)
 })
 
-# myfun <- function(data = mtcars) {
-# 	c <- sapply(data, function(x) class(x)[1])
-# 	gsub("ordered","factor", c)
-# }
-
-# myfun()
-# t <- myfun(diamonds)
-# 'factor' == t
-
-
-
-
 date2character <- function(dat = NULL) {
-	isDate <- sapply(dat, is.Date)
-	if(sum(isDate) > 0) dat[,isDate] <- sapply(dat[,isDate], as.character)
+
+	dat <- getdata()
+  isDate <- "Date" == getdata_class()
+	if(sum(isDate) > 0) {
+		# needed because xtable doesn't like dates
+		dat[,isDate] <- sapply(dat[,isDate], as.character)
+	}
 	dat
 }
 

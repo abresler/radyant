@@ -1,10 +1,13 @@
 # avoid breaks in R-output print and show JSON packets transferred
 # over websockets
 options(width = 150, shiny.trace=TRUE, digits = 3)
+options(error = recover)
+
 
 # creating a reactivevalues store 
 values <- reactiveValues()
 
+values[['running_app_local']] <- FALSE
 if(Sys.getenv('SHINY_PORT') == "") {
   options(shiny.maxRequestSize=100000*1024^2)
   values[['running_app_local']] <- TRUE

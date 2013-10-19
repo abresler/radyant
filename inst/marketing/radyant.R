@@ -45,7 +45,7 @@ getdata <- reactive({
 })
 
 getdata_class <- reactive({
-	# don't do 'isolate' here or values won't change when the dataset is changed
+	# don't use isolate here or values won't change when the dataset is changed
 	cls <- sapply(values[[input$datasets]], function(x) class(x)[1])
 	gsub("ordered","factor", cls)
 })

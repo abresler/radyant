@@ -6,7 +6,7 @@ output$sm_var <- renderUI({
   vars <- varnames()
 	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
  	vars <- vars[isNum]
-  if(is.null(vars)) return()
+  if(is.null(vars)) return(HTML('<label>This dataset has no variables of type numeric, or integer.</label>'))
   selectInput(inputId = "sm_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -36,10 +36,10 @@ plot.singleMean <- function(result) {
 	bw <- diff(range(xvar, na.rm = TRUE)) / 12
 
 	p <- ggplot(dat, aes_string(x=input$sm_var)) + 
-			geom_histogram(colour = 'black', fill = 'blue', binwidth = bw, alpha = .1) + 
-			geom_vline(xintercept = input$sm_compValue, color = 'red', linetype = 'longdash', size = 1) +
-			geom_vline(xintercept = mean(xvar, na.rm = TRUE), color = 'black', linetype = 'solid', size = 1) +
-			geom_vline(xintercept = result$conf.int, color = 'black', linetype = 'longdash', size = .5)
+		geom_histogram(colour = 'black', fill = 'blue', binwidth = bw, alpha = .1) + 
+		geom_vline(xintercept = input$sm_compValue, color = 'red', linetype = 'longdash', size = 1) +
+		geom_vline(xintercept = mean(xvar, na.rm = TRUE), color = 'black', linetype = 'solid', size = 1) +
+		geom_vline(xintercept = result$conf.int, color = 'black', linetype = 'longdash', size = .5)
 	print(p)
 }
 
@@ -59,7 +59,7 @@ output$cm_var1 <- renderUI({
   varCls <- getdata_class()
 	isNumOrFct <- "numeric" == varCls | "integer" == varCls | "factor" == varCls
   vars <- varnames()[isNumOrFct]
-  if(is.null(vars)) return()
+  if(is.null(vars)) return(HTML('<label>This dataset has no variables of type factor, numeric, or integer.</label>'))
   selectInput(inputId = "cm_var1", label = "Select a factor or numerical variable:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -84,10 +84,10 @@ output$cm_var2 <- renderUI({
 ui_compareMeans <- function() {
   list(wellPanel(
     # tags$head(tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")),
-    # radioButtons(inputId = "cm_paired", label = "Test type:", c("Paired" = "paired", "Independent" = "independent"), selected = ""),
     uiOutput("cm_var1"),
     uiOutput("cm_var2"),
     conditionalPanel(condition = "input.analysistabs == 'Summary'",
+	    radioButtons(inputId = "cm_paired", label = "Test type:", c("Paired" = "paired", "Independent" = "independent"), selected = "Paired"),
       selectInput(inputId = "cm_alternative", label = "Alternative hypothesis:", choices = alt, selected = "Two sided"),
     	radioButtons(inputId = "cm_confint", label = "", c("p-values" = "pval", "conf. intervals" = "confint"), selected = "p-values"),
 	    conditionalPanel(condition = "input.cm_confint == 'confint'",
@@ -142,6 +142,16 @@ compareMeans <- reactive({
 	if(!var1 %in% names(getdata_class())) return("")
 	dat <- getdata()[,c(var1,var2)]
 	if(!is.factor(dat[,var1])) {
+
+
+		# Should default to a paired test
+		# Should default to a paired test
+		# Should default to a paired test
+		# Should default to a paired test
+		# Should default to a paired test
+		# Should default to a paired test
+
+
 		dat <- melt(dat)
 		var1 <- colnames(dat)[1]
 		var2 <- colnames(dat)[2]

@@ -33,25 +33,16 @@ output$expl_show_viz <- renderUI({
   checkboxInput('expl_show_viz', 'Show plot', value = FALSE)
 })
 
-output$ui_explore <- renderUI({
-	ui_explore()
-})
-
-ui_explore <- function() {
-  wellPanel(
+ui_Explore <- function() {
+  list(wellPanel(
     uiOutput("expl_columns"),
     uiOutput("expl_byvar"),
     uiOutput("expl_function"),
 	  div(class="row-fluid",
     	div(class="span6",checkboxInput('expl_show_tab', 'Show table', value = TRUE)),
       div(class="span6", uiOutput("expl_show_viz"))
-    )
-
-   	# radioButtons("changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode"), selected = "Change"),
-    # conditionalPanel(condition = "input.changeType == 'change'",
-	   #  selectInput("tr_transfunction", "Change columns:", trans_options)
-    # ),
-    # actionButton("expl_button", "Run quiry")
+    )), 
+ 		helpModal('Explore','explore',includeMarkdown("tools/help/explore.md"))
   )
 }
 
@@ -170,8 +161,15 @@ observe({
 })
 
 #######################################
-### For when we can move to dplyr
+### When Explore is moved to dplyr
 #######################################
+
+# require(devtools)
+# install_github("assertthat")
+# install_github("dplyr")
+
+# require(assertthat)
+# require(dplyr)
 
 # filter(hflights, Month == 1, DayofMonth == 1, Dest == "DFW")
 # head(select(hflights, Year:DayOfWeek))

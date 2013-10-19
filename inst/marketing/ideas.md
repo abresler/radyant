@@ -17,3 +17,10 @@ To implement a filter on the data for all analyses put something in the getdata(
 Dataview changes:
 - Explore -- add subset commands etc. 
 - Visualize -- more plotting options
+
+http://www.r-bloggers.com/pander-0-3-8-is-out/
+http://www.r-bloggers.com/how-to-put-your-meetup-on-the-map-literally/
+http://www.r-bloggers.com/interactive-3d-in-shiny-shinyrgl/
+https://groups.google.com/forum/?fromgroups=#!searchin/shiny-discuss/dynamic$20filter/shiny-discuss/je4zKWw0lBk/uAFCcVeulbEJ
+https://groups.google.com/forum/#!topic/shiny-discuss/hzYGDJQF_e4
+http://vita.had.co.nz/papers/tidy-data.pdf

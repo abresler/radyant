@@ -43,13 +43,9 @@ trans_options <- list("None" = "", "Log" = "log", "Square" = "sq", "Square-root"
 	"Standardize (2-sd)" = "st2","Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
 	"As date (mdy)" = "d_mdy", "As date (dmy)" = "d_dmy", "As date (ymd)" = "d_ymd")
 
-output$ui_transform <- renderUI({
-	ui_transform()
-})
-
-ui_transform <- function() {
+ui_Transform <- function() {
 	# Inspired by Ian Fellow's transform ui in JGR/Deducer
-  wellPanel(
+  list(wellPanel(
     uiOutput("tr_columns"),
 
    	radioButtons("tr_changeType", "", c("Change" = "change", "Create" = "create", "Paste" = "paste", "Recode" = "recode", "Rename" = "rename", "Remove" = "remove"), selected = "Change"),
@@ -76,12 +72,15 @@ ui_transform <- function() {
 
     # actionButton("transfix", "Edit variables in place") # using the 'fix(mtcars)' to edit the data 'inplace'. Looks great from R-ui, not so great from Rstudio
     actionButton("addtrans", "Save changes")
-  )
+  	), 
+		helpModal('Transform','transform',includeMarkdown("tools/help/transform.md"))
+	)
 }
 
 transform_main <- reactive({
 
 	if(input$datatabs != 'Transform') return()
+	if(is.null(input$tr_copyAndPaste) || is.null(input$tr_transform)) return()
 	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '' && input$tr_transform == '')) return()
 
 	dat <- getdata()

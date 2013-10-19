@@ -10,19 +10,29 @@ shinyServer(function(input, output, session) {
 	flist_analysis <- sourceDirectory('tools/analysis', recursive = TRUE)
 	flist_data <- sourceDirectory('tools/data', recursive = TRUE)
 
-	# data ui-element caller - not used yet
-	# output$ui_data <- renderUI(function() {
- 	#  	if(input$tool != "data") return()
-	#   get(paste('ui_',input$datatabs, sep=""))()
-	# })
-
-	# analysis ui-element caller
-	output$ui_analysis <- renderUI({
-  	if(input$tool == "data") return()
-	  get(paste('ui_',input$tool, sep=""))()
+	# find the appropriate UI
+	output$ui_finder <- renderUI({
+  	if(input$tool == "data") {
+  		if(!is.null(input$datatabs)) get(paste('ui_',input$datatabs, sep=""))()
+		} else {
+		  if(!is.null(input$tool)) get(paste('ui_',input$tool, sep=""))()
+		}
 	})
 
-	#analysis output tabs can be customized in the tools files
+	# data tabs
+	output$ui_data_tabs <- renderUI({
+    tabsetPanel(id = "datatabs",
+      tabPanel("Manage", HTML('<h4>20 (max) rows shown. See View-tab for details.</h4>'), tableOutput("dataexample")),
+      tabPanel("View", tableOutput("dataviewer")),
+      tabPanel("Visualize", plotOutput("visualize", width = "100%", height = "100%")),
+      tabPanel("Explore", verbatimTextOutput("expl_data"), plotOutput("expl_viz", width = "100%", height = "100%")),
+      # tabPanel("Merge", #   HTML('<label>Merge data.<br>In progress. Check back soon.</label>') # ),
+      tabPanel("Transform", tableOutput("transform_data"), br(), verbatimTextOutput("transform_summary")),
+      tabPanel("About", includeRmd("about.Rmd"))
+    )
+	})
+
+	# analysis output tabs can be customized in the tools files
 	output$ui_analysis_tabs <- renderUI({
 	  tabs <- try(get(paste('ui_',input$tool,'_tabs', sep=""))(), silent = TRUE)
   	if(is(tabs, 'try-error')) {
@@ -34,5 +44,4 @@ shinyServer(function(input, output, session) {
   		return(tabs)
 	  }
 	})
-
 })

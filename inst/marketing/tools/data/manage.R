@@ -1,9 +1,4 @@
-# used in ui.R. Structure relevant for (future) modularization
-output$ui_manage <- renderUI({
-  ui_manage()
-})
-
-ui_manage <- function() {
+ui_Manage <- function() {
   list(wellPanel(
       radioButtons(inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", ".xls" = "xls"), selected = ".rda"),
       conditionalPanel(condition = "input.dataType != 'xls'",
@@ -26,7 +21,8 @@ ui_manage <- function() {
     wellPanel(
       uiOutput("removeDataset"),
       actionButton('removeDataButton', 'Remove data')
-    )
+    ),
+    helpModal('Manage','manage',includeMarkdown("tools/help/manage.md"))
   )
 }
 

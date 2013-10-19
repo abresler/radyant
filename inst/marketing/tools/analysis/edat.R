@@ -32,11 +32,10 @@ summary.singleMean <- function(result) {
 plot.singleMean <- function(result) {
 
 	dat <- getdata()
-	var <- input$sm_var
-	xvar <- dat[,var]
+	xvar <- dat[,input$sm_var]
 	bw <- diff(range(xvar, na.rm = TRUE)) / 12
 
-	p <- ggplot(dat, aes_string(x=var)) + 
+	p <- ggplot(dat, aes_string(x=input$sm_var)) + 
 			geom_histogram(colour = 'black', fill = 'blue', binwidth = bw, alpha = .1) + 
 			geom_vline(xintercept = input$sm_compValue, color = 'red', linetype = 'longdash', size = 1) +
 			geom_vline(xintercept = mean(xvar, na.rm = TRUE), color = 'black', linetype = 'solid', size = 1) +
@@ -46,10 +45,8 @@ plot.singleMean <- function(result) {
 
 singleMean <- reactive({
 	if(is.null(input$sm_var)) return("Please select a numeric or integer variable")
-	dat <- getdata()
-	var <- input$sm_var
-	if(!var %in% names(getdata_class())) return("")
-	dat <- dat[,var]
+	if(!input$sm_var %in% names(getdata_class())) return("")
+	dat <- getdata()[,input$sm_var]
 	t.test(dat, mu = input$sm_compValue, alternative = input$sm_alternative, conf.level = input$sm_sigLevel)
 })
 
@@ -58,25 +55,21 @@ singleMean <- reactive({
 ###############################
 
 output$cm_var1 <- renderUI({
-  vars <- varnames()
-  if(is.null(vars)) return()
 
-  dat <- getdata()
-  isNum <- sapply(dat, is.numeric)
-  isFct <- sapply(getdata(), is.factor)
- 	vars <- c(vars[isFct],vars[isNum])
+  varCls <- getdata_class()
+	isNumOrFct <- "numeric" == varCls | "integer" == varCls | "factor" == varCls
+  vars <- varnames()[isNumOrFct]
   if(is.null(vars)) return()
-
   selectInput(inputId = "cm_var1", label = "Select a factor or numerical variable:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$cm_var2 <- renderUI({
-  vars <- varnames()
-  if(is.null(vars) || is.null(input$cm_var1)) return()
 
-  dat <- getdata()
-  isNum <- sapply(dat, is.numeric)
- 	vars <- vars[isNum]
+  if(is.null(input$cm_var1)) return()
+
+  varCls <- getdata_class()
+	isNum <- "numeric" == varCls | "integer" == varCls
+  vars <- varnames()[isNum]
   if(is.null(vars)) return()
  	if(input$cm_var1 %in% vars) {
 	 	vars <- vars[-which(vars == input$cm_var1)]
@@ -89,43 +82,52 @@ output$cm_var2 <- renderUI({
 
 
 ui_compareMeans <- function() {
-  wellPanel(
+  list(wellPanel(
     # tags$head(tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")),
     # radioButtons(inputId = "cm_paired", label = "Test type:", c("Paired" = "paired", "Independent" = "independent"), selected = ""),
     uiOutput("cm_var1"),
     uiOutput("cm_var2"),
     conditionalPanel(condition = "input.analysistabs == 'Summary'",
-      # selectInput(inputId = "cm_alternative", label = "Alternative hypothesis", choices = alt, selected = "Two sided"),
-      sliderInput('cm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01)
+      selectInput(inputId = "cm_alternative", label = "Alternative hypothesis:", choices = alt, selected = "Two sided"),
+    	radioButtons(inputId = "cm_confint", label = "", c("p-values" = "pval", "conf. intervals" = "confint"), selected = "p-values"),
+	    conditionalPanel(condition = "input.cm_confint == 'confint'",
+	      sliderInput('cm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01)
+	    )
     ),
     conditionalPanel(condition = "input.analysistabs == 'Plots'",
 		  checkboxInput('cm_jitter', 'Jitter', value = TRUE)
-		),
+		)),
   	helpModal('Compare means','compareMeans',includeRmd("tools/help/compareMeans.Rmd"))
   )
 }
 
 summary.compareMeans <- function(result) {
-	result <- result$model
-	print(summary(result))
-	cat("\n")
-	print(model.tables(result,"means"),digits=3) 
-	cat("\n")
-	TukeyHSD(result, ordered = TRUE, conf.level = input$cm_sigLevel)
+
+	cat("Overall model evaluation:\n")
+	print(summary(result$model))
+	cat("\nMeans table:\n")
+
+	means_tab <- ddply(result$data, c("variable"), colwise(mean))
+	colnames(means_tab)[2] <- "mean"
+	print(means_tab)
+
+	comps <- glht(result$model, linfct = mcp("variable" = "Tukey"), alternative = input$cm_alternative)
+	if(input$cm_confint == 'pval') {
+		print(summary(comps))
+	} else {
+		print(confint(comps, level = input$cm_sigLevel))
+	}
 }
 
 plot.compareMeans <- function(result) {
 
 	dat <- result$data
-
 	var1 <- colnames(dat)[1]
 	var2 <- colnames(dat)[-1]
 
 	plots <- list()
-
 	p <- ggplot(dat, aes_string(x=var1, y=var2, fill=var1)) + geom_boxplot(alpha=.3) 
 	if(input$cm_jitter)	p <- p + geom_jitter() 
-
 	plots[["Boxplot"]] <- p
 	plots[["Density"]] <- ggplot(dat, aes_string(x=var2, fill=var1)) + geom_density(alpha=.3)
 
@@ -136,18 +138,20 @@ compareMeans <- reactive({
 	if(is.null(input$cm_var2)) return("Please select a variable")
 	var1 <- input$cm_var1
 	var2 <- input$cm_var2
+
+	if(!var1 %in% names(getdata_class())) return("")
 	dat <- getdata()[,c(var1,var2)]
 	if(!is.factor(dat[,var1])) {
 		dat <- melt(dat)
 		var1 <- colnames(dat)[1]
 		var2 <- colnames(dat)[2]
+	} else {
+		colnames(dat)[1] <- "variable"
 	}
 
-	formula <- as.formula(paste(var2[1], "~", var1))
-	# list("model" = aov(formula, data = dat, conf.level = input$cm_sigLevel), "data" = data.frame(dat)) 
+	formula <- as.formula(paste(var2[1], "~ variable"))
 	list("model" = aov(formula, data = dat), "data" = data.frame(dat)) 
 })
-
 
 ###############################
 # Single proportion

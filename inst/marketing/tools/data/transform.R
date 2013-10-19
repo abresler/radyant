@@ -52,26 +52,26 @@ ui_transform <- function() {
   wellPanel(
     uiOutput("tr_columns"),
 
-   	# radioButtons("tr_changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Generate" = "gen", "Recode" = "recode", "Remove" = "remove"), selected = "Change"),
-   	radioButtons("tr_changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode", "Remove" = "remove"), selected = "Change"),
+   	radioButtons("tr_changeType", "", c("Change" = "change", "Create" = "create", "Paste" = "paste", "Recode" = "recode", "Rename" = "rename", "Remove" = "remove"), selected = "Change"),
+   	# radioButtons("tr_changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode", "Remove" = "remove"), selected = "Change"),
     conditionalPanel(condition = "input.tr_changeType == 'change'",
 	    selectInput("tr_transfunction", "Change columns:", trans_options)
+    ),
+    conditionalPanel(condition = "input.tr_changeType == 'create'",
+	    textInput("tr_transform", "Create (e.g., x = y - z):", ''), 
+  	  actionButton("tr_transform_sub", "Go")
+    ),
+    conditionalPanel(condition = "input.tr_changeType == 'paste'",
+    	HTML("<label>Paste from Excel:</label>"),
+	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
+    ),
+    conditionalPanel(condition = "input.tr_changeType == 'recode'",
+	    textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
+  	  actionButton("tr_recode_sub", "Go")
     ),
     conditionalPanel(condition = "input.tr_changeType == 'rename'",
     	textInput("tr_rename", "Rename (separate by ','):", ''),
 	   	tags$style(type='text/css', "#tr_rename { max-width: 185px; }")
-    ),
-    conditionalPanel(condition = "input.tr_changeType == 'add'",
-    	HTML("<label>Copy-and-paste from Excel:</label>"),
-	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
-    ),
-    # conditionalPanel(condition = "input.tr_changeType == 'gen'",
-	   #  textInput("tr_transform", "Generate (e.g., x = y - z):", ''), 
-  	 #  actionButton("tr_transform_sub", "Go")
-    # ),
-    conditionalPanel(condition = "input.tr_changeType == 'recode'",
-	    textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
-  	  actionButton("tr_recode_sub", "Go")
     ),
 
     # actionButton("transfix", "Edit variables in place") # using the 'fix(mtcars)' to edit the data 'inplace'. Looks great from R-ui, not so great from Rstudio
@@ -79,9 +79,10 @@ ui_transform <- function() {
   )
 }
 
-transform <- reactive({
-	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return()
+transform_main <- reactive({
+
 	if(input$datatabs != 'Transform') return()
+	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '' && input$tr_transform == '')) return()
 
 	dat <- getdata()
 	if(!is.null(input$tr_columns)) {
@@ -118,36 +119,6 @@ transform <- reactive({
 		})
 	}
 
-	if(!is.null(input$tr_transform_sub) && !input$tr_transform_sub == 0) {
-		isolate({
-			if(input$tr_transform != '') {
-				recom <- input$tr_transform
-				recom <- gsub(" ", "", recom)
-				recom <- gsub("\"","\'", recom)
-
-				all_dat <- getdata()
-
-				# newvarcom <- try(parse(text = paste0("transform(all_dat,",\"",recom,"\")")), silent = TRUE)
-
-				print(parse(text = paste0("transform(all_dat,",recom,")")))
-
-				newvarcom <- try(parse(text = paste0("transform(all_dat,",recom,")")), silent = TRUE)
-
-				if(!is(newvarcom, 'try-error')) {
-
-					newvar <- try(eval(newvarcom), silent = TRUE)
-					if(!is(newvar, 'try-error')) {
-
-						cn <- c(colnames(dat),paste("gen",input$tr_columns[1], sep="."))
-						dat <- cbind(dat,newvar)
-						colnames(dat) <- cn
-						return(dat)
-					}
-				} 
-			}
-		})
-	}
-
 	if(input$tr_copyAndPaste != '') {
 		cpdat <- read.table(header=T, text=input$tr_copyAndPaste)
 		cpname <- names(cpdat)
@@ -162,13 +133,50 @@ transform <- reactive({
 		names(dat)[1:length(rcom)] <- rcom
 	}
 
+	if(input$tr_transform != '') {
+		if(!is.null(input$tr_transform_sub) && !input$tr_transform_sub == 0) {
+			isolate({
+				if(input$tr_transform != '') {
+					recom <- input$tr_transform
+					recom <- gsub(" ", "", recom)
+					recom <- gsub("\"","\'", recom)
+
+					newvarcom <- try(parse(text = paste0("transform(fullDat,",recom,")")), silent = TRUE)
+
+					if(!is(newvarcom, 'try-error')) {
+						fullDat <- getdata()
+						newvar <- try(eval(newvarcom), silent = TRUE)
+						if(!is(newvar, 'try-error')) { 
+							nfull <- ncol(fullDat)
+							nnew <- ncol(newvar)
+
+							# this won't work properly if the transform command creates a new variable
+							# and also overwrites an existing one
+							if(nfull < nnew) newvar <- newvar[,(nfull+1):nnew, drop = FALSE]
+							if(is.null(input$tr_columns)) return(newvar)
+							cn <- c(colnames(dat),colnames(newvar))
+							dat <- cbind(dat,newvar)
+							colnames(dat) <- cn
+						} else if(is.null(input$tr_columns)) {
+							return()
+						}
+					} else if(is.null(input$tr_columns)) {
+						return()
+					}
+				}
+			})
+		} else if(is.null(input$tr_columns)) {
+			return()
+		}
+	}
+
 	dat
 })
 
 output$transform_data <- renderTable({
-	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return()
+	# if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return()
 
-	dat <- transform()
+	dat <- transform_main()
 	if(is.null(dat)) return()
 
 	dat <- data.frame(date2character_dat(dat))
@@ -178,9 +186,9 @@ output$transform_data <- renderTable({
 })
 
 output$transform_summary <- renderPrint({
-	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return(invisible())
+	# if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return(invisible())
 
-	dat <- transform()
+	dat <- transform_main()
 	if(is.null(dat)) return(invisible()) 			# ...
 
 	isFct <- sapply(dat, is.factor)
@@ -205,7 +213,7 @@ output$transform_summary <- renderPrint({
 observe({
 	if(is.null(input$addtrans) || input$addtrans == 0) return()
 	isolate({
-		dat <- transform()
+		dat <- transform_main()
 		# if(input$tr_transfunction == 'remove') {
 		if(input$tr_changeType == 'remove') {
 			changedata(addColName = colnames(dat))
@@ -214,6 +222,7 @@ observe({
 		}
 
 		# reset the values once the changes have been applied
+	 	updateTextInput(session = session, inputId = "tr_transform", label = "Create (e.g., y = x - z):", '')
 	 	updateTextInput(session = session, inputId = "tr_recode", label = "Recode (e.g., lo:20 = 1):", '')
 	 	updateTextInput(session = session, inputId = "tr_rename", label = "Rename (separate by ','):", '')
 	 	updateTextInput(session = session, inputId = "tr_copyAndPaste", label = "", '')

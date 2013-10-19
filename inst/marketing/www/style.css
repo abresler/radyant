@@ -18,7 +18,7 @@ select {
   max-width: 200px; 
 }
 
-textarea, #tr_rename{ 
+textarea, #tr_rename { 
   max-width: 185px; 
 }
 
@@ -55,7 +55,7 @@ textarea, #tr_rename{
   margin-bottom: 35px;
 }
 
-#dv_select, #tr_recode { 
+#dv_select, #tr_recode, #tr_transform { 
   max-width: 135px; 
 }
 
@@ -68,7 +68,7 @@ textarea, #tr_rename{
   vertical-align: top; 
 }
 
-#sub_select, #tr_recode_sub { 
+#sub_select, #tr_recode_sub, #tr_transform_sub { 
   vertical-align: top; 
   width: 45px; 
 }

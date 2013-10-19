@@ -152,10 +152,10 @@ output$datasets <- renderUI({
   if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
 
   # if(input$xls_paste != '') {
-  if(!is.null(input$xls_paste) && input$xls_paste != '') {
-		values[['xls_data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
-    values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
-	}
+ #  if(!is.null(input$xls_paste) && input$xls_paste != '') {
+	# 	values[['xls_data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
+ #    values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
+	# }
 
 	# clean out the copy-and-paste box once the data has been stored
  	updateTextInput(session = session, inputId = "xls_paste", label = "", '')

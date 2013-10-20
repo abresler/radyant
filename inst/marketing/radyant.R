@@ -1,20 +1,6 @@
 ################################################################
 # non-reactive functions used in radyant
 ################################################################
-varnames <- function() {
-	if(is.null(input$datasets)) return()
-
-	# dat <- getdata()
-	# cols <- colnames(dat)
-	# names(cols) <- paste(cols, " {", sapply(dat,class), "}", sep = "")
-	# cols
-
-	dat <- getdata_class()
-	vars <- names(dat)
-	names(vars) <- paste(vars, " {", dat, "}", sep = "")
-	vars
-}
-
 changedata <- function(addCol = list(NULL), addColName = "") {
 	# change data as specified
 	if(addColName[1] == "") return()
@@ -27,10 +13,6 @@ changedata <- function(addCol = list(NULL), addColName = "") {
   	}
   })
 }
-
-# getdata <- function(dataset = input$datasets) {
-#   values[[dataset]]
-# }	
 
 getdata <- reactive({
 	values[[input$datasets]]
@@ -46,8 +28,17 @@ getdata <- reactive({
 
 getdata_class <- reactive({
 	# don't use isolate here or values won't change when the dataset is changed
-	cls <- sapply(values[[input$datasets]], function(x) class(x)[1])
+	cls <- sapply(getdata(), function(x) class(x)[1])
 	gsub("ordered","factor", cls)
+})
+
+# varnames <- function() {
+varnames <- reactive({
+	# if(is.null(input$datasets)) return()
+	dat <- getdata_class()
+	vars <- names(dat)
+	names(vars) <- paste(vars, " {", dat, "}", sep = "")
+	vars
 })
 
 date2character <- reactive({
@@ -79,13 +70,16 @@ date2character_dat <- function(dat) {
 loadUserData <- function(filename, uFile, type) {
 
 	ext <- file_ext(filename)
-	objname <- robjname <- sub(paste(".",ext,sep = ""),"",basename(filename))
+	# objname <- robjname <- sub(paste(".",ext,sep = ""),"",basename(filename))
+	objname <- sub(paste(".",ext,sep = ""),"",basename(filename))
 	ext <- tolower(ext)
 
 	if(ext == 'rda' || ext == 'rdata') {
 		# objname will hold the name of the object inside the R datafile
-	  objname <- robjname <- load(uFile)
-		values[[robjname]] <- data.frame(get(robjname)) 	# only work with data.frames
+	  # objname <- robjname <- load(uFile)
+		# values[[robjname]] <- data.frame(get(robjname)) 	# only work with data.frames
+	  robjname <- load(uFile)
+		values[[objname]] <- data.frame(get(robjname)) 	# only work with data.frames
 	}
 
 	if(values[['datasetlist']][1] == '') {
@@ -135,7 +129,6 @@ output$downloadData <- downloadHandler(
 	  robj <- input$datasets
 
 	  # only save selected columns
-	  # assign(robj, getdata()[,input$columns])
 	  assign(robj, getdata())
 
 		if(ext == 'rda') {
@@ -158,7 +151,7 @@ output$datasets <- renderUI({
 	# }
 
 	# clean out the copy-and-paste box once the data has been stored
- 	updateTextInput(session = session, inputId = "xls_paste", label = "", '')
+ 	# updateTextInput(session = session, inputId = "xls_paste", label = "", '')
 
 	# # loading package data
 	# if(input$packData != "") {

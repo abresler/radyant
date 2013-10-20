@@ -102,7 +102,7 @@ transform_main <- reactive({
 				recom <- gsub(" ", "", recom)
 				recom <- gsub("\"","\'", recom)
 
-				newvarcom <- try(parse(text = paste0("recode(dat$",input$tr_columns[1],",\"",recom,"\")")), silent = TRUE)
+				newvarcom <- try(parse(text = paste0("car::recode(dat$",input$tr_columns[1],",\"",recom,"\")")), silent = TRUE)
 				if(!is(newvarcom, 'try-error')) {
 
 					newvar <- try(eval(newvarcom), silent = TRUE)
@@ -173,19 +173,16 @@ transform_main <- reactive({
 })
 
 output$transform_data <- renderTable({
-	# if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return()
 
 	dat <- transform_main()
 	if(is.null(dat)) return()
 
 	dat <- data.frame(date2character_dat(dat))
 	nr <- min(nrow(dat),10)
-	# dat <- data.frame(dat)
 	dat[1:nr,, drop = FALSE]
 })
 
 output$transform_summary <- renderPrint({
-	# if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '')) return(invisible())
 
 	dat <- transform_main()
 	if(is.null(dat)) return(invisible()) 			# ...
@@ -213,7 +210,6 @@ observe({
 	if(is.null(input$addtrans) || input$addtrans == 0) return()
 	isolate({
 		dat <- transform_main()
-		# if(input$tr_transfunction == 'remove') {
 		if(input$tr_changeType == 'remove') {
 			changedata(addColName = colnames(dat))
 		} else {

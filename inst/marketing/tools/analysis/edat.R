@@ -343,15 +343,15 @@ ui_crosstab <- function() {
   list(wellPanel(
     uiOutput("ct_var1"),
     uiOutput("ct_var2"),
+	  checkboxInput("ct_std_residuals", label = "Deviation (standarized)", value = FALSE),
+	  checkboxInput("ct_deviation", label = "Deviation (percentage)", value = FALSE),
 	  checkboxInput("ct_expected", label = "Expected values", value = FALSE),
-	  checkboxInput("ct_std_residuals", label = "Standarized residuals", value = FALSE),
     conditionalPanel(condition = "input.analysistabs == 'Summary'",
-		  checkboxInput("ct_contrib", label = "Contribution to chisquare value", value = FALSE),
-		  checkboxInput("ct_rowperc", label = "Row percentages", value = FALSE),
-		  checkboxInput("ct_colperc", label = "Column percentages", value = FALSE),
-		  checkboxInput("ct_cellperc", label = "Cell percentages", value = FALSE)
-		)
-		),
+		  checkboxInput("ct_contrib", label = "Contribution to chisquare value", value = FALSE)
+		  # checkboxInput("ct_rowperc", label = "Row percentages", value = FALSE),
+		  # checkboxInput("ct_colperc", label = "Column percentages", value = FALSE),
+		  # checkboxInput("ct_cellperc", label = "Cell percentages", value = FALSE)
+		)),
 	 	helpModal('Cross-tabs','crossTabs',includeMarkdown("tools/help/crossTabs.md"))
   )
 }
@@ -359,6 +359,15 @@ ui_crosstab <- function() {
 summary.crosstab <- function(result) {
 	cat("Observed values:\n")
 	print(result$cst$observed)
+
+	if(input$ct_std_residuals) {
+		cat("\nDeviation (standardized):\n")
+		print(result$cst$residuals, digits = 2) 	# these seem to be the correct std.residuals
+	}
+	if(input$ct_deviation) {
+		cat("\nDeviation (percentage):\n")
+		print(result$cst$deviation, digits = 2) 	# % deviation
+	}
 	if(input$ct_expected) {
 		cat("\nExpected values:\n")
 		print(result$cst$expected, digits = 2)
@@ -367,23 +376,18 @@ summary.crosstab <- function(result) {
 		cat("\nContribution to chisquare value:\n")
 		print((result$cst$observed - result$cst$expected)^2 / result$cst$expected, digits = 2)
 	}
-	if(input$ct_std_residuals) {
-		cat("\nStandardized residuals:\n")
-		print(result$cst$residuals, digits = 2) 	# these seem to be the correct std.residuals
-		# print(result$cst$stdres, digits = 2)
-	}
-	if(input$ct_cellperc) {
-		cat("\nCell percentages:\n")
-		print(prop.table(result$table), digits = 2)  	# cell percentages
-	}
-	if(input$ct_rowperc) {
-		cat("\nRow percentages:\n")
-		print(prop.table(result$table, 1), digits = 2) # row percentages 
-	}
-	if(input$ct_colperc) {
-		cat("\nColumn percentages:\n")
-		print(prop.table(result$table, 2), digits = 2) # column percentages
-	}
+	# if(input$ct_cellperc) {
+	# 	cat("\nCell percentages:\n")
+	# 	print(prop.table(result$table), digits = 2)  	# cell percentages
+	# }
+	# if(input$ct_rowperc) {
+	# 	cat("\nRow percentages:\n")
+	# 	print(prop.table(result$table, 1), digits = 2) # row percentages 
+	# }
+	# if(input$ct_colperc) {
+	# 	cat("\nColumn percentages:\n")
+	# 	print(prop.table(result$table, 2), digits = 2) # column percentages
+	# }
 
 	print(result$cst, digits = 2)
 	cat(paste("\n",sprintf("%.1f",100 * (sum(result$cst$expected < 5) / length(result$cst$expected))),"% of cells have expected values below 5\n\n"), sep = "")
@@ -403,25 +407,39 @@ plot.crosstab <- function(result) {
 		melt(cbind(lab,tab))
 	}
 
-	if(input$ct_expected) {
-
-		tab <- meltTable(result$cst$expected)
-		plots[['expected']] <- ggplot(tab, aes(rnames,value, fill = variable)) +
-         			geom_bar(stat="identity", alpha = .3) +
-         			labs(list(title = paste("Expected values for ",input$ct_var2," versus ",input$ct_var1, sep = ""), 
-		 					x = '', fill = input$ct_var2))
-	}
 	if(input$ct_std_residuals) {
 
 		tab <- meltTable(result$cst$residuals)
 		colnames(tab)[c(2,3)] <- c(input$ct_var1, input$ct_var2)
 		plots[['residuals']] <- ggplot(tab, aes_string(x = input$ct_var1, y = "value", fill = input$ct_var2)) +
          			geom_bar(stat="identity", position = "dodge", alpha = .3) +
-     					geom_hline(yintercept = c(-1.96,1.96), color = 'black', linetype = 'longdash', size = .5) +
-         			labs(list(title = paste("Standardized residuals for ",input$ct_var2," versus ",input$ct_var1, sep = ""), x = input$ct_var1))
+     					geom_hline(yintercept = c(-1.96,1.96,-1.64,1.64), color = 'black', linetype = 'longdash', size = .5) +
+     					geom_text(data = NULL, x = 1, y = 2.05, label = "95%") +
+     					geom_text(data = NULL, x = 1, y = 1.73, label = "90%") +
+         			labs(list(title = paste("Deviation (standardized) for ",input$ct_var2," versus ",input$ct_var1, sep = ""), x = input$ct_var1))
 	}
 
-	plots[['observed']] <- ggplot(dat, aes_string(x = input$ct_var1, fill = input$ct_var2)) + geom_histogram(alpha=.3) +
+	if(input$ct_deviation) {
+
+		tab <- meltTable(result$cst$deviation)
+		colnames(tab)[c(2,3)] <- c(input$ct_var1, input$ct_var2)
+		plots[['deviation']] <- ggplot(tab, aes_string(x = input$ct_var1, y = "value", fill = input$ct_var2)) +
+         			geom_bar(stat="identity", position = "dodge", alpha = .3) + ylim(-1,1) +
+         			labs(list(title = paste("Deviation (percentage) for ",input$ct_var2," versus ",input$ct_var1, sep = ""), x = input$ct_var1))
+	}
+
+	if(input$ct_expected) {
+
+		tab <- meltTable(result$cst$expected)
+		tab$rnames <- factor(tab$rnames,levels=levels(dat[,1]))
+
+		plots[['expected']] <- ggplot(tab, aes_string(x = 'rnames', y = "value", fill = "variable")) +
+         			geom_bar(stat="identity", position = "dodge", alpha = .3) +
+         			labs(list(title = paste("Expected values for ",input$ct_var2," versus ",input$ct_var1, sep = ""), 
+		 					x = ''))
+	}
+
+	plots[['observed']] <- ggplot(dat, aes_string(x = input$ct_var1, fill = input$ct_var2)) + geom_histogram(position = "dodge", alpha=.3) +
 		labs(list(title = paste("Crosstab of ",input$ct_var2," versus ",input$ct_var1, sep = ""), 
 				x = '', y = "Count", fill = input$ct_var2))
 
@@ -443,9 +461,14 @@ crosstab <- reactive({
 	tab <- table(dat[,input$ct_var1], dat[,input$ct_var2], dnn = dnn)
 	cst <- chisq.test(tab, correct = FALSE)
 
-	nr.plot <- 1 + sum(c(input$ct_expected,input$ct_std_residuals))
+	# adding the % deviation table
+	o <- cst$observed
+	e <- cst$expected
+	cst$deviation <- (o-e) / e
 
-	list('cst' = cst, 'table' = tab, plotHeight = 650 * nr.plot)
+	nr.plot <- 1 + sum(c(input$ct_expected,input$ct_deviation, input$ct_std_residuals))
+
+	list('cst' = cst, 'table' = tab, plotHeight = 400 * nr.plot)
 })
 
 ###############################

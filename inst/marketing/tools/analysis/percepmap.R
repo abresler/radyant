@@ -1,22 +1,34 @@
-# variable selection - factor analysis
+# variable selection - factor analysis bases perceptual map
 output$pmap_brand <- renderUI({
-  vars <- varnames()
-  if(is.null(vars)) return()
-  isCar <- sapply(getdata(), is.character)
- 	vars <- vars[isCar]
- 	if(length(vars) > 0) selectInput(inputId = "pmap_brand", label = "Brand:", choices = vars, selected = NULL, multiple = FALSE)
+
+	varCls <- getdata_class()
+	isChar <- "character" == varCls
+  vars <- varnames()[isChar]
+  if(length(vars) == 0) return()
+ 	selectInput(inputId = "pmap_brand", label = "Brand:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$pmap_attr <- renderUI({
-  vars <- varnames()
-  if(is.null(input$pmap_brand)) return()
-  selectInput(inputId = "pmap_attr", label = "Attributes:", choices = vars[-which(vars == input$pmap_brand)], selected = NULL, multiple = TRUE)
+  if(is.null(input$pmap_brand) || is.null(inChecker(c(input$pmap_brand)))) return()
+
+  varCls <- getdata_class()
+ 	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
+ 	vars <- varnames()[isNum]
+  if(length(vars) == 0) return()
+
+  selectInput(inputId = "pmap_attr", label = "Attributes:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
 output$pmap_pref <- renderUI({
-  vars <- varnames()
-  if(is.null(input$pmap_brand)) return()
-  selectInput(inputId = "pmap_pref", label = "Preferences:", choices = vars[-which(vars %in% c(input$pmap_brand,input$pmap_attr))], selected = NULL, multiple = TRUE)
+  if(is.null(input$pmap_attr)) return()
+
+  varCls <- getdata_class()
+ 	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
+ 	vars <- varnames()[isNum]
+ 	vars <- vars[-which(vars %in% input$pmap_attr)]
+  if(length(vars) == 0) return()
+
+  selectInput(inputId = "pmap_pref", label = "Preferences:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
 output$pmap_dim_number <- renderUI({
@@ -26,7 +38,7 @@ output$pmap_dim_number <- renderUI({
 output$pmap_plot <- renderUI({
 	plot_list <- c("Brands" = "brand", "Attributes" = "attr")
   if(!is.null(input$pmap_pref)) plot_list <- c(plot_list, c("Preferences" = "pref"))
-	checkboxGroupInput("pmap_plot", "Plot:", plot_list)
+	checkboxGroupInput("pmap_plot", "", plot_list)
 })
 
 ui_pmap <- function() {
@@ -34,11 +46,11 @@ ui_pmap <- function() {
   	uiOutput("pmap_brand"),
   	uiOutput("pmap_attr"),
   	uiOutput("pmap_pref"),
-  	uiOutput("pmap_dim_number"),
  	 	conditionalPanel(condition = "input.analysistabs == 'Plots'",
 	  	uiOutput("pmap_plot"),
  	    numericInput("pmap_scaling", "Arrow scaling factor:", 2.4, .5, 4, .1)
-    )
+    ),
+  	uiOutput("pmap_dim_number")
  	)
 }
 
@@ -95,8 +107,10 @@ plot.pmap <- function(result) {
 
 pmap <- reactive({
 
-	# if(is.null(input$pmap_brand) || is.null(input$pmap_attr)) return("Please select a brand variable and two or more attribute variables")
-	if(is.null(input$pmap_brand) || (length(input$pmap_attr) < 2)) return("Please select a brand variable and two or more attribute variables")
+	ret_text <- "This analysis requires a brand variables of type character and multiple attribute variables of type numeric or integer. Please select another dataset."
+	if(is.null(input$pmap_brand)) return(ret_text)
+	if(is.null(inChecker(c(input$pmap_brand, input$pmap_attr)))) return(ret_text)
+	if(length(input$pmap_attr) < 2) return("Please select two or more attribute variables")
 
 	dat <- getdata()
 
@@ -135,17 +149,18 @@ pmap <- reactive({
 	if(!is.null(input$pmap_pref))
 		out$pref.names <- input$pmap_pref
 	
-	nr.plots <- factorial(c(nr.dim,2))
-	plotHeight = 650 * (nr.plots[1] / nr.plots[2])
+	# nr.plots <- factorial(c(nr.dim,2))
+	# plotHeight <- 650 * (nr.plots[1] / nr.plots[2])
+
+	nr.plots <- (nr.dim * (nr.dim - 1)) / 2
+	plotHeight <- 650 * nr.plots
 
 	return(list('f.res' = f.res, 'out' = out, 'plotHeight' = plotHeight))
 })
 
 summary.pmap <- function(result) {
 
-	cat("\n======== Attribute based perceptual map ==========\n")
-	cat("\n--- Factor analysis output --- \n")
-
+	cat("-- Attribute based perceptual map --\n")
 	f.res <- result$f.res
 
 	communalities <- as.data.frame(f.res$communality)

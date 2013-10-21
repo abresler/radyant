@@ -86,7 +86,10 @@ output$visualize <- renderPlot({
 		if(!input$vizvars1 %in% colnames(dat)) return()
 
 		if(input$vizvars2 == "") {
-			p <- ggplot(dat, aes_string(x=input$vizvars1)) + geom_histogram(fill = 'blue', alpha=.3) 
+			# p <- ggplot(dat, aes_string(x=input$vizvars1)) + geom_histogram(fill = 'blue', alpha=.3) 
+			# p <- ggplot(dat, aes_string(x=input$vizvars1)) + geom_histogram(alpha=.3) 
+			p <- ggplot(dat, aes_string(x=input$vizvars1)) + geom_histogram(colour = 'black', fill = 'blue', alpha = .1)
+
 			return(print(p))
 		} else {
 

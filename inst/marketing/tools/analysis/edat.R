@@ -6,7 +6,7 @@ output$sm_var <- renderUI({
   vars <- varnames()
 	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
  	vars <- vars[isNum]
-  if(length(vars) == 0) return(HTML('<label>This dataset has no variables of type numeric, or integer.</label>'))
+  if(length(vars) == 0) return()
   selectInput(inputId = "sm_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -44,8 +44,11 @@ plot.singleMean <- function(result) {
 }
 
 singleMean <- reactive({
-	if(is.null(input$sm_var)) return("Please select a numeric or integer variable")
-	if(!input$sm_var %in% names(getdata_class())) return("")
+
+	ret_text <- "This analysis requires a variable of type numeric or interval. Please select another dataset."
+	if(is.null(input$sm_var)) return(ret_text)
+	if(is.null(inChecker(c(input$sm_var)))) return(ret_text)
+
 	dat <- getdata()[,input$sm_var]
 	t.test(dat, mu = input$sm_compValue, alternative = input$sm_alternative, conf.level = input$sm_sigLevel)
 })
@@ -59,7 +62,7 @@ output$cm_var1 <- renderUI({
   varCls <- getdata_class()
 	isNumOrFct <- "numeric" == varCls | "integer" == varCls | "factor" == varCls
   vars <- varnames()[isNumOrFct]
-  if(length(vars) == 0) return(HTML('<label>This dataset has no variables of type factor, numeric, or integer.</label>'))
+  if(length(vars) == 0) return()
   selectInput(inputId = "cm_var1", label = "Select a factor or numerical variable:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -70,10 +73,10 @@ output$cm_var2 <- renderUI({
   varCls <- getdata_class()
 	isNum <- "numeric" == varCls | "integer" == varCls
   vars <- varnames()[isNum]
-  if(length(vars) == 0) return(HTML('<label>A variable of type numeric or integer is not available in this dataset.</label>'))
+  if(length(vars) == 0) return()
  	if(input$cm_var1 %in% vars) {
 	 	vars <- vars[-which(vars == input$cm_var1)]
-	  if(length(vars) == 0) return(HTML('<label>A variable of type numeric or integer is not available in this dataset.</label>'))
+	  if(length(vars) == 0) return()
 	  selectInput(inputId = "cm_var2", label = "Variables (select one or more):", choices = vars, selected = NULL, multiple = TRUE)
 	} else {
 	  selectInput(inputId = "cm_var2", label = "Variables (select one):", choices = vars, selected = NULL, multiple = FALSE)
@@ -83,7 +86,6 @@ output$cm_var2 <- renderUI({
 
 ui_compareMeans <- function() {
   list(wellPanel(
-    # tags$head(tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")),
     uiOutput("cm_var1"),
     uiOutput("cm_var2"),
     conditionalPanel(condition = "input.analysistabs == 'Summary'",
@@ -157,11 +159,16 @@ plot.compareMeans <- function(result) {
 }
 
 compareMeans <- reactive({
-	if(is.null(input$cm_var2)) return("Please select a variable")
+
+	ret_text <- "This analysis requires variables of type factor, numeric or interval. Please select another dataset."
+	if(is.null(input$cm_var1)) return(ret_text)
+	if(is.null(input$cm_var2)) return("Please select a numeric or interval variable")
+
+	if(is.null(inChecker(c(input$cm_var1, input$cm_var2)))) return(ret_text)
+
 	var1 <- input$cm_var1
 	var2 <- input$cm_var2
 
-	if(!var1 %in% names(getdata_class())) return("")
 	dat <- getdata()[,c(var1,var2)]
 
 	if(!is.factor(dat[,var1])) {
@@ -196,7 +203,7 @@ output$sp_var <- renderUI({
   vars <- varnames()
   isFct <- "factor" == getdata_class()
  	vars <- vars[isFct]
-  if(length(vars) == 0) return(HTML('<label>This dataset has no variables of type Factor.</label>'))
+  if(length(vars) == 0) return()
   selectInput(inputId = "sp_var", label = "Variable (select one):", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -218,7 +225,6 @@ summary.singleProp <- function(result) {
 
 plot.singleProp <- function(result) {
 
-  if(is.null(input$sp_var)) return()
 	var <- input$sp_var
 	dat <- getdata()[,var, drop = FALSE]
 	p <- ggplot(dat, aes_string(x = var, fill = var)) + geom_histogram(alpha=.3) +
@@ -228,11 +234,11 @@ plot.singleProp <- function(result) {
 
 singleProp <- reactive({
 
-	if(is.null(input$sp_var)) return("Please select a variable")
-	var <- input$sp_var
-	if(!var %in% names(getdata_class())) return("")
+	ret_text <- "This analysis requires a variable of type factor with two levels. Please select another dataset."
+	if(is.null(input$sp_var)) return(ret_text)
+	if(is.null(inChecker(c(input$sp_var)))) return(ret_text)
 
-	dat <- getdata()[,var]
+	dat <- getdata()[,input$sp_var]
 	lev <- levels(dat)
 	if(length(lev) >2) return("The selected variable has more than two levels. Try another variable or a cross-tab.")
 	prop <- sum(dat == rev(lev)[1])
@@ -248,7 +254,7 @@ output$cp_var1 <- renderUI({
  	varCls <- getdata_class()
 	isFct <- "factor" == varCls
   vars <- varnames()[isFct]
-  if(length(vars) == 0) return(HTML('<label>This dataset has no variables of type factor.</label>'))
+  if(length(vars) == 0) return()
   selectInput(inputId = "cp_var1", label = "Select a grouping factor:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -260,7 +266,7 @@ output$cp_var2 <- renderUI({
   vars <- varnames()[isFct]
 	if(!input$cp_var1 %in% vars) return()
 	vars <- vars[-which(vars == input$cp_var1)]
-  if(length(vars) == 0) return(HTML('<label>This dataset has only one variable of type factor.</label>'))
+  if(length(vars) == 0) return()
   selectInput(inputId = "cp_var2", label = "Select a 2-level factor:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -284,7 +290,6 @@ summary.compareProps <- function(result) {
 plot.compareProps <- function(result) {
 
 	dat <- getdata()[,c(input$cp_var1,input$cp_var2)]
-	# p <- ggplot(dat, aes_string(x = input$cp_var1, fill = input$cp_var2)) + geom_histogram(alpha=.3, position = "dodge") +
 	p <- ggplot(dat, aes_string(x = input$cp_var1, fill = input$cp_var2)) + geom_bar(alpha=.3, position = "fill") +
 				labs(list(title = paste("Comparing proportions of ",input$cp_var2,"$",levels(dat[,1])[1], " across levels of ",input$cp_var1, sep = ""), 
 					x = paste("Factor levels for ", input$cp_var1), y = "Count", fill = input$cp_var2))
@@ -294,20 +299,18 @@ plot.compareProps <- function(result) {
 
 compareProps <- reactive({
 
-	if(is.null(input$cp_var2)) return("Please select a factor")
+	ret_text <- "This analysis requires variables of type factor. Please select another dataset."
+	if(is.null(input$cp_var1) || is.null(input$cp_var2)) return(ret_text)
+	if(is.null(inChecker(c(input$cp_var1, input$cp_var2)))) return(ret_text)
+
 	var1 <- input$cp_var1
 	var2 <- input$cp_var2
-
-	if(!var1 %in% names(getdata_class())) return("")
-	if(!var2 %in% names(getdata_class())) return("")
 
 	dat <- getdata()[,c(var1,var2)]
 	lev1 <- levels(dat[,1])
 	lev2 <- levels(dat[,2])
-
 	if(length(lev2) >2) return("The selected variable has more than two levels. Try another variable or a cross-tab.")
 
-	# tab <- table(group = input$cp_var1, variable = input$cp_var2)
 	tab <- table(group = dat[,input$cp_var1], variable = dat[,input$cp_var2])
 	pt <- prop.test(tab, correct = FALSE, alternative = input$cp_alternative, conf.level = input$cp_sigLevel)
 	pt$data.name <- paste("Group = ",var1,", variable = ",var2, " (level ", levels(dat[,var2])[1],")",sep = "")
@@ -323,7 +326,7 @@ output$ct_var1 <- renderUI({
  	varCls <- getdata_class()
 	isFct <- "factor" == varCls
   vars <- varnames()[isFct]
-  if(length(vars) == 0) return(HTML('<label>This dataset has no variables of type factor.</label>'))
+  if(length(vars) == 0) return()
   selectInput(inputId = "ct_var1", label = "Select a grouping factor:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -335,7 +338,7 @@ output$ct_var2 <- renderUI({
   vars <- varnames()[isFct]
 	if(!input$ct_var1 %in% vars) return()
 	vars <- vars[-which(vars == input$ct_var1)]
-  if(length(vars) == 0) return(HTML('<label>This dataset has only one variable of type factor.</label>'))
+  if(length(vars) == 0) return()
   selectInput(inputId = "ct_var2", label = "Select a factor:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
@@ -448,12 +451,13 @@ plot.crosstab <- function(result) {
 
 crosstab <- reactive({
 
-  if(is.null(input$ct_var2)) return("Please select a factor")
+
+	ret_text <- "This analysis requires variables of type factor. Please select another dataset."
+ 	if(is.null(input$ct_var1) || is.null(input$ct_var2)) return(ret_text)
+	if(is.null(inChecker(c(input$ct_var1, input$ct_var2)))) return(ret_text)
+
   var1 <- input$ct_var1
   var2 <- input$ct_var2
-
-  if(!var1 %in% names(getdata_class())) return("")
-  if(!var2 %in% names(getdata_class())) return("")
 
   dat <- getdata()[,c(var1,var2)]
 
@@ -529,7 +533,7 @@ plot.correlation <- function(dat) {
 correlation <- reactive({
 	vars <- input$cor_var
 	if(is.null(vars) || (length(vars) < 2)) return("Please select two or more variables")
-	if(sum(vars %in% names(getdata_class())) != length(vars))  return("")
+	if(sum(vars %in% varnames()) != length(vars))  return("")
 
 	dat <- getdata()[,vars]
 	data.frame(lapply(dat,as.numeric))

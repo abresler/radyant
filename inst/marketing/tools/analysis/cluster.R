@@ -60,6 +60,7 @@ hclustering <- reactive({
 observe({
 	if(is.null(input$hc_saveclus) || input$hc_saveclus == 0) return()
 	isolate({
+		if(is.character(hclustering())) return()
 		clusmem <- cutree(hclustering(), k = input$hc_nrClus)
 		changedata(data.frame(as.factor(clusmem)), paste("hclus",input$hc_nrClus,sep=""))
 	})
@@ -141,6 +142,7 @@ hinitclustering <- reactive({
 observe({
 	if(is.null(input$km_saveclus) || input$km_saveclus == 0) return()
 	isolate({
+		if(is.character(kmeansClustering())) return()
 		clusmem <- kmeansClustering()$cluster
 		changedata(data.frame(as.factor(clusmem)), paste("kclus",input$km_nrClus,sep=""))
 	})

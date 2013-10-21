@@ -1,24 +1,24 @@
 ################################################################
-# OLS
+# Generalize Linear Models
 ################################################################
 
-# ui
 output$glm_var1 <- renderUI({
   vars <- varnames()
-  if(is.null(vars)) return()
-  isFct <- sapply(getdata(), is.factor)
+	isFct <- "factor" == getdata_class()
  	vars <- vars[isFct]
- 	if(length(vars) == 0) return("Dataset has no factors that can be selected.")
+ 	if(length(vars) == 0) return()
   selectInput(inputId = "glm_var1", label = "Dependent variable:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$glm_var2 <- renderUI({
-  vars <- varnames()
-  if(is.null(vars)) return()
-  selectInput(inputId = "glm_var2", label = "Independent variables:", choices = vars[-which(vars == input$glm_var1)], selected = NULL, multiple = TRUE)
+	vars <- varnames()
+ 	vars <- vars[-which(vars == input$glm_var1)]
+  if(length(vars) == 0) return()
+  selectInput(inputId = "glm_var2", label = "Independent variables:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
 output$glm_var3 <- renderUI({
+
   vars <- input$glm_var2
   if(is.null(vars)) return()
 	if(!is.null(input$glm_intsel) && input$glm_interactions != 'none') vars <- c(vars,input$glm_intsel)
@@ -28,20 +28,22 @@ output$glm_var3 <- renderUI({
 output$glm_intsel <- renderUI({
   vars <- input$glm_var2
   if(is.null(vars) || length(vars) < 2) return()
-	selectInput("glm_intsel", label = "", choices = glm_int_vec(vars,input$glm_interactions), selected = NULL, multiple = TRUE)
+
+  choices <- ""
+ 	if(vars %in% varnames()) choices <- glm_int_vec(vars,input$glm_interactions)
+ 	
+	selectInput("glm_intsel", label = "", choices = choices , selected = NULL, multiple = TRUE)
+	# selectInput("glm_intsel", label = "", choices = glm_int_vec(vars,input$glm_interactions), selected = NULL, multiple = TRUE)
 })
 
 ui_glmreg <- function() {
   wellPanel(
-  	# includeHTML("www/js/tools.js"),
     radioButtons(inputId = "glm_linkfunc", label = "", c("Logit" = "logit", "Probit" = "probit"), selected = "Logit"),
-    radioButtons(inputId = "glm_glmtype", label = "", c("GLM" = "glm", "Bayes GLM" = "bayesglm"), selected = "GLM"),
+    # radioButtons(inputId = "glm_glmtype", label = "", c("GLM" = "glm", "Bayes GLM" = "bayesglm"), selected = "GLM"),
     uiOutput("glm_var1"),
-    # HTML("<link href=\"js/select2/select2.css\" rel=\"stylesheet\"/> <script src=\"js/select2/select2.js\"></script> <script> $(document).ready(function() { $(\"#glm_var2\").select2({ minimumInputLength: 2, placeholder: \"Select interactions\", width: 'resolve' }); }); </script>"),
     uiOutput("glm_var2"),
  	  checkboxInput(inputId = "glm_standardize", label = "Standardized coefficients", value = FALSE),
     radioButtons(inputId = "glm_interactions", label = "Interactions:", c("None" = "none", "All 2-way" = "2way", "All 3-way" = "3way"), selected = "None"),
-  	# tags$head(tags$script(src = "www/js/tools.js")),
     conditionalPanel(condition = "input.glm_interactions != 'none'",
   		uiOutput("glm_intsel") 
   	),
@@ -50,8 +52,8 @@ ui_glmreg <- function() {
   	),
     conditionalPanel(condition = "input.analysistabs == 'Plots'",
       selectInput("glm_plots", "Plots:", choices = gplots, selected = "coef", multiple = FALSE)
-    )
-    # actionButton("saveglmres", "Save residuals")
+    ),
+    actionButton("saveglmres", "Save residuals")
   )
 }
 
@@ -118,29 +120,38 @@ plot.glmreg <- function(result) {
 # analysis reactive
 glmreg <- reactive({
 
+
+	ret_text <- "This analysis requires a dependent variable of type factor and one or more independent variables. Please select another dataset."
+	if(is.null(input$glm_var1)) return(ret_text)
 	vars <- input$glm_var2
-	if(is.null(vars)) return("Please select one or more independent variables")
-	if(!is.null(input$glm_intsel) && input$glm_interactions != 'none') vars <- c(vars,input$glm_intsel)
-	formula <- paste(input$glm_var1, "~", paste(vars, collapse = " + "))
+	if(is.null(vars)) return("Please select one or more independent variables.")
+	if(is.null(inChecker(c(input$glm_var1, vars)))) return(ret_text)
+
+	# adding interaction terms as needed
+	if(input$glm_interactions != 'none') vars <- c(vars,input$glm_intsel)
 
 	dat <- getdata()
 	dv <- which(colnames(dat) == input$glm_var1)
 	if(input$glm_standardize) dat[,-dv] <- data.frame(lapply(dat[,-dv, drop = FALSE],rescale))
 
-	if(input$glm_glmtype == "bayesglm") {
-		mod <- bayesglm(formula, family = binomial(link = input$glm_linkfunc), data = dat)
-	} else {
-		mod <- glm(formula, family = binomial(link = input$glm_linkfunc), data = dat)
-	}
+	formula <- paste(input$glm_var1, "~", paste(vars, collapse = " + "))
+	# if(input$glm_glmtype == "bayesglm") {
+	# 	mod <- bayesglm(formula, family = binomial(link = input$glm_linkfunc), data = dat)
+	# } else {
+	# 	mod <- glm(formula, family = binomial(link = input$glm_linkfunc), data = dat)
+	# }
+
+	mod <- glm(formula, family = binomial(link = input$glm_linkfunc), data = dat)
 	mod
 })
 
 # save residuals
 observe({
 	if(is.null(input$saveglmres) || input$saveglmres == 0) return()
-	isolate(
-		changedata(residuals(glmreg()), "residuals")
- 	)
+	isolate({
+		if(is.character(glmreg())) return()
+		changedata(data.frame(residuals(glmreg())), "residuals")
+ 	})
 })
 
 # additional functions

@@ -14,7 +14,8 @@ if(Sys.getenv('SHINY_PORT') == "") {
 }
 
 options(repos = c(CRAN = "http://cran.rstudio.com"))
-libs <- c("shiny", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "multcomp", "Hmisc")
+# libs <- c("shiny", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "multcomp", "Hmisc")
+libs <- c("shiny", "Hmisc", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "multcomp")
 # libs <- c("shiny", "car", "foreign", "tools", "ggplot2", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape", "vegan")
 available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
 inst.libs <- libs[available == FALSE]
@@ -22,6 +23,10 @@ if(length(inst.libs) != 0) {
   install.packages(inst.libs, dependencies = TRUE)
 	suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
 }
+
+# unloading because it messes with method of some other packages
+# would prefer to use import From but ...
+detach("package:Hmisc", unload=TRUE)
 
 # setting up a few standard datasets to play with 
 mtcars$vs <- as.factor(mtcars$vs)

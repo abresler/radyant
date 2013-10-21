@@ -141,7 +141,7 @@ output$expl_viz <- renderPlot({
 		dat_plyr <- explore_plyr()[[func]]
 		for(col_var in input$expl_columns) {
 			p <- ggplot(data = explore_plyr()[[func]], aes_string(x = by_var, y = col_var, fill = fill_var)) 
-			p <- p + geom_bar(alpha=.3, stat="identity") + ggtitle(paste("Function used:", names(which(expl_functions == func))))
+			p <- p + geom_bar(stat="identity", position = "dodge", alpha=.3) + ggtitle(paste("Function used:", names(which(expl_functions == func))))
 			plots[[pnr]] <- p
 			pnr <- pnr + 1
 		}

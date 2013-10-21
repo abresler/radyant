@@ -22,7 +22,8 @@ textarea, #tr_rename {
   max-width: 185px; 
 }
 
-#fac_number, #km_nrClus { 
+/*number { */
+#fac_number, #fac_cutoff, #km_nrClus { 
   max-width: 185px; 
 }
 

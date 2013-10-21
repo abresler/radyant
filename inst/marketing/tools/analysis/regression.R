@@ -2,36 +2,48 @@
 # OLS
 ################################################################
 
-# ui
 output$reg_var1 <- renderUI({
   vars <- varnames()
-  if(is.null(vars)) return()
+	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
+ 	vars <- vars[isNum]
+  if(length(vars) == 0) return()
   selectInput(inputId = "reg_var1", label = "Dependent variable:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$reg_var2 <- renderUI({
+
+  if(is.null(input$reg_var1)) return()
   vars <- varnames()
-  if(is.null(vars)) return()
-  selectInput(inputId = "reg_var2", label = "Independent variables:", choices = vars[-which(vars == input$reg_var1)], selected = NULL, multiple = TRUE)
+ 	vars <- vars[-which(vars == input$reg_var1)]
+  if(length(vars) == 0) return()
+  selectInput(inputId = "reg_var2", label = "Independent variables:", choices = vars, selected = NULL, multiple = TRUE)
+
 })
 
 output$reg_var3 <- renderUI({
+
   vars <- input$reg_var2
   if(is.null(vars)) return()
+
+  # adding interaction terms as needed 
 	if(!is.null(input$reg_intsel) && input$reg_interactions != 'none') vars <- c(vars,input$reg_intsel)
 
   selectInput(inputId = "reg_var3", label = "Variables to test:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
 output$reg_intsel <- renderUI({
+
   vars <- input$reg_var2
   if(is.null(vars) || length(vars) < 2) return()
-	selectInput("reg_intsel", label = "", choices = reg_int_vec(vars,input$reg_interactions), selected = NULL, multiple = TRUE)
+
+  choices <- ""
+ 	if(vars %in% varnames()) choices <- reg_int_vec(vars,input$reg_interactions)
+ 	
+	selectInput("reg_intsel", label = "", choices = choices, selected = NULL, multiple = TRUE)
 })
 
 ui_regression <- function() {
   wellPanel(
-  	tags$head(tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")),
     uiOutput("reg_var1"),
     uiOutput("reg_var2"),
   	checkboxInput(inputId = "reg_standardize", label = "Standardized coefficients", value = FALSE),
@@ -116,17 +128,21 @@ plot.regression <- function(result) {
 
 # analysis reactive
 regression <- reactive({
-	vars <- input$reg_var2
-	if(is.null(vars)) return("Please select one or more independent variables")
 
-	if(!is.null(input$reg_intsel) && input$reg_interactions != 'none') vars <- c(vars,input$reg_intsel)
+	ret_text <- "This analysis requires a dependent variable of type integer or numeric and one or more independent variables. Please select another dataset."
+
+	if(is.null(input$reg_var1)) return(ret_text)
+	vars <- input$reg_var2
+	if(is.null(vars)) return("Please select one or more independent variables.")
+	if(is.null(inChecker(c(input$reg_var1, vars)))) return(ret_text)
+
+	# adding interaction terms as needed
+	if(input$reg_interactions != 'none') vars <- c(vars,input$reg_intsel)
+
+	dat <- getdata()
+	if(input$reg_standardize) dat <- data.frame(lapply(dat,rescale))
 
 	formula <- paste(input$reg_var1, "~", paste(vars, collapse = " + "))
-	dat <- getdata()
-
-	# if(is.character(dat[,input$reg_var1])) return("The dependent variable is of type character. Please choose a numeric variable instead.")
-
-	if(input$reg_standardize) dat <- data.frame(lapply(dat,rescale))
 	if(input$reg_stepwise) {
 		mod <- step(lm(as.formula(paste(input$reg_var1, "~ 1")), data = dat), scope = list(upper = formula), direction = 'forward')
 	} else {
@@ -139,6 +155,7 @@ regression <- reactive({
 observe({
 	if(is.null(input$saveres) || input$saveres == 0) return()
 	isolate({
+		if(is.character(regression())) return()
 		changedata(data.frame(regression()$residuals), "residuals")
 	})
 })

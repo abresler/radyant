@@ -1,20 +1,35 @@
-# variable selection - factor analysis
+# variable selection - MDS
 output$mds_id1 <- renderUI({
-  vars <- varnames()
-  if(is.null(vars)) return()
+	varCls <- getdata_class()
+	isChar <- "character" == varCls
+  vars <- varnames()[isChar]
+  if(length(vars) == 0) return(HTML('<label>This dataset has no variables of type character.</label>'))
+  # if(length(vars) == 0) return()
   selectInput(inputId = "mds_id1", label = "ID 1:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$mds_id2 <- renderUI({
-  vars <- varnames()
-  if(is.null(input$mds_id1)) return()
-  selectInput(inputId = "mds_id2", label = "ID 2:", choices = vars[-which(vars == input$mds_id1)], selected = NULL, multiple = FALSE)
+
+  if(is.null(input$mds_id1) || !input$mds_id1 %in% varnames()) return()
+
+  varCls <- getdata_class()
+  isChar <- "character" == varCls
+  vars <- varnames()[isChar]
+	vars <- vars[-which(vars == input$mds_id1)]
+  if(length(vars) == 0) return(HTML('<label>This dataset has only one variable of type character.</label>'))
+  # if(length(vars) == 0) return()
+  selectInput(inputId = "mds_id2", label = "ID 2:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$mds_dis <- renderUI({
-  vars <- varnames()
-  if(is.null(input$mds_id2)) return()
-  selectInput(inputId = "mds_dis", label = "Dissimilarity:", choices = vars[-which(vars %in% c(input$mds_id1,input$mds_id2))], selected = NULL, multiple = FALSE)
+  if(is.null(input$mds_id2) || !input$mds_id2 %in% varnames()) return()
+
+  varCls <- getdata_class()
+ 	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
+ 	vars <- varnames()[isNum]
+  # if(length(vars) == 0) return(HTML('<label>This dataset has no numeric variables.</label>'))
+  if(length(vars) == 0) return()
+  selectInput(inputId = "mds_dis", label = "Dissimilarity:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$mds_dim_number <- renderUI({
@@ -99,9 +114,12 @@ plot.mds <- function(result) {
 
 mds <- reactive({
 
-	if(is.null(input$mds_id1) || is.null(input$mds_id2) || is.null(input$mds_dis)) return("Please select two id-variables and a measure of dissimilarity")
+	ret_text <- "This analysis requires two id-variables of type character and a measure of dissimilarity of type numeric or interval. Please select another dataset."
+	if(is.null(input$mds_id2) || is.null(input$mds_dis)) return(ret_text)
 
 	dat <- getdata()
+
+	if(is.null(inChecker(c(input$mds_id1, input$mds_id2, input$mds_dis)))) return(ret_text)
 
 	nr.dim <- as.numeric(input$mds_dim_number)
 
@@ -151,8 +169,11 @@ mds <- reactive({
 	out$lim <- max(abs(out$points)) * pbf
 	out$fsize <- fsize
 
-	nr.plots <- factorial(c(nr.dim,2))
-	plotHeight = 650 * (nr.plots[1] / nr.plots[2])
+	# nr.plots <- factorial(c(nr.dim,2))
+	# plotHeight <- 650 * (nr.plots[1] / nr.plots[2])
+
+	nr.plots <- (nr.dim * (nr.dim - 1)) / 2
+	plotHeight <- 650 * nr.plots
 
 	return(list('co.mds' = co.mds, 'co.dist.mat' = co.dist.mat, 'out' = out, 'plotHeight' = plotHeight))
 })

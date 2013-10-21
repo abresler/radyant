@@ -14,6 +14,16 @@ changedata <- function(addCol = list(NULL), addColName = "") {
   })
 }
 
+inChecker <- function(tocheck) {
+
+	# checking if variables are in the selected dataset
+	for(var in tocheck) {
+		if(!var %in% varnames()) return(NULL)
+	}
+
+	return('Good stuff')
+}
+
 getdata <- reactive({
 	values[[input$datasets]]
 
@@ -225,13 +235,14 @@ output$dataviewer <- renderTable({
 				if(length(grep("rm\\(list",selcom)) > 0) q()
 					
 				# selcom is a valid expression to the subset command
-				parse_selcom <- try(parse(text = selcom)[[1]], silent = TRUE)
-				if(!is(parse_selcom, 'try-error')) {
-					seldat <- try(eval(parse(text = paste("subset(dat,",selcom,")")[[1]])), silent = TRUE)
+				selcom <- try(parse(text = paste0("subset(dat,",selcom,")")), silent = TRUE)
+				if(!is(selcom, 'try-error')) {
+					seldat <- try(eval(selcom), silent = TRUE)
 					if(is.data.frame(seldat)) {
-						# return(seldat[, input$columns, drop = FALSE])
 						dat <- seldat
 						seldat <- NULL
+						# showing all rows that fit the condition
+						updateSliderInput(session = session, "nrRows", "Rows to show:", value = c(1,nrow(dat)))
 					}
 				} 
 			}

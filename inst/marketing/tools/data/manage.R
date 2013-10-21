@@ -1,7 +1,8 @@
 ui_Manage <- function() {
   list(wellPanel(
-      radioButtons(inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard"), selected = ".rda"),
-      conditionalPanel(condition = "input.dataType != 'clipboard'",
+      # radioButtons(inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard"), selected = ".rda"),
+      radioButtons(inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard", "examples" = "examples"), selected = ".rda"),
+      conditionalPanel(condition = "input.dataType != 'clipboard' && input.dataType != 'examples'",
         conditionalPanel(condition = "input.dataType == 'csv'",
           checkboxInput('header', 'Header', TRUE),
           radioButtons('sep', '', c(Comma=',', Semicolon=';', Tab='\t'), 'Comma')
@@ -10,6 +11,9 @@ ui_Manage <- function() {
       ),
       conditionalPanel(condition = "input.dataType == 'clipboard'",
         actionButton('loadClipData', 'Paste data')
+      ),
+      conditionalPanel(condition = "input.dataType == 'examples'",
+        actionButton('loadExampleData', 'Load examples')
       )
     ),
     wellPanel(
@@ -42,7 +46,27 @@ observe({
 
     values[['xls_data']] <- as.data.frame(dat)
     values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
-    updateRadioButtons(session = session, inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard"), selected = ".rda")
+    updateRadioButtons(session = session, inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard", "examples" = "examples"), selected = ".rda")
+  })
+})
+
+observe({
+  # loading all examples files (linked to helpfiles)
+  if(is.null(input$loadExampleData) || input$loadExampleData == 0) return()
+  isolate({
+    path <- "www/examples/"
+    examples <- list.files(path)
+
+    for(ex in examples) {
+
+      ext <- file_ext(ex)
+      robjname <- sub(paste0(".",ext),"",ex)
+      robj <- load(paste0(path,ex))
+      values[[robjname]] <- data.frame(get(robj))  # only work with data.frames
+      values[['datasetlist']] <- unique(c(robjname,values[['datasetlist']]))
+    }
+
+    updateRadioButtons(session = session, inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard", "examples" = "examples"), selected = ".rda")
   })
 })
 

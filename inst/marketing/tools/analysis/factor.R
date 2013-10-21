@@ -1,11 +1,11 @@
 # variable selection - factor analysis
 output$preFactor_vars <- renderUI({
-  vars <- varnames()
-  if(is.null(vars)) return()
 
-	dat <- getdata()[1,]
-  isNum <- sapply(dat, is.numeric)
-  vars <- vars[isNum]
+  varCls <- getdata_class()
+ 	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
+ 	vars <- varnames()[isNum]
+  if(length(vars) == 0) return()
+
   selectInput(inputId = "preFactor_vars", label = "Variables:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
@@ -15,12 +15,16 @@ ui_preFactor <- function() {
 
 # variable selection - factor analysis
 output$factor_vars <- renderUI({
-  vars <- varnames()
-  if(is.null(vars)) return()
 
-	dat <- getdata()[1,]
-  isNum <- sapply(dat, is.numeric)
-  vars <- vars[isNum]
+  varCls <- getdata_class()
+ 	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
+ 	vars <- varnames()[isNum]
+  if(length(vars) == 0) return()
+
+  # No memory when you want it :)
+  # sel <- NULL
+  # if(!is.null(input$preFactor_vars) || !is.null(inChecker(c(input$preFactor_vars)))) sel <- input$preFactor_vars
+
   selectInput(inputId = "factor_vars", label = "Variables:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
@@ -32,9 +36,9 @@ ui_fullFactor <- function() {
   wellPanel(
     uiOutput("factor_vars"), 
     selectInput("fac_method", label = "Method:", choices = fac_method, selected = fac_method[1], multiple = FALSE),
-    # selectInput("fac_rotation", label = "Rotation:", choices = fac_rotation, selected = fac_rotation[1], multiple = FALSE),
-    radioButtons("fac_rotation", label = "Rotation:", fac_rotation, selected = 'Varimax'),
     numericInput("fac_number", label = "Number of factors:", min = 1, value = 1),
+    numericInput("fac_cutoff", label = "Loadings cutoff:", min = 0, max = 1, value = 0, step = .05),
+    radioButtons("fac_rotation", label = "Rotation:", fac_rotation, selected = 'Varimax'),
     actionButton("fac_savescores", "Save scores")
   )
 }
@@ -74,10 +78,13 @@ plot.preFactor <- function(result) {
 }
 
 preFactor <- reactive({
+
 	if(is.null(input$preFactor_vars) || length(input$preFactor_vars) < 2) return("Please select two or more variables")
 
-	dat <- getdata()[,input$preFactor_vars]
+	ret_text <- "This analysis requires a multiple variables of type numeric or integer. Please select another dataset."
+	if(is.null(inChecker(c(input$preFactor_vars)))) return(ret_text)
 
+	dat <- getdata()[,input$preFactor_vars]
 	if(nrow(dat) < ncol(dat)) return("Data has more variables than observations. Please reduce the number of variables.")
 
 	btest <- cortest.bartlett(cor(dat), nrow(dat))
@@ -88,16 +95,18 @@ preFactor <- reactive({
 
 summary.fullFactor <- function(result) {
 
-	df <- as.data.frame(result$loadings[])
-	# df$Communality <- result$communality
-	df$Communality <- 1 - result$uniqueness
-	cat("\nFactor loadings matrix\n\n")
-	print(df, digits = 3)
+	cat("\nFactor loadings matrix:\n")
+	print(result$loadings, cutoff = input$fac_cutoff, digits = 3)
 
-	cat("\nFactor scores\n\n")
+	communalities <- data.frame(1 - result$uniqueness)
+	colnames(communalities) <- ""
+	cat("\nAttribute communalities:\n")
+	print(communalities, digits = 3)
+
+	cat("\nFactor scores (max 30 shown):\n")
 	scores <- as.data.frame(result$scores)
-	print(scores, digits = 3)
-	# print(str(result))
+	print(scores[1:min(nrow(scores),30),, drop = FALSE], digits = 3)
+
 }
 
 plot.fullFactor <- function(result) {
@@ -111,25 +120,40 @@ plot.fullFactor <- function(result) {
 	pnr <- 1
 	ab_df <- data.frame(a=c(0,0), b=c(1, 0))
 
+	for(i in 1:(length(cnames)-1)) {
+		for(j in (i+1):length(cnames)) {
 
-	for(i in cnames[-ncol(df)]) {
-		for(j in cnames[c(-1,-which(cnames == i))]) {
-		  df2 <- cbind(df[, c(i,j)],rnames)
-  		plots[[pnr]] <- ggplot(df2, aes_string(x = i, y = j, color = 'rnames', label = 'rnames')) + geom_text() + theme(legend.position = "none") +
+			i_name <- cnames[i]
+			j_name <- cnames[j]
+
+		  df2 <- cbind(df[, c(i_name,j_name)],rnames)
+  		plots[[pnr]] <- ggplot(df2, aes_string(x = i_name, y = j_name, color = 'rnames', label = 'rnames')) + geom_text() + theme(legend.position = "none") +
   			xlim(-1,1) + ylim(-1,1) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0)
-  			# xlim(-1,1) + ylim(-1,1) + geom_abline(aes(intercept=a, slope=b), data=ab_df)
   		pnr <- pnr + 1
   	}
 	}
+
+	# for(i in cnames[-ncol(df)]) {
+	# 	for(j in cnames[c(-1,-which(cnames == i))]) {
+	# 	  df2 <- cbind(df[, c(i,j)],rnames)
+ #  		plots[[pnr]] <- ggplot(df2, aes_string(x = i, y = j, color = 'rnames', label = 'rnames')) + geom_text() + theme(legend.position = "none") +
+ #  			xlim(-1,1) + ylim(-1,1) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0)
+ #  			# xlim(-1,1) + ylim(-1,1) + geom_abline(aes(intercept=a, slope=b), data=ab_df)
+ #  		pnr <- pnr + 1
+ #  	}
+	# }
 
 	print(do.call(grid.arrange, c(plots, list(ncol = 1))))
 }
 
 fullFactor <- reactive({
+
 	if(is.null(input$factor_vars) || length(input$factor_vars) < 2) return("Please select two or more variables")
 
-	dat <- getdata()[,input$factor_vars]
+	ret_text <- "This analysis requires a multiple variables of type numeric or integer. Please select another dataset."
+	if(is.null(inChecker(c(input$factor_vars)))) return(ret_text)
 
+	dat <- getdata()[,input$factor_vars]
 	if(nrow(dat) < ncol(dat)) return("Data has more variables than observations. Please reduce the number of variables.")
 
 	nrFac <- as.numeric(input$fac_number)
@@ -145,18 +169,18 @@ fullFactor <- reactive({
 		fres$rotation <- input$fac_rotation
 	}
 
-	nr.plots <- factorial(c(nrFac,2))
-	# plotHeight = 650 * (nr.plots[1] / nr.plots[2])
-	fres$plotHeight <- 650 * (nr.plots[1] / nr.plots[2])
-
-	return(fres)
-
+	# nr.plots <- factorial(c(nrFac,2))
+	# fres$plotHeight <- 650 * (nr.plots[1] / nr.plots[2])
+	nr.plots <- (nrFac * (nrFac - 1)) / 2
+	fres$plotHeight <- 650 * nr.plots
+	fres
 })
 
 # save cluster membership when action button is pressed
 observe({
 	if(is.null(input$fac_savescores) || input$fac_savescores == 0) return()
 	isolate({
+		if(is.character(fullFactor())) return()
 		facscores <- data.frame(fullFactor()$scores)
 		changedata(facscores, paste0("fac",1:input$fac_number))
 	})

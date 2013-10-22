@@ -43,7 +43,7 @@ output$reg_intsel <- renderUI({
 })
 
 ui_regression <- function() {
-  wellPanel(
+  list(wellPanel(
     uiOutput("reg_var1"),
     uiOutput("reg_var2"),
   	checkboxInput(inputId = "reg_standardize", label = "Standardized coefficients", value = FALSE),
@@ -60,7 +60,9 @@ ui_regression <- function() {
       selectInput("reg_plots", "Regression plots:", choices = r_plots, selected = 'coef', multiple = FALSE)
     ),
     actionButton("saveres", "Save residuals")
-  )
+	  ),
+		helpModal('Regression','regression',includeMarkdown("tools/help/regression.md"))
+	)
 }
 
 # main functions called from radyant.R

@@ -5,11 +5,11 @@ shinyUI(
     headerPanel(''),
     sidebarPanel(
 
-      tags$head(
-        tags$link(rel="stylesheet", type="text/css", href="style.css")
+      # tags$head(
         # tags$script(src = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML', type = 'text/javascript')
-      ),
+      # ),
 
+      includeCSS('www/style.css'),
       includeHTML("www/js/sel2.js"),
       includeHTML('www/js/lr.js'), 
       getTool("tool"),

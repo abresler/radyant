@@ -182,6 +182,22 @@ output$transform_data <- renderTable({
 	dat[1:nr,, drop = FALSE]
 })
 
+
+output$transform_data <- reactive({
+
+	dat <- transform_main()
+	if(is.null(dat)) return()
+
+	dat <- data.frame(date2character_dat(dat))
+	nr <- min(nrow(dat),10)
+	dat <- dat[1:nr,, drop = FALSE]
+
+	html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
+	html <- paste(html, '<label>10 rows shown. See View-tab for details.</label>') 
+	sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+
+})
+
 output$transform_summary <- renderPrint({
 
 	dat <- transform_main()

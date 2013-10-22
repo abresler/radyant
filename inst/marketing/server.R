@@ -22,22 +22,35 @@ shinyServer(function(input, output, session) {
 	# data tabs
 	output$ui_data_tabs <- renderUI({
     tabsetPanel(id = "datatabs",
-      tabPanel("Manage", HTML('<h4>20 (max) rows shown. See View-tab for details.</h4>'), tableOutput("dataexample")),
-      tabPanel("View", tableOutput("dataviewer")),
+      tabPanel("Manage", htmlOutput("htmlDataExample"), HTML('<label>15 (max) rows shown. See View-tab for details.</label>')),
+      tabPanel("View", htmlOutput("dataviewer")),
       tabPanel("Visualize", plotOutput("visualize", width = "100%", height = "100%")),
       tabPanel("Explore", verbatimTextOutput("expl_data"), plotOutput("expl_viz", width = "100%", height = "100%")),
       # tabPanel("Merge", #   HTML('<label>Merge data.<br>In progress. Check back soon.</label>') # ),
-      tabPanel("Transform", tableOutput("transform_data"), br(), verbatimTextOutput("transform_summary")),
+      tabPanel("Transform", htmlOutput("transform_data"), verbatimTextOutput("transform_summary")),
       tabPanel("About", includeRmd("about.Rmd"))
     )
 	})
+
+	fancyTableOutput <- function() {
+
+	  fancyTab <- try(get(paste0(input$tool,'_fancy_tab'))(), silent = TRUE)
+  	if(!is(fancyTab, 'try-error')) {
+  		if(is.null(fancyTab)) return("")
+			html <- markdownToHTML(text = fancyTab, stylesheet="www/fancyTab.css")
+			html <- sub("<table>","<table class='table table-condensed'>", html)
+			html
+		} else {
+			""
+		} 
+	}
 
 	# analysis output tabs can be customized in the tools files
 	output$ui_analysis_tabs <- renderUI({
 	  tabs <- try(get(paste('ui_',input$tool,'_tabs', sep=""))(), silent = TRUE)
   	if(is(tabs, 'try-error')) {
   		return(tabsetPanel(id = "analysistabs",
-	  	  tabPanel("Summary", verbatimTextOutput("summary")),
+	  	  tabPanel("Summary", HTML(fancyTableOutput()), verbatimTextOutput("summary")),
 	    	tabPanel("Plots", plotOutput("plots", height = "100%")))
 		  )
 	  } else {

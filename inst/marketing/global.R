@@ -15,7 +15,7 @@ if(Sys.getenv('SHINY_PORT') == "") {
 
 options(repos = c(CRAN = "http://cran.rstudio.com"))
 # libs <- c("shiny", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "multcomp", "Hmisc")
-libs <- c("shiny", "Hmisc", "car", "foreign", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "multcomp")
+libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
 # libs <- c("shiny", "car", "foreign", "tools", "ggplot2", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape", "vegan")
 available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
 inst.libs <- libs[available == FALSE]
@@ -23,6 +23,8 @@ if(length(inst.libs) != 0) {
   install.packages(inst.libs, dependencies = TRUE)
 	suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
 }
+
+panderOptions('digits',3)
 
 # unloading because it messes with method of some other packages
 # would prefer to use import From but ...

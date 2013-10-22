@@ -22,8 +22,9 @@ textarea, #tr_rename {
   max-width: 185px; 
 }
 
-/*number { */
-#fac_number, #fac_cutoff, #km_nrClus { 
+/*#fac_number, #fac_cutoff, #km_nrClus { */
+
+input[type="number"] {
   max-width: 185px; 
 }
 
@@ -82,6 +83,14 @@ textarea, #tr_rename {
 
 #viz_plot_width, #viz_plot_height { 
   max-width: 60px; 
+}
+
+#fac_cutoff { 
+  max-width: 60px; 
+}
+
+#fac_condFormat { 
+  vertical-align: middle; 
 }
 
 

@@ -37,7 +37,7 @@ output$glm_intsel <- renderUI({
 })
 
 ui_glmreg <- function() {
-  wellPanel(
+  list(wellPanel(
     radioButtons(inputId = "glm_linkfunc", label = "", c("Logit" = "logit", "Probit" = "probit"), selected = "Logit"),
     # radioButtons(inputId = "glm_glmtype", label = "", c("GLM" = "glm", "Bayes GLM" = "bayesglm"), selected = "GLM"),
     uiOutput("glm_var1"),
@@ -54,7 +54,9 @@ ui_glmreg <- function() {
       selectInput("glm_plots", "Plots:", choices = gplots, selected = "coef", multiple = FALSE)
     ),
     actionButton("saveglmres", "Save residuals")
-  )
+  	),
+		helpModal('Generalized Linear Models (GLM)','glmreg',includeMarkdown("tools/help/glmreg.md"))
+	)
 }
 
 # main functions called from radyant.R

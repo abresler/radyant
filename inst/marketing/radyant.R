@@ -204,17 +204,38 @@ output$nrRows <- renderUI({
 ################################################################
 # Data reactives - view, plot, transform data, and log your work
 ################################################################
-output$dataexample <- renderTable({
+# output$dataexample <- renderTable({
+# 	if(is.null(input$datasets)) return()
+
+# 	dat <- date2character()
+
+# 	# Show only the first 20 rows
+# 	nr <- min(20,nrow(dat))
+# 	data.frame(dat[1:nr,, drop = FALSE])
+
+# })
+
+output$htmlDataExample <- reactive({
 	if(is.null(input$datasets)) return()
 
-	dat <- date2character()
+	# dat <- date2character()
+	dat <- getdata()
 
 	# Show only the first 20 rows
-	nr <- min(20,nrow(dat))
-	data.frame(dat[1:nr,, drop = FALSE])
+	nr <- min(15,nrow(dat))
+	dat <- data.frame(dat[1:nr,, drop = FALSE])
+
+	dat <- date2character_dat(dat)
+
+	html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
+	# sub("<TABLE border=1>","<table class='table table-condensed'>", html)
+	sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+
 })
 
-output$dataviewer <- renderTable({
+
+# output$dataviewer <- renderTable({
+output$dataviewer <- reactive({
 	if(is.null(input$datasets) || is.null(input$columns)) return()
 
 	# dat <- getdata()
@@ -257,7 +278,10 @@ output$dataviewer <- renderTable({
 
 	# Show only the selected columns and no more than 50 rows at a time
 	nr <- min(input$nrRows[2],nrow(dat))
-	data.frame(dat[input$nrRows[1]:nr, input$columns, drop = FALSE])
+	dat <- data.frame(dat[input$nrRows[1]:nr, input$columns, drop = FALSE])
+
+	html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
+	sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
 
 })
 
@@ -326,6 +350,17 @@ plotHeight <- function(height = 650) {
 	}
 }
 
+plotWidth <- function(width = 650) {
+
+ 	width <- try(get(input$tool)()[['plotWidth']], silent = TRUE)
+	if(is(width, 'try-error') || is.null(width)) {
+		return(650)
+	} else {
+		return(width)
+	}
+}
+
+
 # Generate output for the plots tab
 output$plots <- renderPlot({
 
@@ -343,4 +378,4 @@ output$plots <- renderPlot({
 		plot(x = 1, type = 'n', main=result, axes = FALSE, xlab = "", ylab = "")
 	}
 
-}, width=650, height=plotHeight)
+}, width=plotWidth, height=plotHeight)

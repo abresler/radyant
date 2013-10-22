@@ -43,15 +43,16 @@ output$mds_rev_dim <- renderUI({
 })
 
 ui_mds <- function() {
-  wellPanel(
+  list(wellPanel(
   	uiOutput("mds_id1"),
   	uiOutput("mds_id2"),
   	uiOutput("mds_dis"),
   	uiOutput("mds_dim_number"),
  	 	conditionalPanel(condition = "input.analysistabs == 'Plots'",
 	  	uiOutput("mds_rev_dim")
-    )
- 	)
+    )),
+		helpModal('(Dis)similarity based maps (MDS)','mds',includeMarkdown("tools/help/mds.md"))
+	)
 }
 
 summary.mds <- function(result) {

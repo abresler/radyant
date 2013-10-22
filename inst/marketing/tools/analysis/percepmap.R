@@ -42,7 +42,7 @@ output$pmap_plot <- renderUI({
 })
 
 ui_pmap <- function() {
-  wellPanel(
+  list(wellPanel(
   	uiOutput("pmap_brand"),
   	uiOutput("pmap_attr"),
   	uiOutput("pmap_pref"),
@@ -51,7 +51,9 @@ ui_pmap <- function() {
  	    numericInput("pmap_scaling", "Arrow scaling factor:", 2.4, .5, 4, .1)
     ),
   	uiOutput("pmap_dim_number")
- 	)
+ 		),
+		helpModal('Attribute based maps','mds',includeMarkdown("tools/help/percepmap.md"))
+	)
 }
 
 plot.pmap <- function(result) {

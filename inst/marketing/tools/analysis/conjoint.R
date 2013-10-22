@@ -74,9 +74,6 @@ conjointProfiles <- reactive({
 
 })
 
-# getdata <- function(dataset = input$datasets) {
-#   values[[dataset]]
-# }	
 
 ca_loadUserProfiles <- function(uFile) {
 
@@ -106,16 +103,31 @@ output$ca_downloadProfiles <- downloadHandler(
 	}
 )
 
+
+################################################################
+# Conjoint regression
+################################################################
+
 output$ca_var1 <- renderUI({
+
   vars <- varnames()
-  if(is.null(vars)) return()
+	isNum <- "numeric" == getdata_class() | "integer" == getdata_class()
+ 	vars <- vars[isNum]
+  if(length(vars) == 0) return()
+
   selectInput(inputId = "ca_var1", label = "Profile evaluations:", choices = vars, selected = NULL, multiple = FALSE)
 })
 
 output$ca_var2 <- renderUI({
+
+  if(is.null(input$ca_var1)) return()
+
   vars <- varnames()
-  if(is.null(vars)) return()
-  selectInput(inputId = "ca_var2", label = "Attributes:", choices = vars[-which(vars == input$ca_var1)], selected = NULL, multiple = TRUE)
+	isFct <- "factor" == getdata_class()
+ 	vars <- vars[isFct]
+  if(length(vars) == 0) return()
+
+  selectInput(inputId = "ca_var2", label = "Attributes:", choices = vars, selected = NULL, multiple = TRUE)
 })
 
 plot.conjoint <- function(result) {
@@ -156,7 +168,7 @@ plot.conjoint <- function(result) {
 ca_plots <- list("Part-worths" = "pw", "Importance-weights" = "iw")
 
 ui_conjoint <- function() {
-  wellPanel(
+  list(wellPanel(
   	# tags$head(tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")),
     uiOutput("ca_var1"),
     uiOutput("ca_var2"),
@@ -173,8 +185,9 @@ ui_conjoint <- function() {
     conditionalPanel(condition = "input.analysistabs == 'Plots'",
 	    checkboxInput(inputId = "ca_scale_plot", label = "Scale PW plots", value = FALSE),
       selectInput("ca_plots", "Conjoint plots:", choices = ca_plots, selected = 'pw', multiple = FALSE)
-    )
-  )
+    )),
+		helpModal('Conjoint analysis','conjoint',includeMarkdown("tools/help/conjoint.md"))
+	)
 }
 
 output$downloadPWs <- downloadHandler(
@@ -218,9 +231,21 @@ vif.conjoint <- function(result) {
 }
 
 conjoint <- reactive({
+
+
+	ret_text <- "This analysis requires a dependent variable of type integer or numeric and one or more independent variables or type factor. Please select another dataset."
+
+	if(is.null(input$ca_var1)) return(ret_text)
+
+  vars <- varnames()
+	isFct <- "factor" == getdata_class()
+ 	vars <- vars[isFct]
+  if(length(vars) == 0) return(ret_text)
+
 	vars <- input$ca_var2
-	if(is.null(vars)) return("Please select one or more attributes")
-	if(!is.null(input$ca_intsel) && input$ca_interactions != 'none') vars <- c(vars,input$ca_intsel)
+	if(is.null(vars)) return("Please select one or more independent variables of type factor.")
+
+	if(is.null(inChecker(c(input$ca_var1, vars)))) return(ret_text)
 
 	formula <- paste(input$ca_var1, "~", paste(vars, collapse = " + "))
 	dat <- getdata()
@@ -230,7 +255,13 @@ conjoint <- reactive({
 		dat[,input$ca_var1] <- abs(ca_dep - max(ca_dep)) + 1
 	}
 	
-	lm(formula, data = dat)
+	ca_res <- lm(formula, data = dat)
+
+	nrVars <- length(vars)
+	ca_res$plotHeight <- 325 * (1 + floor((nrVars - 1) / 2))
+	ca_res$plotWidth <- 325 * min(nrVars,2)
+
+	ca_res
 
 })
 
@@ -298,20 +329,4 @@ ca_theTable <- function(result) {
 
 	list('PW' = PW.df, 'IW' = IW, 'plot_ylim' = plot_ylim)
 }
-
-
-# getwd()
-# load('con_lim.rda')
-# attach(con_lim)
-# rangePW
-
-# maxlim <- rangePW[,'Max'] > abs(rangePW[,'Min'])
-# maxrange <- max(rangePW[,'Range'])
-
-# ylim <- rangePW[,c('Min','Max')]
-# ylim[maxlim,'Max'] <- maxrange
-# ylim[maxlim == FALSE,'Min'] <- -maxrange
-# ylim
-
-# maxlim == FALSE
 

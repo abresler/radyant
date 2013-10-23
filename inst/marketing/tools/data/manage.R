@@ -39,9 +39,13 @@ observe({
   isolate({
     os_type <- .Platform$OS.type
     if (os_type == 'windows') {
-      dat <- read.table("clipboard", header = TRUE, sep = '\t')
+      
+      dat <- try(read.table("clipboard", header = TRUE, sep = '\t'), silent = TRUE)
+      if(is(dat, 'try-error')) dat <- c("Data from clipboard was not well formatted. Try exporting the data to csv format.")
     } else { 
-      dat <- read.table(pipe("pbpaste"), header = TRUE, sep = '\t')
+
+      dat <- try(read.table(pipe("pbpaste"), header = TRUE, sep = '\t'), silent = TRUE)
+      if(is(dat, 'try-error')) dat <- c("Data from clipboard was not well formatted. Try exporting the data to csv format.")
     }
 
     values[['xls_data']] <- as.data.frame(dat)

@@ -199,21 +199,9 @@ output$nrRows <- renderUI({
 	sliderInput("nrRows", "Rows to show:", min = 1, max = nr, value = c(1,min(15,nr)), step = 1)
 })
 
-
-
 ################################################################
-# Data reactives - view, plot, transform data, and log your work
+# Main reactives 
 ################################################################
-# output$dataexample <- renderTable({
-# 	if(is.null(input$datasets)) return()
-
-# 	dat <- date2character()
-
-# 	# Show only the first 20 rows
-# 	nr <- min(20,nrow(dat))
-# 	data.frame(dat[1:nr,, drop = FALSE])
-
-# })
 
 output$htmlDataExample <- reactive({
 	if(is.null(input$datasets)) return()

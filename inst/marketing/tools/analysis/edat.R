@@ -22,7 +22,7 @@ ui_singleMean <- function() {
     	numericInput("sm_compValue", "Comparison value:", 0)
   	),
  		# helpModal('Single mean','singleMean',includeMarkdown("tools/help/singleMean.md"))
- 		helpModal('Single mean','singleMean',HTML("tools/help/singleMean.html"))
+ 		helpModal('Single mean','singleMean',includeHTML("tools/help/singleMean.html"))
  	)
 }
 

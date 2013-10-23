@@ -3,35 +3,28 @@
 Interactive data analytics using [R](http://www.r-project.org/) and [Shiny](http://www.rstudio.com/shiny/) by [Rstudio](http://www.rstudio.com/). 
 
 ### Todo:
-- Use ggplot2 for perceptual maps
 - Create help files
 - Use dplyr to explore and summarize data
 - Use knitr to log analysis output
 - etc. etc.
 
-### Install the marketing app locally
+### Install the marketing app to run locally
 
 - Required: [R](http://cran.rstudio.com/), version 3.0.2 or later
 - Required: Shiny, version 0.7.0 or later
 - Required: A modern browser (e.g., Chrome, Firefox, or Safari). Internet Explorer is not supported.
 - Suggested: [Rstudio](http://www.rstudio.com/ide/download/)
 
-Start R(studio) and copy-and-paste the commands below:
+Start R(studio) and copy-and-paste the commands below to create a directory 'radyant' on your desktop:
 
-#### on windows
-
-	install.packages('shiny', repos = "http://cran.rstudio.com/")
-	dir.create('~/../Desktop/radyant/', showWarnings = FALSE)
-	setwd('~/../Desktop/radyant/')
 	source('http://vnijs.rady.ucsd.edu/site_media/R/update.R')
+
+Once the installation has completed use the command below to start the app:
+
+	# on windows
 	shiny::runApp('~/../Desktop/radyant/')
 
-#### on mac
-
-	install.packages('shiny', repos = "http://cran.rstudio.com/")
-	dir.create('~/Desktop/radyant/', showWarnings = FALSE)
-	setwd('~/Desktop/radyant/')
-	source('http://vnijs.rady.ucsd.edu/site_media/R/update.R')
+ 	# on mac
 	shiny::runApp('~/Desktop/radyant/')
 
 ### License

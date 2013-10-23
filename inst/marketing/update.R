@@ -19,7 +19,7 @@ update_app <- function(url) {
     download <- download.file_win
   } else { 
     download <- download.file_mac
-	  # try_remote <- try(download.file(paste0(url,f),f, method = 'curl', quiet = TRUE, extra = '-L'), silent = TRUE)
+    # try_remote <- try(download.file(paste0(url,f),f, method = 'curl', quiet = TRUE, extra = '-L'), silent = TRUE)
   }
 
   f <- 'dbox_remote.rda'
@@ -63,4 +63,30 @@ update_app <- function(url) {
   }
 }
 
+
+# installing the required packages 
+options(repos = c(CRAN = "http://cran.rstudio.com"))
+libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
+
+available <- libs %in% rownames(installed.packages())
+inst.libs <- libs[!available]
+if(length(inst.libs) != 0) {
+  install.packages(inst.libs, dependencies = TRUE)
+}
+
+# full install 
+os_type <- .Platform$OS.type
+if (os_type == 'windows') {
+  dir.create('~/../Desktop/radyant/', showWarnings = FALSE)
+  setwd('~/../Desktop/radyant/')
+} else {
+  dir.create('~/Desktop/radyant/', showWarnings = FALSE)
+  setwd('~/Desktop/radyant/')
+}
+
+require(shiny)
+
+# getting the Radyant files
 suppressWarnings(update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/'))
+
+q("ask")

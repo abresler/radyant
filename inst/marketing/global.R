@@ -13,9 +13,11 @@ if(Sys.getenv('SHINY_PORT') == "") {
   values[['running_app_local']] <- TRUE
 }
 
+# main install happens in update.R now. this is just to 
 options(repos = c(CRAN = "http://cran.rstudio.com"))
 libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
-available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
+# available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
+available <- suppressWarnings(sapply(libs, require, character.only=TRUE))
 inst.libs <- libs[available == FALSE]
 if(length(inst.libs) != 0) {
   install.packages(inst.libs, dependencies = TRUE)

@@ -21,7 +21,8 @@ ui_singleMean <- function() {
     	sliderInput('sm_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01),
     	numericInput("sm_compValue", "Comparison value:", 0)
   	),
- 		helpModal('Single mean','singleMean',includeMarkdown("tools/help/singleMean.md"))
+ 		helpModal('Single mean','singleMean',includeMarkdown("tools/help/singleMean.md")),
+ 		helpModal('Single mean','singleMean',includeRmd("tools/help/singleMean.Rmd"))
  	)
 }
 

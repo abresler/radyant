@@ -98,7 +98,7 @@ includeRmd <- function(path){
     stop("Markdown package is not installed")
   shiny:::dependsOnFile(path)
   contents <- paste(readLines(path, warn = FALSE), collapse = '\n')
-  html <- knitr::knit2html(text = contents, fragment.only = TRUE)
+  html <- knitr::knit2html(text = contents, fragment.only = TRUE, options = "")
   Encoding(html) <- 'UTF-8'
   HTML(html)
 }

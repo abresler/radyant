@@ -124,7 +124,7 @@ ui_sampleSize <- function() {
 	    numericInput("rnd_prop_p", "Sample proportion:", min = 0, value = .5, step = .1)
   	),
     numericInput("rnd_z", "Confidence level (z-value):", min = 0, value = 1.96, step = .1),
-	  radioButtons(inputId = "rnd_pop_correction", label = "Correct for population size:", c("Yes" = TRUE, "No" = FALSE), selected = "No"),
+	  radioButtons(inputId = "rnd_pop_correction", label = "Correct for population size:", c("Yes" = "yes", "No" = "no"), selected = "No"),
 	  conditionalPanel(condition = "input.rnd_pop_correction == 'yes'",
 	    numericInput("rnd_pop_size", "Population size:", min = 1, value = 1000000, step = 1000)
     )),
@@ -151,7 +151,7 @@ sampleSize <- reactive({
 		n <- (input$rnd_z^2 * input$rnd_mean_s^2) / input$rnd_mean_err^2
 
 		# if(!is.null(input$rnd_pop_size)) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
-		if(input$rnd_pop_correction) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
+		if(input$rnd_pop_correction == 'yes') n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
 
 		return(ceiling(n))
 
@@ -162,7 +162,7 @@ sampleSize <- reactive({
 		n <- (input$rnd_z^2 * input$rnd_prop_p * (1 - input$rnd_prop_p)) / input$rnd_prop_err^2
 
 		# if(!is.null(input$rnd_pop_size)) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
-		if(input$rnd_pop_correction) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
+		if(input$rnd_pop_correction == 'yes') n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
 
 		return(ceiling(n))
 	}

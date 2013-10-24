@@ -111,3 +111,51 @@ observe({
 # levs <- levels(tulsa_age$rc.age)
 # levels(tulsa_age$rc.age) <- levs[c(1,3,2)]
 # levels(tulsa_age$rc.age)
+
+ui_sampleSize <- function() {
+  # list(wellPanel(
+  wellPanel(
+	  radioButtons(inputId = "rnd_mean", label = "", c("Mean" = "mean", "Proportion" = "proportion"), selected = "Mean"),
+	  conditionalPanel(condition = "input.rnd_mean == 'mean'",
+	    numericInput("rnd_mean_err", "Acceptable Error (units):", min = 0, value = 1, step = .1),
+	    numericInput("rnd_mean_s", "Sample std. deviation:", min = 0, value = 1, step = .1),
+  	),
+	  conditionalPanel(condition = "input.rnd_mean != 'mean'",
+	  	numericInput("rnd_prop_err", "Acceptable Error (%):", min = 0, value = .1, step = .01),
+	    numericInput("rnd_prop_p", "Sample proportion:", min = 0, value = 1, step = .1),
+  	),
+    numericInput("rnd_z", "Confidence level (z-value):", min = 0, value = 1.96, step = .1)
+	 	# helpModal('Sample size','sampleSize',includeHTML("tools/help/sampleSize.html"))
+ 	)
+}
+
+summary.sampleSize <- function(result) {
+	cat("Required sample size:", result)
+}
+
+plot.sampleSize <- function(result) {
+	"Relevant output is in the Summary tab."
+}
+
+sampleSize <- reactive({
+
+	if(is.null(input$rnd_mean)) return("")
+
+
+	if(input$rnd_mean == 'mean') {
+
+		if(is.na(input$rnd_mean_err)) return("Please select an error value greater 0.")
+
+		n <- (input$rnd_z)^2
+
+		return(n)
+
+	} else {
+
+		if(is.na(input$rnd_prop_err)) return("Please select an error value greater 0.")
+
+		n <- (input$rnd_z)^2
+
+		return(n)
+	}
+})

@@ -113,19 +113,22 @@ observe({
 # levels(tulsa_age$rc.age)
 
 ui_sampleSize <- function() {
-  # list(wellPanel(
-  wellPanel(
+  list(wellPanel(
 	  radioButtons(inputId = "rnd_mean", label = "", c("Mean" = "mean", "Proportion" = "proportion"), selected = "Mean"),
 	  conditionalPanel(condition = "input.rnd_mean == 'mean'",
-	    numericInput("rnd_mean_err", "Acceptable Error (units):", min = 0, value = 1, step = .1),
-	    numericInput("rnd_mean_s", "Sample std. deviation:", min = 0, value = 1, step = .1),
+	    numericInput("rnd_mean_err", "Acceptable Error (units):", min = 0, value = .2, step = .1),
+	    numericInput("rnd_mean_s", "Sample std. deviation:", min = 0, value = 3, step = .1)
   	),
 	  conditionalPanel(condition = "input.rnd_mean != 'mean'",
 	  	numericInput("rnd_prop_err", "Acceptable Error (%):", min = 0, value = .1, step = .01),
-	    numericInput("rnd_prop_p", "Sample proportion:", min = 0, value = 1, step = .1),
+	    numericInput("rnd_prop_p", "Sample proportion:", min = 0, value = .5, step = .1)
   	),
-    numericInput("rnd_z", "Confidence level (z-value):", min = 0, value = 1.96, step = .1)
-	 	# helpModal('Sample size','sampleSize',includeHTML("tools/help/sampleSize.html"))
+    numericInput("rnd_z", "Confidence level (z-value):", min = 0, value = 1.96, step = .1),
+	  radioButtons(inputId = "rnd_pop_correction", label = "Correct for population size:", c("Yes" = TRUE, "No" = FALSE), selected = "No"),
+	  conditionalPanel(condition = "input.rnd_pop_correction == 'yes'",
+	    numericInput("rnd_pop_size", "Population size:", min = 1, value = 1000000, step = 1000)
+    )),
+	 	helpModal('Sample size','sampleSize',includeHTML("tools/help/sampleSize.html"))
  	)
 }
 
@@ -141,21 +144,26 @@ sampleSize <- reactive({
 
 	if(is.null(input$rnd_mean)) return("")
 
-
 	if(input$rnd_mean == 'mean') {
 
 		if(is.na(input$rnd_mean_err)) return("Please select an error value greater 0.")
 
-		n <- (input$rnd_z)^2
+		n <- (input$rnd_z^2 * input$rnd_mean_s^2) / input$rnd_mean_err^2
 
-		return(n)
+		# if(!is.null(input$rnd_pop_size)) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
+		if(input$rnd_pop_correction) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
+
+		return(ceiling(n))
 
 	} else {
 
 		if(is.na(input$rnd_prop_err)) return("Please select an error value greater 0.")
 
-		n <- (input$rnd_z)^2
+		n <- (input$rnd_z^2 * input$rnd_prop_p * (1 - input$rnd_prop_p)) / input$rnd_prop_err^2
 
-		return(n)
+		# if(!is.null(input$rnd_pop_size)) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
+		if(input$rnd_pop_correction) n <- n * input$rnd_pop_size / ((n - 1) + input$rnd_pop_size)
+
+		return(ceiling(n))
 	}
 })

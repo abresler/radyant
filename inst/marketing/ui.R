@@ -12,6 +12,7 @@ shinyUI(
       includeCSS('www/style.css'),
       includeHTML("www/js/sel2.js"),
       includeHTML('www/js/lr.js'), 
+      # tags$head(tags$script(src = "js/textInputBindingEnter.js")),
       getTool("tool"),
 
       wellPanel(

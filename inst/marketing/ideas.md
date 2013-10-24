@@ -24,3 +24,10 @@ http://www.r-bloggers.com/interactive-3d-in-shiny-shinyrgl/
 https://groups.google.com/forum/?fromgroups=#!searchin/shiny-discuss/dynamic$20filter/shiny-discuss/je4zKWw0lBk/uAFCcVeulbEJ
 https://groups.google.com/forum/#!topic/shiny-discuss/hzYGDJQF_e4
 http://vita.had.co.nz/papers/tidy-data.pdf
+
+Use data-tables once Shiny .8 hits CRAN https://github.com/rstudio/shiny-examples and http://glimmer.rstudio.com/yihui/12_datatables/
+
+
+By David Gonzales:
+"In my experience, unless the application is highly interactive and animated, the user prefers to wait until moving on to the next field or pressing <return> before the changes are updated. But still a user might like the reactivity of not having to mouse press a button."
+https://groups.google.com/forum/#!topic/shiny-discuss/BFUgjICEQlc

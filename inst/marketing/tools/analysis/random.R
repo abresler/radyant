@@ -57,8 +57,9 @@ random <- reactive({
 	ret_text <- "This analysis requires a variable of type character. Enteries should be unique (i.e., no duplicates). Please select another dataset."
 	if(is.null(input$rnd_var)) return(ret_text)
 	if(is.null(inChecker(c(input$rnd_var)))) return(ret_text)
+	if(is.na(input$rnd_sample_size)) return("Please select a sample size of 1 or greater.")
 
-	# example data from http://listofrandomnames.com
+	# example list of names obtained from http://listofrandomnames.com
 	dat <- getdata()
 
 	if(input$rnd_sample == 'sample') {
@@ -82,8 +83,8 @@ random <- reactive({
 			# nrCond <- 1:5
 
 			# adapted from http://stackoverflow.com/questions/5399773/how-to-generate-a-random-treatment-variable-by-factor
-			dat <- ddply(dat, c(input$rnd_block), transform, 
-				treatment = replace(treatment, sample(seq_along(treatment)), nrCond))
+			 dat <- ddply(dat, c(input$rnd_block), transform, 
+			 		treatment = replace(treatment, sample(seq_along(treatment)), nrCond))
 
 		} else {
 
@@ -103,7 +104,6 @@ observe({
 	})
 })
 
-
 # levs <- levels(tulsa_age$age)
 # levels(tulsa_age$age) <- levs[c(1,3,4,5,6,2)]
 # levels(tulsa_age$age)
@@ -111,6 +111,3 @@ observe({
 # levs <- levels(tulsa_age$rc.age)
 # levels(tulsa_age$rc.age) <- levs[c(1,3,2)]
 # levels(tulsa_age$rc.age)
-
-
-

@@ -418,8 +418,8 @@ plot.crosstab <- function(result) {
 		plots[['residuals']] <- ggplot(tab, aes_string(x = input$ct_var1, y = "value", fill = input$ct_var2)) +
          			geom_bar(stat="identity", position = "dodge", alpha = .3) +
      					geom_hline(yintercept = c(-1.96,1.96,-1.64,1.64), color = 'black', linetype = 'longdash', size = .5) +
-     					geom_text(data = NULL, x = 1, y = 2.05, label = "95%") +
-     					geom_text(data = NULL, x = 1, y = 1.73, label = "90%") +
+     					geom_text(data = NULL, x = 1, y = 2.11, label = "95%") +
+     					geom_text(data = NULL, x = 1, y = 1.49, label = "90%") +
          			labs(list(title = paste("Deviation (standardized) for ",input$ct_var2," versus ",input$ct_var1, sep = ""), x = input$ct_var1))
 	}
 

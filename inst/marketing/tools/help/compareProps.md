@@ -1,110 +1,42 @@
-## Markdown Quick Reference
+The compare proportions X-squared-test is used to compare the proportion of a variable for one sample in our data to the proportion of the same variable in one, or more, other samples. 
 
-Markdown is an easy-to-write plain text format for creating web content.
+This is important since we seldom have access to data for an entire population. The hypothesized value in the population is specified in the 'Comparsion value' box. 
 
-### Emphasis
+We can perform either a one-tailed test (i.e., less than or greater than) or two-tailed test (see 'Alternative hypothesis'). In marketing we often use one-tailed tests because we want to evaluate if the available data provide evidence that a variable or effect is larger (or smaller) in one sample than another.
 
-*italic*   **bold**
+#### Example
 
-_italic_   __bold__
+We have access to data from [Pew Internet & American Life Project](http://www.pewinternet.org/Shared-Content/Data-Sets/2012/December-2012--Facebook-%28omnibus%29.aspx) on people's Facebook habits and attitudes. We are interested in whether men and women have different habits and attitudes towards their use of Facebook. 
 
-### Headers
+You can find the information on people's Facebook habits and attitudes in the __facebook.rda__ dataset. The variable 'pial8' in the dataset stands for people's responses to the question whether Facebook has become more important in people's life (see the [questionnaire](http://www.pewinternet.org/~/media/Files/Data%20Sets/2012/Omnibus_Dec_2012_Quest.docx) for more information). Here 1 stands for "MORE important". Another variable 'pial9' asks whether the subject has spent more time on Facebook last year (1=More). And 'sex' documents the subject's gender (1=male, 2=female).
 
-# Header 1
-## Header 2
-### Header 3
-#### Header 4
+![Compare proportions - Data](figures/CompareProportionsData.png)
 
-### Unordered List
+Before we compare the proportions, we need to transform the dataset a little bit. 
 
-* Item 1
-* Item 2
-  * Item 2a
-  * Item 2b
+1) Change the variable 'sex' from integer to factor
 
-### Ordered List
-1. Item 1
-2. Item 2
-3. Item 3
-   * Item 3a
-   * Item 3b
+![Compare proportions - Transform1](figures/CompareProportionsTransform1.png)
 
-### Manual Line Breaks
+2) Create a new variable 'important' by 'important=factor(pial8==1)'
 
-End a line with two or more spaces:
+![Compare proportions - Transform12](figures/CompareProportionsTransform2.png)
 
-Roses are red,   
-Violets are blue.
+3) Create a new variable 'moretime' by 'moretime=factor(pial9==1)'
 
-### Links
 
-Use a plain http address or add a link to a phrase:
+We want to know the attitudes and habits of Facebook users so that we can better deliver our advertisements. Let's first see the attitudes. Our null-hypothesis is that the proportion of men and women who think Facebook is more important is equal. 
 
-http://rstudio.com
+![Compare proportions - summary](figures/CompareProportionsSummary.png)
 
-[Rstudio](http://rstudio.com)
+Because the p-value is smaller than the conventional level of significance (i.e. 0.05) we can reject the null hypothesis based on the available sample. The data suggest that different proportions of men and women think that Facebook has become more important for them.
 
-### Images
+In addition to the numerical output provided in the Summary tab we can also evaluate the hypothesis visually (see Plots tab). The settings in the side-panel are the same as before. 
 
-Images on the web or local files in the same directory:
+![Compare proportions - plots](figures/CompareProportionsPlots.png)
 
-![alt text](http://upload.chinaz.com/2012/0720/1342775570137.jpg)
+It seems that men and women have different attitudes towards Facebook. How about their actual habits? We now use 'moretime' to test this. Our null-hypothesis is that the proportion of men and women who report that they have spent more time on Facebook last year is equal. 
 
-![alt text](figures/view.png)
+![Compare proportions - moretime](figures/CompareProportionsMoretime.png)
 
-For the help files using a chrome screen-capture tool is recommended:
-
-[Awesome screenshot](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=en)
-
-### Blockquotes
-
-A friend once said:
-
-> It's always better to give 
-> than to receive.
-
-### R Code Blocks
-
-R code will be evaluated and printed
-```{r}
-summary(cars$dist)
-summary(cars$speed)
-```
-
-#### Inline R Code
-
-There were `r nrow(cars)` cars studied
-
-#### Plain Code Blocks
-
-Plain code blocks are displayed in a fixed-width font but not evaulated
-```
-This text is displayed verbatim / preformatted
-```
-
-### Horizontal Rule / Page Break
-
-Three or more asterisks or dashes:
-
-******
-------
-
-### Links
-
-A [linked phrase][id]. 
-
-At the bottom of the document:
-
-[id]: http://Rstudio.com/ "Title"
-
-### Miscellaneous
-
-superscript^2
-
-~~strikethrough~~
-
-## Math
-
-$$ y_t = \alpha + \beta X + \epsilon_t $$
-
-An inline version looks like this: $y_t = \alpha + \beta X + \epsilon_t$
+Because the p-value is greater than the conventional level of significance (i.e. 0.05) we cannot reject the null hypothesis based on the available sample. The data suggest that the proportions of men and women who spent more time on Facebook last year seem to be the same.

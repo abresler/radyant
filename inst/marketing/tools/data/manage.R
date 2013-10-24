@@ -124,3 +124,170 @@ observe({
     values[['datasetlist']] <- datasets
   })
 })
+
+
+loadUserData <- function(filename, uFile, type) {
+
+  ext <- file_ext(filename)
+  # objname <- robjname <- sub(paste(".",ext,sep = ""),"",basename(filename))
+  objname <- sub(paste(".",ext,sep = ""),"",basename(filename))
+  ext <- tolower(ext)
+
+  if(ext == 'rda' || ext == 'rdata') {
+    # objname will hold the name of the object inside the R datafile
+    # objname <- robjname <- load(uFile)
+    # values[[robjname]] <- data.frame(get(robjname))   # only work with data.frames
+    robjname <- load(uFile)
+    values[[objname]] <- data.frame(get(robjname))  # only work with data.frames
+  }
+
+  # testing for description component
+  # description = "The mtcars data. Standard file available in R."
+  # mydata <- save(= mtcars, "description" = description, file = "mydata.rda")
+  # uFile <- "mydata.rda"
+ #  robjname <- load(uFile)
+ #  robjname
+ #  get(robjname[2])
+
+  if(values[['datasetlist']][1] == '') {
+    values[['datasetlist']] <- c(objname)
+  } else {
+    values[['datasetlist']] <- unique(c(objname,values[['datasetlist']]))
+  }
+
+  if(ext == 'sav') {
+    values[[objname]] <- as.data.frame(as.data.set(spss.system.file(uFile)))
+  } else if(ext == 'dta') {
+    values[[objname]] <- read.dta(uFile)
+  } else if(ext == 'csv') {
+    values[[objname]] <- read.csv(uFile, header=input$header, sep=input$sep)
+  }
+}
+
+loadPackData <- function(pFile) {
+
+  robjname <- data(list = pFile)
+  dat <- get(robjname)
+
+  if(pFile != robjname) return("R-object not found. Please choose another dataset")
+
+  if(is.null(ncol(dat))) {
+    return()
+  }
+
+  values[[robjname]] <- dat
+
+  if(values[['datasetlist']][1] == '') {
+    values[['datasetlist']] <- c(robjname)
+  } else {
+    values[['datasetlist']] <- unique(c(robjname,values[['datasetlist']]))
+  }
+}
+
+output$datasets <- renderUI({
+
+  inFile <- input$uploadfile
+  if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
+
+  # if(input$xls_paste != '') {
+ #  if(!is.null(input$xls_paste) && input$xls_paste != '') {
+  #   values[['xls_data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
+ #    values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
+  # }
+
+  # clean out the copy-and-paste box once the data has been stored
+  # updateTextInput(session = session, inputId = "xls_paste", label = "", '')
+
+  # # loading package data
+  # if(input$packData != "") {
+  #   if(input$packData != lastLoaded) {
+  #     loadPackData(input$packData)
+  #     lastLoaded <<- input$packData 
+  #   }
+  # }
+
+  # Drop-down selection of data set
+  # selectInput(inputId = "datasets", label = "Datasets:", choices = datasets, selected = datasets[1], multiple = FALSE)
+  selectInput(inputId = "datasets", label = "Datasets:", choices = values$datasetlist, selected = values$datasetlist[1], multiple = FALSE)
+})
+
+output$removeDataset <- renderUI({
+  # Drop-down selection of data set
+  selectInput(inputId = "removeDataset", label = "Remove data from memory:", choices = values$datasetlist, selected = NULL, multiple = TRUE)
+})
+
+output$packData <- renderUI({
+  selectInput(inputId = "packData", label = "Load package data:", choices = packDataSets, selected = '', multiple = FALSE)
+})
+
+output$downloadData <- downloadHandler(
+  filename = function() { paste(input$datasets,'.',input$saveAs, sep='') },
+  content = function(file) {
+
+    ext <- input$saveAs
+    robj <- input$datasets
+
+    # only save selected columns
+    assign(robj, getdata())
+
+    if(ext == 'rda') {
+      save(list = robj, file = file)
+    } else if(ext == 'csv') {
+      write.csv(get(robj), file)
+    }
+  }
+)
+
+output$datasets <- renderUI({
+
+  inFile <- input$uploadfile
+  if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
+
+  # if(input$xls_paste != '') {
+ #  if(!is.null(input$xls_paste) && input$xls_paste != '') {
+  #   values[['xls_data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
+ #    values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
+  # }
+
+  # clean out the copy-and-paste box once the data has been stored
+  # updateTextInput(session = session, inputId = "xls_paste", label = "", '')
+
+  # # loading package data
+  # if(input$packData != "") {
+  #   if(input$packData != lastLoaded) {
+  #     loadPackData(input$packData)
+  #     lastLoaded <<- input$packData 
+  #   }
+  # }
+
+  # Drop-down selection of data set
+  # selectInput(inputId = "datasets", label = "Datasets:", choices = datasets, selected = datasets[1], multiple = FALSE)
+  selectInput(inputId = "datasets", label = "Datasets:", choices = values$datasetlist, selected = values$datasetlist[1], multiple = FALSE)
+})
+
+output$removeDataset <- renderUI({
+  # Drop-down selection of data set
+  selectInput(inputId = "removeDataset", label = "Remove data from memory:", choices = values$datasetlist, selected = NULL, multiple = TRUE)
+})
+
+output$packData <- renderUI({
+  selectInput(inputId = "packData", label = "Load package data:", choices = packDataSets, selected = '', multiple = FALSE)
+})
+
+output$htmlDataExample <- reactive({
+  if(is.null(input$datasets)) return()
+
+  # dat <- date2character()
+  dat <- getdata()
+
+  # Show only the first 20 rows
+  nr <- min(15,nrow(dat))
+  dat <- data.frame(dat[1:nr,, drop = FALSE])
+
+  dat <- date2character_dat(dat)
+
+  html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
+  # sub("<TABLE border=1>","<table class='table table-condensed'>", html)
+  sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+
+})

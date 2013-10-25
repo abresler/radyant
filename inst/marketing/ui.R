@@ -1,3 +1,10 @@
+# myTextInput <- function(inputId, label, value = "") {
+#   tagList(
+#     singleton(tags$head(tags$script(src = "js/textInputBindingEnter.js"))),
+#     tags$text(id = inputId, label = label, as.character(value))
+#   )
+# }
+
 shinyUI(
   pageWithSidebar(
 
@@ -12,6 +19,7 @@ shinyUI(
       includeCSS('www/style.css'),
       includeHTML("www/js/sel2.js"),
       includeHTML('www/js/lr.js'), 
+      # includeHTML('www/js/textInputBindingEnter.js'), 
       # tags$head(tags$script(src = "js/textInputBindingEnter.js")),
       getTool("tool"),
 

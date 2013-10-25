@@ -1,10 +1,5 @@
-  // Text input
-
-// var navbarBinding = new Shiny.InputBinding();
-
-  var textInputBinding = new InputBinding();
-  // var textInputBinding = new Shiny.InputBinding();
-  $.extend(textInputBinding, {
+  var myTextInputBinding = new Shiny.InputBinding();
+  $.extend(myTextInputBinding, {
     find: function(scope) {
       return $(scope).find('input[type="text"]');
     },
@@ -21,12 +16,12 @@
       // $(el).on('keyup.textInputBinding input.textInputBinding', function(event) {
       //   callback(true);
       // });
-      $(el).on('change.textInputBinding', function(event) {
+      $(el).on('change.myTextInputBinding', function(event) {
         callback(false);
       });
     },
     unsubscribe: function(el) {
-      $(el).off('.textInputBinding');
+      $(el).off('.myTextInputBinding');
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
@@ -50,5 +45,4 @@
       };
     }
   });
-  // Shiny.inputBindings.register(textInputBinding, 'shiny.textInput');
-  inputBindings.register(textInputBinding, 'shiny.textInput');
+  // Shiny.inputBindings.register(myTextInputBinding, 'shiny.myTextInput');

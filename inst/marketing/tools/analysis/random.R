@@ -104,14 +104,6 @@ observe({
 	})
 })
 
-# levs <- levels(tulsa_age$age)
-# levels(tulsa_age$age) <- levs[c(1,3,4,5,6,2)]
-# levels(tulsa_age$age)
-
-# levs <- levels(tulsa_age$rc.age)
-# levels(tulsa_age$rc.age) <- levs[c(1,3,2)]
-# levels(tulsa_age$rc.age)
-
 ui_sampleSize <- function() {
   list(wellPanel(
 	  radioButtons(inputId = "rnd_mean", label = "", c("Mean" = "mean", "Proportion" = "proportion"), selected = "Mean"),
@@ -124,6 +116,8 @@ ui_sampleSize <- function() {
 	    numericInput("rnd_prop_p", "Sample proportion:", min = 0, value = .5, step = .1)
   	),
     numericInput("rnd_z", "Confidence level (z-value):", min = 0, value = 1.96, step = .1),
+    numericInput("rnd_incidence", "Incidence rate:", min = 0, value = 1, step = .05),
+    numericInput("rnd_response", "Response rate:", min = 0, value = 1, step = .05),
 	  radioButtons(inputId = "rnd_pop_correction", label = "Correct for population size:", c("Yes" = "yes", "No" = "no"), selected = "No"),
 	  conditionalPanel(condition = "input.rnd_pop_correction == 'yes'",
 	    numericInput("rnd_pop_size", "Population size:", min = 1, value = 1000000, step = 1000)
@@ -134,6 +128,7 @@ ui_sampleSize <- function() {
 
 summary.sampleSize <- function(result) {
 	cat("Required sample size:", result)
+	cat("\nRequired contact attempts:", result / input$rnd_incidence / input$rnd_response)
 }
 
 plot.sampleSize <- function(result) {

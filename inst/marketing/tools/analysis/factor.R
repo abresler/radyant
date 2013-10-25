@@ -135,7 +135,7 @@ fullFactor_fancy_tab <- function() {
 			ind_not_max <- which(abs_res < row_max, arr.ind = TRUE)
 			emphasize.strong.cells(ind_max)
 			emphasize.cells(ind_not_max)
-			pander.return(res, style='rmarkdown')
+			pander.return(res, style='rmarkdown', split.tables=Inf)
 		} else {
 			NULL
 		}

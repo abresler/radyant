@@ -26,6 +26,15 @@ if(length(inst.libs) != 0) {
 
 panderOptions('digits',3)
 
+# tags$head(tags$script(src = "js/textInputBindingEnter.js"))
+
+# myTextInput <- function(inputId, label, value = "") {
+#   tagList(
+#     singleton(tags$head(tags$script(src = "js/textInputBindingEnter.js"))),
+#     tags$text(id = inputId, label = label, as.character(value))
+#   )
+# }
+
 # unloading because it messes with method of some other packages
 # would prefer to use import From but ...
 detach("package:Hmisc", unload=TRUE)

@@ -116,11 +116,11 @@ ui_sampleSize <- function() {
   list(wellPanel(
 	  radioButtons(inputId = "rnd_mean", label = "", c("Mean" = "mean", "Proportion" = "proportion"), selected = "Mean"),
 	  conditionalPanel(condition = "input.rnd_mean == 'mean'",
-	    numericInput("rnd_mean_err", "Acceptable Error (units):", min = 0, value = .2, step = .1),
+	    numericInput("rnd_mean_err", "Acceptable Error (units, e.g., $10):", min = 0, value = .2, step = .1),
 	    numericInput("rnd_mean_s", "Sample std. deviation:", min = 0, value = 3, step = .1)
   	),
 	  conditionalPanel(condition = "input.rnd_mean != 'mean'",
-	  	numericInput("rnd_prop_err", "Acceptable Error (%):", min = 0, value = .1, step = .01),
+	  	numericInput("rnd_prop_err", "Acceptable Error (e.g., .03):", min = 0, value = .1, step = .01),
 	    numericInput("rnd_prop_p", "Sample proportion:", min = 0, value = .5, step = .1)
   	),
     numericInput("rnd_z", "Confidence level (z-value):", min = 0, value = 1.96, step = .1),

@@ -129,6 +129,11 @@ ui_sampleSize <- function() {
 summary.sampleSize <- function(result) {
 	cat("Required sample size:", result)
 	cat("\nRequired contact attempts:", result / input$rnd_incidence / input$rnd_response)
+
+	cat("\n\nChoose a Z-value as follows:\n")
+	# cat("90% / 1.64\n95% / 1.96\n99% / 2.58\n99.9% / 3.29")
+	cat("90%\t1.64\n95%\t1.96\n99%\t2.58\n99.9%\t3.29")
+
 }
 
 plot.sampleSize <- function(result) {

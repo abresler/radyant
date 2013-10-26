@@ -1,5 +1,0 @@
-setwd('~/Desktop/radyant/')
-require(shiny)
-runApp(launch.browser = TRUE)
-# runApp('.', launch.browser = TRUE)
-# shiny::runApp('.', launch.browser = TRUE)

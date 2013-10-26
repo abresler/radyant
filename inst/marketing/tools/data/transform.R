@@ -48,7 +48,7 @@ ui_Transform <- function() {
   list(wellPanel(
     uiOutput("tr_columns"),
 
-   	radioButtons("tr_changeType", "", c("Change" = "change", "Create" = "create", "Paste" = "paste", "Recode" = "recode", "Rename" = "rename", "Remove" = "remove"), selected = "Change"),
+   	radioButtons("tr_changeType", "", c("Change" = "change", "Create" = "create", "Clipboard" = "clip", "Recode" = "recode", "Rename" = "rename", "Remove" = "remove"), selected = "Change"),
    	# radioButtons("tr_changeType", "", c("Change" = "change", "Rename" = "rename", "Add" = "add", "Recode" = "recode", "Remove" = "remove"), selected = "Change"),
     conditionalPanel(condition = "input.tr_changeType == 'change'",
 	    selectInput("tr_transfunction", "Change columns:", trans_options)
@@ -58,7 +58,8 @@ ui_Transform <- function() {
 	    # textInput("tr_transform", "Create (e.g., x = y - z):", ''), 
   	  # actionButton("tr_transform_sub", "Go")
     ),
-    conditionalPanel(condition = "input.tr_changeType == 'paste'",
+    conditionalPanel(condition = "input.tr_changeType == 'clip'",
+      # actionButton('pasteClipData', 'Paste data')
     	HTML("<label>Paste from Excel:</label>"),
 	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
     ),
@@ -83,7 +84,9 @@ transform_main <- reactive({
 
 	if(input$datatabs != 'Transform') return()
 	if(is.null(input$tr_copyAndPaste) || is.null(input$tr_transform)) return()
+	# if(is.null(input$tr_transform)) return()
 	if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_copyAndPaste == '' && input$tr_transform == '')) return()
+	# if(is.null(input$datasets) || (is.null(input$tr_columns) && input$tr_transform == '')) return()
 
 	dat <- getdata()
 	if(!is.null(input$tr_columns)) {
@@ -111,6 +114,31 @@ transform_main <- reactive({
 			return(dat)
 		}
 	}
+
+	# if(input$tr_changeType == 'clip') {
+	# 	if(is.null(input$pasteClipData) || input$pasteClipData == 0) return()
+	# 	isolate({
+	# 	  os_type <- .Platform$OS.type
+	# 	  if (os_type == 'windows') {
+		    
+	# 	    cpdat <- try(read.table("clipboard", header = TRUE, sep = '\t'), silent = TRUE)
+
+	# 	    # if(is(dat, 'try-error')) 
+	# 	    	# dat <- c("Data from clipboard was not well formatted. Try exporting the data to csv format.")
+	# 		  # write.table("", "clipboard", sep="\t", row.names=FALSE)
+	# 	  } else { 
+
+	# 	    cpdat <- try(read.table(pipe("pbpaste"), header = TRUE, sep = '\t'), silent = TRUE)
+	# 	    # if(is(dat, 'try-error')) 
+	# 	    	# dat <- c("Data from clipboard was not well formatted. Try exporting the data to csv format.")
+	#       # write.table("", file = pipe("pbcopy"), row.names = FALSE, sep = '\t')
+	# 	  }
+	# 		cpname <- names(cpdat)
+	# 		if(sum(cpname %in% colnames(dat)) > 0) names(cpdat) <- paste('cp',cpname,sep = '.')
+	# 		if(is.null(input$tr_columns)) return(cpdat)
+	# 		if(nrow(cpdat) == nrow(dat)) dat <- cbind(dat,cpdat)
+	# 	})
+	# }
 
 	if(input$tr_copyAndPaste != '') {
 		cpdat <- read.table(header=T, text=input$tr_copyAndPaste)

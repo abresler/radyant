@@ -7,8 +7,7 @@ ui_View <- function() {
   list(wellPanel(
       uiOutput("columns"), 
      	uiOutput("view_order"), checkboxInput("view_order_desc", "DESC", value = FALSE),
-      textInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
-      actionButton("sub_select", "Go"),
+      returnTextInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
       uiOutput("nrRows")
     ),
     helpModal('View','view',includeMarkdown("tools/help/view.md"))
@@ -22,43 +21,23 @@ output$dataviewer <- reactive({
   # dat <- getdata()
   dat <- date2character()
 
-  # not sure why this is needed when files change ... but it is
-  # without it you will get errors the invalid columns have been
-  # selected
   if(!all(input$columns %in% colnames(dat))) return()
 
-  if(!is.null(input$sub_select) && !input$sub_select == 0) {
-    isolate({
-      if(input$dv_select != '') {
-        selcom <- input$dv_select
-        selcom <- gsub(" ", "", selcom)
-        if(nchar(selcom) > 30) q()
-        if(length(grep("system",selcom)) > 0) q()
-        if(length(grep("rm\\(list",selcom)) > 0) q()
-          
-        # selcom is a valid expression to the subset command
-        selcom <- try(parse(text = paste0("subset(dat,",selcom,")")), silent = TRUE)
-        if(!is(selcom, 'try-error')) {
-          seldat <- try(eval(selcom), silent = TRUE)
-          if(is.data.frame(seldat)) {
-            dat <- seldat
-            seldat <- NULL
-            # showing all rows that fit the condition
-            updateSliderInput(session = session, "nrRows", "Rows to show:", value = c(1,nrow(dat)))
-          }
-        } 
+  if(input$dv_select != '') {
+    selcom <- input$dv_select
+    selcom <- gsub(" ", "", selcom)
+
+    seldat <- try(do.call(subset, list(dat,parse(text = selcom))), silent = TRUE)
+
+    if(!is(seldat, 'try-error')) {
+      if(is.data.frame(seldat)) {
+        dat <- seldat
+        seldat <- NULL
+        # showing all rows that fit the condition
+        # updateSliderInput(session = session, "nrRows", "Rows to show:", value = c(1,nrow(dat)))
       }
-    })
+    }
   }
-
-
-# dat <- mtcars
-# selcom <- "mpg > 20"
-# do.call("subset", list("dat",selcom), quote = TRUE)
-# do.call(subset, list(dat,expression("mpg > 20")))
-# do.call("subset", list(dat,parse(text = "mpg > 20")))
-
-
 
   # order data
   if(!is.null(input$view_order) && input$view_order != "None") {

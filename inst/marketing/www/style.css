@@ -18,11 +18,9 @@ select {
   max-width: 200px; 
 }
 
-textarea, #tr_rename { 
+textarea { 
   max-width: 185px; 
 }
-
-/*#fac_number, #fac_cutoff, #km_nrClus { */
 
 input[type="number"] {
   max-width: 185px; 
@@ -57,13 +55,8 @@ input[type="number"] {
   margin-bottom: 35px;
 }
 
-#dv_select, #tr_recode, #tr_transform { 
-  max-width: 135px; 
-}
-
-#sub_select, #tr_recode_sub, #tr_transform_sub { 
-  vertical-align: top; 
-  width: 45px; 
+#dv_select, #tr_rename, #tr_recode, #tr_transform { 
+  max-width: 185px; 
 }
 
 #view_order { 

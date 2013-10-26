@@ -54,16 +54,18 @@ ui_Transform <- function() {
 	    selectInput("tr_transfunction", "Change columns:", trans_options)
     ),
     conditionalPanel(condition = "input.tr_changeType == 'create'",
-	    textInput("tr_transform", "Create (e.g., x = y - z):", ''), 
-  	  actionButton("tr_transform_sub", "Go")
+	    returnTextInput("tr_transform", "Create (e.g., x = y - z):", '')
+	    # textInput("tr_transform", "Create (e.g., x = y - z):", ''), 
+  	  # actionButton("tr_transform_sub", "Go")
     ),
     conditionalPanel(condition = "input.tr_changeType == 'paste'",
     	HTML("<label>Paste from Excel:</label>"),
 	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
     ),
     conditionalPanel(condition = "input.tr_changeType == 'recode'",
-	    textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
-  	  actionButton("tr_recode_sub", "Go")
+	    returnTextInput("tr_recode", "Recode (e.g., lo:20 = 1):", '')
+	    # textInput("tr_recode", "Recode (e.g., lo:20 = 1):", ''), 
+  	  # actionButton("tr_recode_sub", "Go")
     ),
     conditionalPanel(condition = "input.tr_changeType == 'rename'",
 	   	returnTextInput("tr_rename", "Rename (separate by ','):", '')
@@ -95,27 +97,19 @@ transform_main <- reactive({
 		}
 	}
 
-	if(!is.null(input$tr_recode_sub) && !input$tr_recode_sub == 0) {
-		isolate({
-			if(input$tr_recode != '') {
-				recom <- input$tr_recode
-				recom <- gsub(" ", "", recom)
-				recom <- gsub("\"","\'", recom)
+	if(input$tr_recode != '') {
+		recom <- input$tr_recode
+		recom <- gsub(" ", "", recom)
+		recom <- gsub("\"","\'", recom)
 
-				newvarcom <- try(parse(text = paste0("car::recode(dat$",input$tr_columns[1],",\"",recom,"\")")), silent = TRUE)
-				if(!is(newvarcom, 'try-error')) {
+		newvar <- try(do.call(car::recode, list(dat[,input$tr_columns[1]],parse(text = recom))), silent = TRUE)
+		if(!is(newvar, 'try-error')) {
 
-					newvar <- try(eval(newvarcom), silent = TRUE)
-					if(!is(newvar, 'try-error')) {
-
-						cn <- c(colnames(dat),paste("rc",input$tr_columns[1], sep="."))
-						dat <- cbind(dat,newvar)
-						colnames(dat) <- cn
-						return(dat)
-					}
-				} 
-			}
-		})
+			cn <- c(colnames(dat),paste("rc",input$tr_columns[1], sep="."))
+			dat <- cbind(dat,newvar)
+			colnames(dat) <- cn
+			return(dat)
+		}
 	}
 
 	if(input$tr_copyAndPaste != '') {
@@ -132,41 +126,32 @@ transform_main <- reactive({
 	}
 
 	if(input$tr_transform != '') {
-		if(!is.null(input$tr_transform_sub) && !input$tr_transform_sub == 0) {
-			isolate({
-				if(input$tr_transform != '') {
-					recom <- input$tr_transform
-					recom <- gsub(" ", "", recom)
-					recom <- gsub("\"","\'", recom)
+		recom <- input$tr_transform
+		recom <- gsub(" ", "", recom)
+		recom <- gsub("\"","\'", recom)
 
-					newvarcom <- try(parse(text = paste0("transform(fullDat,",recom,")")), silent = TRUE)
+		fullDat <- getdata()
+		newvar <- try(do.call(within, list(fullDat,parse(text = recom))), silent = TRUE)
 
-					if(!is(newvarcom, 'try-error')) {
-						fullDat <- getdata()
-						newvar <- try(eval(newvarcom), silent = TRUE)
-						if(!is(newvar, 'try-error')) { 
-							nfull <- ncol(fullDat)
-							nnew <- ncol(newvar)
+		if(!is(newvar, 'try-error')) { 
+			nfull <- ncol(fullDat)
+			nnew <- ncol(newvar)
 
-							# this won't work properly if the transform command creates a new variable
-							# and also overwrites an existing one
-							if(nfull < nnew) newvar <- newvar[,(nfull+1):nnew, drop = FALSE]
-							if(is.null(input$tr_columns)) return(newvar)
-							cn <- c(colnames(dat),colnames(newvar))
-							dat <- cbind(dat,newvar)
-							colnames(dat) <- cn
-						} else if(is.null(input$tr_columns)) {
-							return()
-						}
-					} else if(is.null(input$tr_columns)) {
-						return()
-					}
-				}
-			})
+			# this won't work properly if the transform command creates a new variable
+			# and also overwrites an existing one
+			if(nfull < nnew) newvar <- newvar[,(nfull+1):nnew, drop = FALSE]
+			if(is.null(input$tr_columns)) return(newvar)
+			cn <- c(colnames(dat),colnames(newvar))
+			dat <- cbind(dat,newvar)
+			colnames(dat) <- cn
 		} else if(is.null(input$tr_columns)) {
 			return()
 		}
 	}
+
+	# dat <- mtcar
+	# recom <- "t = mpg + cyl"
+	# do.call(within, list(dat, parse(text = recom)))
 
 	dat
 })

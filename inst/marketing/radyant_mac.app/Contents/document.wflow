@@ -59,7 +59,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>R --vanilla &lt; ~/Desktop/radyant/init.R</string>
+					<string>R --vanilla &lt; Desktop/radyant/init.R</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -84,7 +84,7 @@
 				<key>Class Name</key>
 				<string>RunShellScriptAction</string>
 				<key>InputUUID</key>
-				<string>E0B65111-1F21-411A-9466-92D1165E220F</string>
+				<string>61BA7114-4A31-42C0-9A24-431A1724C0F1</string>
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
@@ -94,9 +94,9 @@
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
-				<string>679B4521-E88F-4C58-84A0-AD3B49A6457F</string>
+				<string>11AF5B93-312E-4C77-B33C-9665E359AE05</string>
 				<key>UUID</key>
-				<string>3E6A28DD-6241-4652-B4CE-5C9C490FDB53</string>
+				<string>E2B00601-68BD-41AF-BC94-04547770D0B0</string>
 				<key>UnlocalizedApplications</key>
 				<array>
 					<string>Automator</string>

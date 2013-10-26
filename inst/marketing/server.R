@@ -57,4 +57,10 @@ shinyServer(function(input, output, session) {
   		return(tabs)
 	  }
 	})
+
+	# From Joe Cheng's post at:
+	# https://groups.google.com/forum/?fromgroups=#!searchin/shiny-discuss/close$20r/shiny-discuss/JptpzKxLuvU/boGBwwI3SjIJ
+	session$onSessionEnded(function() {
+    q("no")
+  })
 })

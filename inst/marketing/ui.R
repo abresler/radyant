@@ -1,10 +1,3 @@
-# myTextInput <- function(inputId, label, value = "") {
-#   tagList(
-#     singleton(tags$head(tags$script(src = "js/textInputBindingEnter.js"))),
-#     tags$text(id = inputId, label = label, as.character(value))
-#   )
-# }
-
 shinyUI(
   pageWithSidebar(
 
@@ -12,15 +5,10 @@ shinyUI(
     headerPanel(''),
     sidebarPanel(
 
-      # tags$head(
-        # tags$script(src = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML', type = 'text/javascript')
-      # ),
-
+      # tags$head(tags$script(src = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML', type = 'text/javascript') # ),
       includeCSS('www/style.css'),
       includeHTML("www/js/sel2.js"),
       includeHTML('www/js/lr.js'), 
-      # includeHTML('www/js/textInputBindingEnter.js'), 
-      # tags$head(tags$script(src = "js/textInputBindingEnter.js")),
       getTool("tool"),
 
       wellPanel(

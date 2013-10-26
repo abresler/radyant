@@ -2,7 +2,7 @@
 # over websockets
 # options(width = 150, shiny.reactlog=TRUE, shiny.trace=TRUE, digits = 3)
 # options(error = recover)
-# options(width = 150, shiny.trace=TRUE, digits = 3)
+options(width = 150, shiny.trace=TRUE, digits = 3)
 
 # creating a reactivevalues store 
 values <- reactiveValues()
@@ -26,14 +26,13 @@ if(length(inst.libs) != 0) {
 
 panderOptions('digits',3)
 
-# tags$head(tags$script(src = "js/textInputBindingEnter.js"))
-
-# myTextInput <- function(inputId, label, value = "") {
-#   tagList(
-#     singleton(tags$head(tags$script(src = "js/textInputBindingEnter.js"))),
-#     tags$text(id = inputId, label = label, as.character(value))
-#   )
-# }
+returnTextInput <- function(inputId, label, value = "") {
+  tagList(
+    singleton(tags$head(tags$script(src = "js/returnTextInputBinding.js"))),
+    tags$label(label, `for` = inputId),
+    tags$input(id = inputId, type = "text", value = value, class = "returnTextInput")
+  )
+}
 
 # unloading because it messes with method of some other packages
 # would prefer to use import From but ...

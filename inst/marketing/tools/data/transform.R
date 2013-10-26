@@ -66,9 +66,8 @@ ui_Transform <- function() {
   	  actionButton("tr_recode_sub", "Go")
     ),
     conditionalPanel(condition = "input.tr_changeType == 'rename'",
-    	textInput("tr_rename", "Rename (separate by ','):", '')
-	   	# tags$style(type='text/css', "#tr_rename { max-width: 185px; }"),
-	   	# myTextInput("tr_rename", "Rename (separate by ','):", '')
+	   	returnTextInput("tr_rename", "Rename (separate by ','):", '')
+	   	# textInput("tr_rename", "Rename (separate by ','):", '')
     ),
 
     # actionButton("transfix", "Edit variables in place") # using the 'fix(mtcars)' to edit the data 'inplace'. Looks great from R-ui, not so great from Rstudio
@@ -235,7 +234,7 @@ observe({
 		# reset the values once the changes have been applied
 	 	updateTextInput(session = session, inputId = "tr_transform", label = "Create (e.g., y = x - z):", '')
 	 	updateTextInput(session = session, inputId = "tr_recode", label = "Recode (e.g., lo:20 = 1):", '')
-	 	updateTextInput(session = session, inputId = "tr_rename", label = "Rename (separate by ','):", '')
+	 	updateTextInput(session = session, inputId = "tr_rename", label = "Rename (separate by ','):", value = '')
 	 	updateTextInput(session = session, inputId = "tr_copyAndPaste", label = "", '')
 		updateSelectInput(session = session, inputId = "tr_transfunction", choices = trans_options, selected = "None")
 	})

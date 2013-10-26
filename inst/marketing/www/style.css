@@ -61,6 +61,11 @@ input[type="number"] {
   max-width: 135px; 
 }
 
+#sub_select, #tr_recode_sub, #tr_transform_sub { 
+  vertical-align: top; 
+  width: 45px; 
+}
+
 #view_order { 
   max-width: 135px; 
   display: inline;
@@ -68,11 +73,6 @@ input[type="number"] {
 
 #view_order_desc { 
   vertical-align: top; 
-}
-
-#sub_select, #tr_recode_sub, #tr_transform_sub { 
-  vertical-align: top; 
-  width: 45px; 
 }
 
 #downloadData { 

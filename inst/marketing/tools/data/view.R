@@ -51,6 +51,15 @@ output$dataviewer <- reactive({
     })
   }
 
+
+# dat <- mtcars
+# selcom <- "mpg > 20"
+# do.call("subset", list("dat",selcom), quote = TRUE)
+# do.call(subset, list(dat,expression("mpg > 20")))
+# do.call("subset", list(dat,parse(text = "mpg > 20")))
+
+
+
   # order data
   if(!is.null(input$view_order) && input$view_order != "None") {
     indx <- order(dat[,input$view_order], decreasing = input$view_order_desc)

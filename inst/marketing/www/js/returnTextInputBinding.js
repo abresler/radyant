@@ -1,10 +1,11 @@
-  var myTextInputBinding = new Shiny.InputBinding();
-  $.extend(myTextInputBinding, {
+  // Text input
+  var returnTextInputBinding = new Shiny.InputBinding();
+  $.extend(returnTextInputBinding, {
     find: function(scope) {
       return $(scope).find('input[type="text"]');
     },
     getId: function(el) {
-      return InputBinding.prototype.getId.call(this, el) || el.name;
+      return Shiny.InputBinding.prototype.getId.call(this, el) || el.name;
     },
     getValue: function(el) {
       return el.value;
@@ -16,12 +17,12 @@
       // $(el).on('keyup.textInputBinding input.textInputBinding', function(event) {
       //   callback(true);
       // });
-      $(el).on('change.myTextInputBinding', function(event) {
+      $(el).on('change.textInputBinding', function(event) {
         callback(false);
       });
     },
     unsubscribe: function(el) {
-      $(el).off('.myTextInputBinding');
+      $(el).off('.textInputBinding');
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
@@ -45,4 +46,4 @@
       };
     }
   });
-  // Shiny.inputBindings.register(myTextInputBinding, 'shiny.myTextInput');
+  Shiny.inputBindings.register(returnTextInputBinding, 'returnTextInput');

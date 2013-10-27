@@ -66,9 +66,10 @@ ui_regression <- function() {
 }
 
 # main functions called from radyant.R
-r_plots <- list("Coefficient plot" = "coef", "Actual vs Fitted" = 0, "Residuals vs Fitted" = 1, "Normal Q-Q" = 2, "Scale-Location" = 3,
-	"Cook's distance" = 4, "Residuals vs Leverage" = 5, "Cook's distance vs Leverage" = 6
-)
+r_plots <- list("Coefficient plot" = "coef", "Actual vs Fitted" = 0, "Residuals vs Fitted" = 1, "Normal Q-Q" = 2)
+# r_plots <- list("Coefficient plot" = "coef", "Actual vs Fitted" = 0, "Residuals vs Fitted" = 1, "Normal Q-Q" = 2, "Scale-Location" = 3,
+# 	"Cook's distance" = 4, "Residuals vs Leverage" = 5, "Cook's distance vs Leverage" = 6
+# )
 
 summary.regression <- function(result) {
 	print(summary(result), digits = 3)
@@ -116,7 +117,7 @@ plot.regression <- function(result) {
 
 	} else if(input$reg_plots == 5) {
 		p <- qplot(.hat, .stdresid, data = mod, size = .cooksd) + geom_smooth(se = FALSE, size = 0.5) +
-			labs(list(title = "Residuals vs Leverage", x = "Leverage", y = "Standardize residuals", size = "Cook's distance"))
+			labs(list(title = "Residuals vs Leverage", x = "Leverage", y = "Standardized residuals", size = "Cook's distance"))
 
 	} else if(input$reg_plots == 6) {
 		p <- ggplot(mod, aes(.hat, .cooksd)) + geom_vline(xintercept = 0, colour = NA) +

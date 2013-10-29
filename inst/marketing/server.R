@@ -1,5 +1,16 @@
-dbox_remote <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
-save(dbox_remote, file = "dbox_remote.rda")
+os_type <- .Platform$OS.type
+if (os_type == 'windows') {
+  Sys.setlocale(category = "LC_ALL","English_United States.1252")
+} else {
+  # Sys.setlocale(category = "LC_ALL","Japanese_Japan.932")
+  Sys.setlocale(category = "LC_ALL","en_US.UTF-8")
+}
+
+if(file.exists("/Users/vnijs/radyant")) {
+	dbox_remote <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
+	save(dbox_remote, file = "dbox_remote.rda")
+}
+
 
 shinyServer(function(input, output, session) {
 

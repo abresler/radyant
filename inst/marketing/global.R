@@ -1,9 +1,3 @@
-# avoid breaks in R-output print and show JSON packets transferred
-# over websockets
-# options(error = recover)
-# options(shiny.reactlog=TRUE)
-options(shiny.trace=TRUE)
-
 os_type <- .Platform$OS.type
 if (os_type == 'windows') {
   Sys.setlocale(category = "LC_ALL","English_United States.1252")
@@ -12,6 +6,11 @@ if (os_type == 'windows') {
   Sys.setlocale(category = "LC_ALL","en_US.UTF-8")
 }
 
+# avoid breaks in R-output print and show JSON packets transferred
+# over websockets
+# options(error = recover)
+# options(shiny.reactlog=TRUE)
+options(shiny.trace=TRUE)
 
 # shiny::runApp('~/../Desktop/radyant/')
 

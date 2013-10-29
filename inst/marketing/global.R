@@ -56,15 +56,15 @@ detach("package:Hmisc", unload=TRUE)
 # n <- nrow(diamonds)
 # values$diamonds <- diamonds[sample(1:n,3000),]
 
+# mtcars <- NULL
 robj <- load("data/mtcars.rda") 
-robj <- get(robj)
-values[[paste0(robj$data,"_descr")]] <- robj$description
-values$mtcars <- get(robj$data)
+values[["mtcars"]] <- data.frame(get(robj[1]))
+values[["mtcars_descr"]] <- get(robj[2])
 
+# diamonds <- NULL
 robj <- load("data/diamonds.rda") 
-robj <- get(robj)
-values[[paste0(robj$data,"_descr")]] <- robj$description
-values$diamonds <- get(robj$data)
+values[["diamonds"]] <- data.frame(get(robj[1]))
+values[["diamonds_descr"]] <- get(robj[2])
 
 values$datasetlist <- c("mtcars", "diamonds")
 

@@ -135,32 +135,17 @@ loadUserData <- function(filename, uFile, type) {
   ext <- tolower(ext)
 
   if(ext == 'rda' || ext == 'rdata') {
-    # objname will hold the name of the object inside the R datafile
+    # objname will hold the name of the object(s) inside the R datafile
     robjname <- load(uFile)
 
-    if(robjname == 'radyant_file') {
-      radf <- get(robjname) 
-      values[[paste0(objname,"_descr")]] <- radf$description
-      robjname <- radf$data
+    if(length(robjname) > 1) {
+
+      values[[objname]] <- data.frame(get(robjname[1]))
+      values[[paste0(objname,"_descr")]] <- get(robjname[2])
     }
 
     values[[objname]] <- data.frame(get(robjname))  # only work with data.frames
   }
-
-  # testing for description component
-  # description <- "The mtcars data. Standard file available in R."
-  # rad_file <- list(data = mtcars, description = description)
-  # getwd()
-  # save(rad_file, file = "~/Desktop/mydata.rda")
-  # uFile <- "~/Desktop/mydata.rda"
-  # robjname <- load(uFile)
-  # robjname
-  # rf <- get(robjname)
-  # str(rf)
-  # class(rf)
-  # is.list(rf)
-  # if(is.list(rf))
-  ## something like this http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html
 
   if(values[['datasetlist']][1] == '') {
     values[['datasetlist']] <- c(objname)
@@ -240,23 +225,22 @@ output$downloadData <- downloadHandler(
     ext <- input$saveAs
     robj <- input$datasets
 
-    assign(robj, getdata())
 
     if(ext == 'rda') {
       if(input$man_data_descr != "") {
 
-         # testing for description component
-         radyant_file <- list(data = robj, description = input$man_data_descr)
-         save(radyant_file, file = file)
-
-         # updating the description text after saving
-         # dataDescr <- paste0(input$datasets,"_descr")
-         # values[[dataDescr]] <- input$man_data_descr
+        # save data description
+        assign(robj, getdata())
+        description <- input$man_data_descr
+        save(list = c(robj,"description"), file = file)
 
       } else {
+
+        assign(robj, getdata())
         save(list = robj, file = file)
       }
     } else if(ext == 'csv') {
+      assign(robj, getdata())
       write.csv(get(robj), file)
     }
   }

@@ -149,7 +149,6 @@ helpModal <- function(title, link, content) {
                      <div class='modal-body'>%s</div>
                    </div>
                    <a data-toggle='modal' href='#%s' class='icon-question-sign'></a>", link, title, content, link)
-  
   Encoding(html) <- 'UTF-8'
   HTML(html)
 }

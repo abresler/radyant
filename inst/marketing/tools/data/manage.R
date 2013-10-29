@@ -234,6 +234,10 @@ output$downloadData <- downloadHandler(
         description <- input$man_data_descr
         save(list = c(robj,"description"), file = file)
 
+        # isolate({
+        #   values[[paste0(input$datasets,"_descr")]] <- input$man_data_descr
+        # })
+
       } else {
 
         assign(robj, getdata())
@@ -298,6 +302,8 @@ output$htmlDataExample <- reactive({
   dat <- date2character_dat(dat)
 
   html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
-  sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+  html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+  # Encoding(html) <- 'UTF-8'
+  html
 
 })

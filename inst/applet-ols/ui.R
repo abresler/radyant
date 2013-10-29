@@ -10,10 +10,12 @@ shinyUI(
       checkboxInput('showFit', 'Show OLS fit'),
       helpText('Adapted from appstat by Yihui Xie')
 
+
     ),
     
     mainPanel(
-      plotOutput('plot')
+      plotOutput('plot'),
+      verbatimTextOutput("lists")
     )
   )
 )

@@ -205,7 +205,10 @@ output$transform_data <- reactive({
 
 	html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
 	html <- paste(html, '<label>10 rows shown. See View-tab for details.</label>') 
-	sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+	html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+  # Encoding(html) <- 'UTF-8'
+  html
+
 
 })
 

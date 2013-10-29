@@ -50,7 +50,9 @@ output$dataviewer <- reactive({
   dat <- data.frame(dat[input$nrRows[1]:nr, input$columns, drop = FALSE])
 
   html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
-  sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+  html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+  # Encoding(html) <- 'UTF-8'
+  html
 
 })
 

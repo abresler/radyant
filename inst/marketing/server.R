@@ -51,6 +51,8 @@ shinyServer(function(input, output, session) {
 			if(ret == 'md') {
 				return(text)
 			} else {
+				# html <- markdownToHTML(text = text)
+			 	# Encoding(html) <- 'UTF-8'
 				markdownToHTML(text = text)
 			}
  		}
@@ -64,6 +66,7 @@ shinyServer(function(input, output, session) {
 			# html <- markdownToHTML(text = fancyTab, stylesheet="www/fancyTab.css")
 			html <- markdownToHTML(text = fancyTab)
 			html <- sub("<table>","<table class='table table-condensed'>", html)
+			# Encoding(html) <- 'UTF-8'
 			html
 		} else {
 			""
@@ -85,7 +88,7 @@ shinyServer(function(input, output, session) {
 
 	# From Joe Cheng's post at:
 	# https://groups.google.com/forum/?fromgroups=#!searchin/shiny-discuss/close$20r/shiny-discuss/JptpzKxLuvU/boGBwwI3SjIJ
-	session$onSessionEnded(function() {
-  	q("ask")
-  })
+	# session$onSessionEnded(function() {
+ #  	q("ask")
+ #  })
 })

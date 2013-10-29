@@ -153,3 +153,4 @@ output$plots <- renderPlot({
 	}
 
 }, width=plotWidth, height=plotHeight)
+

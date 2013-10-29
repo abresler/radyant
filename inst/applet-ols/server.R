@@ -14,5 +14,9 @@ shinyServer(function(input, output) {
     }
 
   }, width = 700, height = 500)
-  
-})
+
+  # output$lists <- renderPrint({ 
+  #   cat('\n中文测试') 
+  #   cat('\n日本語')
+  # }) 
+}) 

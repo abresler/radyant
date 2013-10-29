@@ -51,7 +51,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string>tell application "R"	activate	cmd "setwd('~/Desktop/radyant/')"	cmd "shiny::runApp()"end tell</string>
+					<string>tell application "R"	activate	cmd "Sys.setlocale(category = 'LC_ALL','en_US.UTF-8')"	cmd "shiny::runApp('~/Desktop/radyant/')"end tell</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>

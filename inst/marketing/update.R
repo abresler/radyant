@@ -25,12 +25,13 @@ update_app <- function(url) {
   f <- 'dbox_remote.rda'
   try_remote <- try(download(url,f), silent = TRUE)
 
+  print("Downloading file list")
+  Sys.sleep(10)
+
   if(!is(try_remote, 'try-error')) {
 
     dbox_local <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
     load(f)
-
-    dbox_remote
 
     if(dim(dbox_remote)[1] == dim(dbox_local)[1]) {
       if(sum(dbox_remote$mtime == dbox_local$mtime) == dim(dbox_local)[1]) stop
@@ -89,4 +90,4 @@ require(shiny)
 # getting the Radyant files
 suppressWarnings(update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/'))
 
-q("no")
+q("ask")

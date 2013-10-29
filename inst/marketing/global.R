@@ -2,7 +2,7 @@
 # over websockets
 # options(error = recover)
 # options(shiny.reactlog=TRUE)
-# options(shiny.trace=TRUE)
+options(shiny.trace=TRUE)
 
 os_type <- .Platform$OS.type
 if (os_type == 'windows') {

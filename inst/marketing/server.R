@@ -13,16 +13,25 @@ shinyServer(function(input, output, session) {
 	# find the appropriate UI
 	output$ui_finder <- renderUI({
   	if(input$tool == "data") {
-  		if(!is.null(input$datatabs)) get(paste('ui_',input$datatabs, sep=""))()
+  		if(!is.null(input$datatabs)) get(paste0('ui_',input$datatabs))()
 		} else {
-		  if(!is.null(input$tool)) get(paste('ui_',input$tool, sep=""))()
+		  if(!is.null(input$tool)) get(paste0('ui_',input$tool))()
 		}
 	})
 
 	# data tabs
 	output$ui_data_tabs <- renderUI({
     tabsetPanel(id = "datatabs",
-      tabPanel("Manage", htmlOutput("htmlDataExample"), HTML('<label>15 (max) rows shown. See View-tab for details.</label>')),
+      tabPanel("Manage", htmlOutput("htmlDataExample"), 
+      	HTML('<label>10 (max) rows shown. See View-tab for details.</label>'),
+	      conditionalPanel(condition = "input.man_add_descr == false",
+	      	HTML(dataDescriptionOutput())
+	      ),
+	      conditionalPanel(condition = "input.man_add_descr == true",
+ 	  	  	HTML("<label>Add data description:</label>"),
+		  	  tags$textarea(id="man_data_descr", rows="10", cols="12", dataDescriptionOutput('md'))
+		  	)
+     	),
       tabPanel("View", htmlOutput("dataviewer")),
       tabPanel("Visualize", plotOutput("visualize", width = "100%", height = "100%")),
       tabPanel("Explore", verbatimTextOutput("expl_data"), plotOutput("expl_viz", width = "100%", height = "100%")),
@@ -32,12 +41,28 @@ shinyServer(function(input, output, session) {
     )
 	})
 
+	dataDescriptionOutput <- function(ret = 'html') {
+
+ 		dataDescr <- paste0(input$datasets,"_descr")
+		text <- values[[dataDescr]]
+ 		if(is.null(values[[dataDescr]])) {
+ 			return("")
+ 		} else {
+			if(ret == 'md') {
+				return(text)
+			} else {
+				markdownToHTML(text = text)
+			}
+ 		}
+	}
+
 	fancyTableOutput <- function() {
 
 	  fancyTab <- try(get(paste0(input$tool,'_fancy_tab'))(), silent = TRUE)
   	if(!is(fancyTab, 'try-error')) {
   		if(is.null(fancyTab)) return("")
-			html <- markdownToHTML(text = fancyTab, stylesheet="www/fancyTab.css")
+			# html <- markdownToHTML(text = fancyTab, stylesheet="www/fancyTab.css")
+			html <- markdownToHTML(text = fancyTab)
 			html <- sub("<table>","<table class='table table-condensed'>", html)
 			html
 		} else {
@@ -61,6 +86,6 @@ shinyServer(function(input, output, session) {
 	# From Joe Cheng's post at:
 	# https://groups.google.com/forum/?fromgroups=#!searchin/shiny-discuss/close$20r/shiny-discuss/JptpzKxLuvU/boGBwwI3SjIJ
 	session$onSessionEnded(function() {
-    q("no")
+  	q("ask")
   })
 })

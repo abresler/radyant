@@ -54,30 +54,18 @@ varnames <- reactive({
 date2character <- reactive({
 
 	dat <- getdata()
-  isDate <- "Date" == getdata_class()
-	if(sum(isDate) > 0) {
-		# needed because xtable doesn't like dates
-		dat[,isDate] <- sapply(dat[,isDate], as.character)
-	}
+  isDate <- c("Date" == getdata_class())
+	# needed because xtable doesn't like dates
+	dat[,isDate] <- sapply(dat[,isDate], as.character)
 	dat
 })
 
 date2character_dat <- function(dat) {
 
-  isDate <- sapply(dat, is.Date)
-	# print(isDate)
-
-	if(sum(isDate) > 0) {
-		# needed because xtable doesn't like dates
-		dat[,isDate] <- sapply(dat[,isDate], as.character)
-	}
+  isDate <- c(sapply(dat, is.Date))
+	dat[,isDate] <- sapply(dat[,isDate], as.character)
 	dat
 }
-
-# xtable <- function(x, ...) {
-#    for (i in which(sapply(x, function(y) !all(is.na(match(c("POSIXt","Date"),class(y))))))) x[[i]] <- as.character(x[[i]])
-#    xtable::xtable(x, ...)
-# }
 
 output$columns <- renderUI({
 	cols <- varnames()

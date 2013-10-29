@@ -16,13 +16,15 @@ if(Sys.getenv('SHINY_PORT') == "") {
 
 # main install happens in update.R now. this is just to 
 options(repos = c(CRAN = "http://cran.rstudio.com"))
-libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
+# libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
+libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
 # available <- suppressWarnings(suppressPackageStartupMessages(sapply(libs, require, character.only=TRUE)))
 available <- suppressWarnings(sapply(libs, require, character.only=TRUE))
 inst.libs <- libs[available == FALSE]
 if(length(inst.libs) != 0) {
   install.packages(inst.libs, dependencies = TRUE)
-	suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
+	# suppressWarnings(suppressPackageStartupMessages(sapply(inst.libs, require, character.only=TRUE)))
+  suppressWarnings(sapply(inst.libs, require, character.only=TRUE))
 }
 
 panderOptions('digits',3)
@@ -40,8 +42,8 @@ returnTextInput <- function(inputId, label, value = "") {
 detach("package:Hmisc", unload=TRUE)
 
 # setting up a few standard datasets to play with 
-mtcars$vs <- as.factor(mtcars$vs)
-mtcars$am <- as.factor(mtcars$am)
+# mtcars$vs <- as.factor(mtcars$vs)
+# mtcars$am <- as.factor(mtcars$am)
 
 # Our datasets can change over time (i.e. the changedata function). Therefore,
 # these need to be reactive values; otherwise, the other reactive functions
@@ -50,16 +52,21 @@ mtcars$am <- as.factor(mtcars$am)
 # Note that we never get or assign the "original" copies of mtcars, morley, 
 # or rock. This way, all user sessions are independent from each other 
 
-values$mtcars <- mtcars
-values$morley <- morley
-values$rock <- rock
+# values$mtcars <- mtcars
+# n <- nrow(diamonds)
+# values$diamonds <- diamonds[sample(1:n,3000),]
 
-n <- nrow(diamonds)
-values$diamonds <- diamonds[sample(1:n,3000),]
+robj <- load("data/mtcars.rda") 
+robj <- get(robj)
+values[[paste0(robj$data,"_descr")]] <- robj$description
+values$mtcars <- get(robj$data)
 
-# values$datasets <- c("mtcars", "diamonds", "rock")
-values$datasetlist <- c("mtcars", "diamonds", "rock")
-# datasets <- c("mtcars", "diamonds", "rock")
+robj <- load("data/diamonds.rda") 
+robj <- get(robj)
+values[[paste0(robj$data,"_descr")]] <- robj$description
+values$diamonds <- get(robj$data)
+
+values$datasetlist <- c("mtcars", "diamonds")
 
 # loading list of data.frame in the car package
 # listPackData <- function(packs) {
@@ -89,8 +96,8 @@ values$datasetlist <- c("mtcars", "diamonds", "rock")
 # packDataSets <- c('',pds)
 # save(packDataSets, file = '~/Desktop/packDataSets.rda')
 
-load('data/packDataSets.rda')
-lastLoaded <- "" 		
+# load('data/packDataSets.rda')
+# lastLoaded <- "" 		
 
 getTool <- function(inputId) {
   tagList(

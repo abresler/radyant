@@ -66,7 +66,7 @@ update_app <- function(url) {
 
 # installing the required packages 
 options(repos = c(CRAN = "http://cran.rstudio.com"))
-libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "xts", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
+libs <- c("shiny", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
 
 available <- libs %in% rownames(installed.packages())
 inst.libs <- libs[!available]
@@ -89,4 +89,4 @@ require(shiny)
 # getting the Radyant files
 suppressWarnings(update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/'))
 
-q("ask")
+q("no")

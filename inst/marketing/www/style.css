@@ -19,8 +19,19 @@ select {
 }
 
 textarea { 
+  /*width: 100%; */
+  width: 650px; 
+}
+
+#tr_copyAndPaste {
   max-width: 185px; 
 }
+
+/*
+#man_data_descr { 
+  max-width: 600px; 
+}
+*/
 
 input[type="number"] {
   max-width: 185px; 

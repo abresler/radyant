@@ -57,11 +57,15 @@ ui_mds <- function() {
 
 summary.mds <- function(result) {
 
-	cat("\n======== MDS output ==========\n")
+	cat("Distance data:\n")
 	print(result$co.dist.mat, digits = 3)
-	cat("\n")
-	print(result$co.mds, digits = 3)
+	cat("\nCoordinates:\n")
+	co.mds <- result$co.mds
+	coor <- co.mds$points
+	colnames(coor) <- paste("Dim ", 1:ncol(coor))
+	print(coor, digits = 3)
 
+	cat("\nFinal stress measure equal to", sprintf("%.3f", co.mds$stress/100))
 }
 
 plot.mds <- function(result) {
@@ -156,7 +160,7 @@ mds <- reactive({
 	# co.mds <- suppressWarnings(metaMDS(co.dist.mat, k = nr.dim, trymax = 500))
 	# if(co.mds$converged == FALSE) return("The MDS algorithm did not converge. Please try again.")
 
-	co.mds <- isoMDS(co.dist.mat, k = nr.dim)
+	co.mds <- isoMDS(co.dist.mat, k = nr.dim, trace = FALSE)
 
 	pbf <- 1
 	fsize <- 1.5

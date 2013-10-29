@@ -18,6 +18,7 @@ ui_Manage <- function() {
     ),
     wellPanel(
       radioButtons(inputId = "saveAs", label = "Save data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard"), selected = ".rda"),
+      checkboxInput("man_add_descr","Add/edit data description", FALSE),
       conditionalPanel(condition = "input.saveAs == 'clipboard'",
         actionButton('saveClipData', 'Copy data')
       ),
@@ -135,19 +136,31 @@ loadUserData <- function(filename, uFile, type) {
 
   if(ext == 'rda' || ext == 'rdata') {
     # objname will hold the name of the object inside the R datafile
-    # objname <- robjname <- load(uFile)
-    # values[[robjname]] <- data.frame(get(robjname))   # only work with data.frames
     robjname <- load(uFile)
+
+    if(robjname == 'radyant_file') {
+      radf <- get(robjname) 
+      values[[paste0(objname,"_descr")]] <- radf$description
+      robjname <- radf$data
+    }
+
     values[[objname]] <- data.frame(get(robjname))  # only work with data.frames
   }
 
   # testing for description component
-  # description = "The mtcars data. Standard file available in R."
-  # mydata <- save(= mtcars, "description" = description, file = "mydata.rda")
-  # uFile <- "mydata.rda"
- #  robjname <- load(uFile)
- #  robjname
- #  get(robjname[2])
+  # description <- "The mtcars data. Standard file available in R."
+  # rad_file <- list(data = mtcars, description = description)
+  # getwd()
+  # save(rad_file, file = "~/Desktop/mydata.rda")
+  # uFile <- "~/Desktop/mydata.rda"
+  # robjname <- load(uFile)
+  # robjname
+  # rf <- get(robjname)
+  # str(rf)
+  # class(rf)
+  # is.list(rf)
+  # if(is.list(rf))
+  ## something like this http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html
 
   if(values[['datasetlist']][1] == '') {
     values[['datasetlist']] <- c(objname)
@@ -227,11 +240,22 @@ output$downloadData <- downloadHandler(
     ext <- input$saveAs
     robj <- input$datasets
 
-    # only save selected columns
     assign(robj, getdata())
 
     if(ext == 'rda') {
-      save(list = robj, file = file)
+      if(input$man_data_descr != "") {
+
+         # testing for description component
+         radyant_file <- list(data = robj, description = input$man_data_descr)
+         save(radyant_file, file = file)
+
+         # updating the description text after saving
+         # dataDescr <- paste0(input$datasets,"_descr")
+         # values[[dataDescr]] <- input$man_data_descr
+
+      } else {
+        save(list = robj, file = file)
+      }
     } else if(ext == 'csv') {
       write.csv(get(robj), file)
     }
@@ -243,15 +267,6 @@ output$datasets <- renderUI({
   inFile <- input$uploadfile
   if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
 
-  # if(input$xls_paste != '') {
- #  if(!is.null(input$xls_paste) && input$xls_paste != '') {
-  #   values[['xls_data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
- #    values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
-  # }
-
-  # clean out the copy-and-paste box once the data has been stored
-  # updateTextInput(session = session, inputId = "xls_paste", label = "", '')
-
   # # loading package data
   # if(input$packData != "") {
   #   if(input$packData != lastLoaded) {
@@ -260,9 +275,21 @@ output$datasets <- renderUI({
   #   }
   # }
 
+  # system(paste("rm", inFile$datapath))
+  # inFile$datapath <- NULL
+  # inFile <- NULL
+  # file.remove(as.character(inFile$datapath))
+  # inFile$datapath <- NULL
+  # file.create(as.character(inFile$data))
+  # file.create(inFile$data, showWarnings = FALSE)
+
+  # if(file.exists(inFile$datapath)) unlink(inFile$datapath)
+  # if(file.exists(as.character(inFile$datapath))) unlink(inFile$datapath)
+
   # Drop-down selection of data set
   # selectInput(inputId = "datasets", label = "Datasets:", choices = datasets, selected = datasets[1], multiple = FALSE)
   selectInput(inputId = "datasets", label = "Datasets:", choices = values$datasetlist, selected = values$datasetlist[1], multiple = FALSE)
+
 })
 
 output$removeDataset <- renderUI({
@@ -280,14 +307,13 @@ output$htmlDataExample <- reactive({
   # dat <- date2character()
   dat <- getdata()
 
-  # Show only the first 20 rows
-  nr <- min(15,nrow(dat))
+  # Show only the first 10 rows
+  nr <- min(10,nrow(dat))
   dat <- data.frame(dat[1:nr,, drop = FALSE])
 
   dat <- date2character_dat(dat)
 
   html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
-  # sub("<TABLE border=1>","<table class='table table-condensed'>", html)
   sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
 
 })

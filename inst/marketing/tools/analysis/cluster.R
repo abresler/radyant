@@ -73,13 +73,13 @@ hclustering <- reactive({
 	ret_text <- "This analysis requires variables of type numeric or integer. Please select another dataset."
 	if(is.null(inChecker(c(input$hc_vars)))) return(ret_text)
 
-	dat <- getdata()[,input$hc_vars]
+	dat <- scale( getdata()[,input$hc_vars] ) 					# standardizing the data
 	if(input$hc_dist == "sq.euclidian") {
 		dist.data <- dist(dat, method = "euclidean")^2
 	} else {
 		dist.data <- dist(dat, method = input$hc_dist)
 	}
-	
+
 	res <- hclust(d = dist.data, method= input$hc_meth)
 	res$plotHeight = 650
 	res
@@ -151,7 +151,14 @@ summary.kmeansClustering <- function(result) {
 
 	cat("Kmeans clustering with", nrClus, "clusters of sizes", paste0(result$size, collapse=", "),"\n\n")
 	cat("Cluster means:\n")
-	cnt <- result$centers
+	
+	# print(result$centers, digits = 3)
+
+	dat <- getdata()[,input$km_vars, drop = FALSE]
+	cvar <- as.factor(result$cluster)
+	dat <- cbind(cvar,dat)
+	cnt <- ddply(dat, c("cvar"), colwise(mean))
+	cnt <- cnt[,-1, drop = FALSE]
 	colnames(cnt) <- input$km_vars
 	clusNames <- paste("Cluster",1:nrClus)
 	rownames(cnt) <- clusNames
@@ -195,7 +202,8 @@ kmeansClustering <- reactive({
 	if(is.null(inChecker(c(input$km_vars)))) return(ret_text)
 
 	set.seed(input$km_seed)
-	dat <- getdata()[,input$km_vars]
+	dat <- scale( getdata()[,input$km_vars] )
+	# dat <- getdata()[,input$km_vars]
 
 	if(input$km_hcinit) {
 		clusmem <- cutree(hinitclustering(), k = input$km_nrClus)

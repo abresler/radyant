@@ -11,8 +11,7 @@ revFactorOrder <- function(x) {
 
 standardize_1sd <- function(x) {
 	if(is.factor(x)) return(rescale(x))
-	if(is.numeric(x)) return(scale(x))
-	x
+	if(is.numeric(x)) return(as.numeric(scale(x)))
 }
 
 centerVar <- function(x) {
@@ -61,7 +60,7 @@ ui_Transform <- function() {
     conditionalPanel(condition = "input.tr_changeType == 'clip'",
       # actionButton('pasteClipData', 'Paste data')
     	HTML("<label>Paste from Excel:</label>"),
-	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=40, "")
+	    tags$textarea(id="tr_copyAndPaste", rows=3, cols=5, "")
     ),
     conditionalPanel(condition = "input.tr_changeType == 'recode'",
 	    returnTextInput("tr_recode", "Recode (e.g., lo:20 = 1):", '')

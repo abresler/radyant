@@ -170,6 +170,7 @@ compareMeans <- reactive({
 	var1 <- input$cm_var1
 	var2 <- input$cm_var2
 
+	# dat <- na.omit( getdata()[,c(var1,var2)] )
 	dat <- getdata()[,c(var1,var2)]
 
 	if(!is.factor(dat[,var1])) {

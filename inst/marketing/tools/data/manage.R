@@ -65,10 +65,14 @@ observe({
     for(ex in examples) {
 
       ext <- file_ext(ex)
-      robjname <- sub(paste0(".",ext),"",ex)
-      robj <- load(paste0(path,ex))
-      values[[robjname]] <- data.frame(get(robj))  # only work with data.frames
-      values[['datasetlist']] <- unique(c(robjname,values[['datasetlist']]))
+      # robjname <- sub(paste0(".",ext),"",ex)
+      # filename <- sub(paste0(".",ext),"",ex)
+
+      loadUserData(ex, paste0(path,ex))
+
+      # robj <- load(paste0(path,ex))
+      # values[[robjname]] <- data.frame(get(robj))  # only work with data.frames
+      # values[['datasetlist']] <- unique(c(robjname,values[['datasetlist']]))
     }
 
     updateRadioButtons(session = session, inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard", "examples" = "examples"), selected = ".rda")
@@ -127,7 +131,7 @@ observe({
 })
 
 
-loadUserData <- function(filename, uFile, type) {
+loadUserData <- function(filename, uFile) {
 
   ext <- file_ext(filename)
   # objname <- robjname <- sub(paste(".",ext,sep = ""),"",basename(filename))
@@ -140,8 +144,9 @@ loadUserData <- function(filename, uFile, type) {
 
     if(length(robjname) > 1) {
 
-      values[[objname]] <- data.frame(get(robjname[1]))
-      values[[paste0(objname,"_descr")]] <- get(robjname[2])
+      # values[[objname]] <- data.frame(get(robjname[1]))
+      values[[objname]] <- data.frame(get(robjname[-which(robjname == "description")]))
+      values[[paste0(objname,"_descr")]] <- get("description")
     }
 
     values[[objname]] <- data.frame(get(robjname))  # only work with data.frames
@@ -185,7 +190,8 @@ loadPackData <- function(pFile) {
 output$datasets <- renderUI({
 
   inFile <- input$uploadfile
-  if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
+  # if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
+  if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath)
 
   # if(input$xls_paste != '') {
  #  if(!is.null(input$xls_paste) && input$xls_paste != '') {
@@ -249,36 +255,6 @@ output$downloadData <- downloadHandler(
     }
   }
 )
-
-output$datasets <- renderUI({
-
-  inFile <- input$uploadfile
-  if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
-
-  # # loading package data
-  # if(input$packData != "") {
-  #   if(input$packData != lastLoaded) {
-  #     loadPackData(input$packData)
-  #     lastLoaded <<- input$packData 
-  #   }
-  # }
-
-  # system(paste("rm", inFile$datapath))
-  # inFile$datapath <- NULL
-  # inFile <- NULL
-  # file.remove(as.character(inFile$datapath))
-  # inFile$datapath <- NULL
-  # file.create(as.character(inFile$data))
-  # file.create(inFile$data, showWarnings = FALSE)
-
-  # if(file.exists(inFile$datapath)) unlink(inFile$datapath)
-  # if(file.exists(as.character(inFile$datapath))) unlink(inFile$datapath)
-
-  # Drop-down selection of data set
-  # selectInput(inputId = "datasets", label = "Datasets:", choices = datasets, selected = datasets[1], multiple = FALSE)
-  selectInput(inputId = "datasets", label = "Datasets:", choices = values$datasetlist, selected = values$datasetlist[1], multiple = FALSE)
-
-})
 
 output$removeDataset <- renderUI({
   # Drop-down selection of data set

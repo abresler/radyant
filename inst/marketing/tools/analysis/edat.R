@@ -357,7 +357,8 @@ ui_crosstab <- function() {
 		  # checkboxInput("ct_colperc", label = "Column percentages", value = FALSE),
 		  # checkboxInput("ct_cellperc", label = "Cell percentages", value = FALSE)
 		)),
-	 	helpModal('Cross-tabs','crossTabs',includeMarkdown("tools/help/crossTabs.md"))
+	 	# helpModal('Cross-tabs','crossTabs',includeMarkdown("tools/help/crossTabs.md"))
+	 	helpModal('Cross-tabs','crossTabs',includeHTML("tools/help/crossTabs.html"))
   )
 }
 

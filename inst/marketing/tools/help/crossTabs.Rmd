@@ -1,110 +1,25 @@
-## Markdown Quick Reference
+Cross-tab (or contingency table) analysis is used to evaluate if two nominally scaled variables are associated. 
 
-Markdown is an easy-to-write plain text format for creating web content.
+#### Example
 
-### Emphasis
+The data are from a sample for 580 newspaper readers that indicated which newspaper they read most frequently (USA today or Wall Street Journal) and their level of income (Low income vs. High income). The data has three variables:  A respondent identifier (Resp), respondent income (High or Low), and the primary newspaper the respondent reads (USA today or Wall Street Journal).
 
-*italic*   **bold**
+We will examine if there is a relationship between income level and choice of newspaper. In particular, we test the following null and alternative hypothesis:
 
-_italic_   __bold__
+- H0: There is no relationship between income level and newspaper choice
+-	Ha: There is a relationship between income level and newspaper choice
 
-### Headers
+If the null-hypothesis is rejected we can investigate which cell(s) contribute to the hypothesized association. In Radyant (EDAT > Cross-tab) we choose Income as the grouping factor and Newspaper as the second factor. First we compare the observed and expected frequencies. The expected frequencies are calculated using H0 (i.e., no association) as (Row total x Column Total) /  Overall Total.
 
-# Header 1
-## Header 2
-### Header 3
-#### Header 4
+![cross-tab - summary](figures/CrossTabSummary.png)
 
-### Unordered List
+The Pearson chi-squared test evaluates if we can reject the null-hypothesis that the two variables are independent. It does so by comparing the observed frequencies (i.e., what we actually see in the data) to the expected frequencies (i.e., what we would expect to see if the two variables were independent). If there are big differences between the table of expected and observed frequencies the chi-square value will be 'large'. In order to determine if the chi-square can be considered large we first determine the degrees of freedom (df). In particular: df = (# rows - 1) x (# columns - 1). In a 2X 2 table, we have (2-1) X (2-1) = 1 df. The output in the summary tab shows the value of the chi-square statistic, the associated df and the p-value associated with the test. We also see the contribution from each cells to the overall chi-square measure. 
 
-* Item 1
-* Item 2
-  * Item 2a
-  * Item 2b
 
-### Ordered List
-1. Item 1
-2. Item 2
-3. Item 3
-   * Item 3a
-   * Item 3b
+Remember to check the expected values: None of of the cells should have an expected count of less than 5. If necessary, ‘collapse’ rows and/or columns. All expected frequencies are > 5 therefore the chi-square statistic is unlikely to be biased. As usual we reject the null-hypothesis when the p-value is smaller 0.05. Since our p-value is very small (< .001) we can reject the null-hypothesis (i.e., the data support the conclusion that there is an association between newspaper readership and income).
 
-### Manual Line Breaks
+In addition to the numerical output provided in the Summary tab we can evaluate the hypothesis visually (see Plots tab). We choose the same variables as before. However, we will plot the the the standardized deviations. This measure is calculated as O - E / sqrt(E), i.e., a score of how different the observed and expected frequencies in one cell in our table are. When a cell’s standardized deviation is greater than 1.96 (in absolute value) we can say the cell has a significant deviation from the model of independence (or no association).
 
-End a line with two or more spaces:
+![cross-tab - plots](figures/CrossTabPlots.png)
 
-Roses are red,   
-Violets are blue.
-
-### Links
-
-Use a plain http address or add a link to a phrase:
-
-http://rstudio.com
-
-[Rstudio](http://rstudio.com)
-
-### Images
-
-Images on the web or local files in the same directory:
-
-![alt text](http://upload.chinaz.com/2012/0720/1342775570137.jpg)
-
-![alt text](figures/view.png)
-
-For the help files using a chrome screen-capture tool is recommended:
-
-[Awesome screenshot](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=en)
-
-### Blockquotes
-
-A friend once said:
-
-> It's always better to give 
-> than to receive.
-
-### R Code Blocks
-
-R code will be evaluated and printed
-```{r}
-summary(cars$dist)
-summary(cars$speed)
-```
-
-#### Inline R Code
-
-There were `r nrow(cars)` cars studied
-
-#### Plain Code Blocks
-
-Plain code blocks are displayed in a fixed-width font but not evaulated
-```
-This text is displayed verbatim / preformatted
-```
-
-### Horizontal Rule / Page Break
-
-Three or more asterisks or dashes:
-
-******
-------
-
-### Links
-
-A [linked phrase][id]. 
-
-At the bottom of the document:
-
-[id]: http://Rstudio.com/ "Title"
-
-### Miscellaneous
-
-superscript^2
-
-~~strikethrough~~
-
-## Math
-
-$$ y_t = \alpha + \beta X + \epsilon_t $$
-
-An inline version looks like this: $y_t = \alpha + \beta X + \epsilon_t$
+In the plots we see that all cells contribute to the association between income and readership as the standardized deviations are larger than 1.96 in absolute value (i.e., the bars extend beyond the dotted lines in the plot).

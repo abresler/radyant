@@ -12,10 +12,10 @@ update_app <- function(url) {
 
   if (os_type == 'windows') {
     # copied from Shiny source code
-    mySI2 <- `::`(utils, 'setInternet2')
-    internet2_start <- mySI2(NA)
-    on.exit(mySI2(internet2_start))
-    mySI2(TRUE)
+    # mySI2 <- `::`(utils, 'setInternet2')
+    # internet2_start <- mySI2(NA)
+    # on.exit(mySI2(internet2_start))
+    # mySI2(TRUE)
     download <- download.file_win
   } else { 
     download <- download.file_mac
@@ -24,9 +24,6 @@ update_app <- function(url) {
 
   f <- 'dbox_remote.rda'
   try_remote <- try(download(url,f), silent = TRUE)
-
-  print("Downloading file list")
-  Sys.sleep(10)
 
   if(!is(try_remote, 'try-error')) {
 
@@ -88,6 +85,10 @@ if (os_type == 'windows') {
 require(shiny)
 
 # getting the Radyant files
-suppressWarnings(update_app('https://raw.github.com/mostly-harmless/radyant/master/inst/marketing/'))
+suppressWarnings(update_app('http://vnijs.rady.ucsd.edu/site_media/R/radyant/inst/marketing/'))
+
+
+
+
 
 q("ask")

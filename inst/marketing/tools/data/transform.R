@@ -30,6 +30,7 @@ bin10 <<- function(x) cut(x,10)
 fct <<- as.factor
 rfct <<- revFactorOrder
 num <<- as.numeric
+int <<- as.integer
 ch <<- as.character
 # d <<- as.Date
 d_mdy <<- function(x) as.Date(mdy(as.character(x)))
@@ -41,10 +42,8 @@ d_ymd <<- function(x) as.Date(ymd(as.character(x)))
 # "Standardize (2-sd)" = "st2","Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
 
 trans_options <- list("None" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize" = "st", 
-	"Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
+	"Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As integer" = "int", "As character" = "ch", 
 	"As date (mdy)" = "d_mdy", "As date (dmy)" = "d_dmy", "As date (ymd)" = "d_ymd")
-
-
 
 ui_Transform <- function() {
 	# Inspired by Ian Fellow's transform ui in JGR/Deducer

@@ -46,17 +46,30 @@ shinyServer(function(input, output, session) {
 	dataDescriptionOutput <- function(ret = 'html') {
 
  		dataDescr <- paste0(input$datasets,"_descr")
+
+ 		# text box loses focus some how - sort of works
+		# if(is.null(input$man_data_descr) || input$man_data_descr == "") {
+		# 	text <- values[[dataDescr]]
+		# } else { 
+		# 	if(!is.null(input$man_add_descr) && input$man_add_descr == TRUE) {
+		# 		text <- input$man_data_descr
+		# 	} else {
+		# 		text <- values[[dataDescr]]
+		# 	}
+		# }
+
 		text <- values[[dataDescr]]
- 		if(is.null(values[[dataDescr]])) {
+ 		if(is.null(text)) {
  			return("")
  		} else {
 			if(ret == 'md') {
 				return(text)
 			} else {
 				# html <- markdownToHTML(text = text)
-			 	# Encoding(html) <- 'UTF-8'
 				# markdownToHTML(text = text)
-				markdownToHTML(text = text, stylesheet="www/fancyTab.css")
+				html <- suppressWarnings(markdownToHTML(text = text, stylesheet="www/fancyTab.css"))
+			 	Encoding(html) <- 'UTF-8'
+			 	html
 			}
  		}
 	}

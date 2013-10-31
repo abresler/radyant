@@ -181,7 +181,8 @@ plot.regression <- function(result) {
 	if(input$reg_plots == "histlist") {
 		plots <- list()
 		for(i in vars) plots[[i]] <- ggplot(dat, aes_string(x = i)) + geom_histogram()
-		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+
+		p <- suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2))))
 	}
 
 	# input$reg_plots = "correlations"
@@ -209,7 +210,7 @@ plot.regression <- function(result) {
 		plots[[4]] <- qplot(sample =.stdresid, data = mod, stat = "qq") + geom_abline() +
 			labs(list(title = "Normal Q-Q", x = "Theoretical quantiles", y = "Standardized residuals"))
 
-		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+		p <- suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2))))
 
 	}
 
@@ -218,7 +219,7 @@ plot.regression <- function(result) {
 		plots <- list()
 		# for(i in input$reg_var2) plots[[i]] <- ggplot(dat, aes_string(x=i, y=input$reg_var1)) + geom_point() + geom_smooth(method = "lm", size = .75, linetype = "dotdash")
 		for(i in input$reg_var2) plots[[i]] <- ggplot(dat, aes_string(x=i, y=input$reg_var1)) + geom_point() + geom_smooth(size = .75, linetype = "dotdash")
-		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+		p <- suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2))))
 	}
 
 	# input$reg_plots = "resid_vs_predictorlist"
@@ -228,7 +229,7 @@ plot.regression <- function(result) {
 		rdat <- cbind(residuals,dat[,input$reg_var2])
 		# for(i in input$reg_var2) plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(method = "lm", size = .75, linetype = "dotdash")
 		for(i in input$reg_var2) plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(se = FALSE)
-		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+		p <- suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2))))
 	}
 
 	# input$reg_plots = "leverage_plots"
@@ -285,6 +286,49 @@ plot.regression <- function(result) {
 # analysis reactive
 regression <- reactive({
 
+	mod <- regression.mod()
+
+	if(class(mod) != 'lm') return(mod)
+
+	# "Histograms" = "histlist", 
+	# "Correlations" = "correlations", 
+	# "Scatter" = "scatterlist", 
+	# "Dashboard" = "dashboard",
+	# "Residual vs predictor" = "resid_vs_predictorlist", 
+	# "Leverage plots" = "leverage_plots", 
+	# "Coefficient plot" = "coef"
+
+	if(input$reg_plots == 'dashboard') {
+		mod$plotHeight <- 650
+		mod$plotWidth <- 650
+	}
+
+	if(input$reg_plots == 'coef') {
+		mod$plotHeight <- 500
+		mod$plotWidth <- 500
+	}
+
+	nrVars <- length(input$reg_var2) + 1
+	if(input$reg_plots == 'histlist') {
+		mod$plotHeight <- 325 * ceiling(nrVars / 2)
+		mod$plotWidth <- 650
+	}
+
+	if(input$reg_plots == 'correlations') {
+		mod$plotHeight <- 150 * nrVars
+		mod$plotWidth <- 150 * nrVars
+	}
+
+	if(input$reg_plots %in% c('scatterlist','leverage_plots','resid_vs_predictorlist')) {
+		mod$plotHeight <- 325 * ceiling((nrVars-1) / 2)
+		mod$plotWidth <- 650
+	}
+
+	mod
+})
+
+regression.mod <- reactive({
+
 	ret_text <- "This analysis requires a dependent variable of type integer or numeric and one or more independent variables. Please select another dataset."
 
 	if(is.null(input$reg_var1)) return(ret_text)
@@ -303,13 +347,6 @@ regression <- reactive({
 		mod <- step(lm(as.formula(paste(input$reg_var1, "~ 1")), data = dat), scope = list(upper = formula), direction = 'forward')
 	} else {
 		mod <- lm(formula, data = dat)
-	}
-
-	# length of plot window
-	nrVars <- length(input$reg_var2) + 1
-	if(nrVars > 4) {
-		mod$plotHeight <- 325 * ceiling(nrVars / 2)
-		mod$plotWidth <- 650
 	}
 
 	mod

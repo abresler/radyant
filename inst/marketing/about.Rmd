@@ -1,6 +1,6 @@
 ## Radyant - Marketing analytics using Shiny
 
-Version 0.83 (10/31/2013)
+Version 0.84 (10/31/2013)
 
 By: Vincent Nijs (vnijs at rady.ucsd.edu)
 

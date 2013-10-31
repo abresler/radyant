@@ -8,21 +8,15 @@ We can perform either a one-tailed test (i.e., less than or greater than) or two
 
 We have access to data from [Pew Internet & American Life Project](http://www.pewinternet.org/Shared-Content/Data-Sets/2012/December-2012--Facebook-%28omnibus%29.aspx) on people's Facebook habits and attitudes. We are interested in whether men and women have different habits and attitudes towards their use of Facebook. 
 
-You can find the information on people's Facebook habits and attitudes in the __facebook.rda__ dataset. The variable 'pial8' in the dataset stands for people's responses to the question whether Facebook has become more important in people's life (see the [questionnaire](http://www.pewinternet.org/~/media/Files/Data%20Sets/2012/Omnibus_Dec_2012_Quest.docx) for more information). Here 1 stands for "MORE important". Another variable 'pial9' asks whether the subject has spent more time on Facebook last year (1=More). And 'sex' documents the subject's gender (1=male, 2=female).
-
-![Compare proportions - Data](figures/CompareProportionsData.png)
+You can find the information on people's Facebook habits and attitudes in the __facebook.rda__ dataset. The variable 'more.important' in the dataset stands for people's responses to the question whether Facebook has become more important in people's life (see the [questionnaire](http://www.pewinternet.org/~/media/Files/Data%20Sets/2012/Omnibus_Dec_2012_Quest.docx) for more information). Here 1 stands for "MORE important". Another variable 'more.time' asks whether the subject has spent more time on Facebook last year (1=More). And 'gender' documents the subject's gender (Male or Female).
 
 Before we compare the proportions, we need to transform the dataset a little bit. 
 
-1) Change the variable 'sex' from integer to factor
+1) Create a new variable 'fct.more.important' by 'fct.more.important=factor(more.important==1)'
 
-![Compare proportions - Transform1](figures/CompareProportionsTransform1.png)
+![Compare proportions - Transform12](figures/CompareProportionsTransform.png)
 
-2) Create a new variable 'important' by 'important=factor(pial8==1)'
-
-![Compare proportions - Transform12](figures/CompareProportionsTransform2.png)
-
-3) Create a new variable 'moretime' by 'moretime=factor(pial9==1)'
+2) Create a new variable 'fct.more.time' by 'fct.more.time=factor(more.time==1)'
 
 
 We want to know the attitudes and habits of Facebook users so that we can better deliver our advertisements. Let's first see the attitudes. Our null-hypothesis is that the proportion of men and women who think Facebook is more important is equal. 
@@ -35,8 +29,8 @@ In addition to the numerical output provided in the Summary tab we can also eval
 
 ![Compare proportions - plots](figures/CompareProportionsPlots.png)
 
-It seems that men and women have different attitudes towards Facebook. How about their actual habits? We now use 'moretime' to test this. Our null-hypothesis is that the proportion of men and women who report that they have spent more time on Facebook last year is equal. 
+It seems that men and women have different attitudes towards Facebook. How about their actual habits? We now use 'more.time' to test this. Our null-hypothesis is that the proportion of men and women who report that they have spent more time on Facebook last year is equal. 
 
 ![Compare proportions - moretime](figures/CompareProportionsMoretime.png)
 
-Because the p-value is greater than the conventional level of significance (i.e. 0.05) we cannot reject the null hypothesis based on the available sample. The data suggest that the proportions of men and women who spent more time on Facebook last year seem to be the same.
+Because the p-value is greater than the conventional level of significance (i.e. 0.05) we cannot reject the null hypothesis based on the available sample. The data suggest that the proportions of men and women who spent more time on Facebook last year seem to be similar.

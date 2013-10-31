@@ -75,7 +75,7 @@ observe({
       # values[['datasetlist']] <- unique(c(robjname,values[['datasetlist']]))
     }
 
-    updateRadioButtons(session = session, inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard", "examples" = "examples"), selected = ".rda")
+    # updateRadioButtons(session = session, inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard", "examples" = "examples"), selected = ".rda")
   })
 })
 
@@ -144,15 +144,16 @@ loadUserData <- function(filename, uFile) {
 
     if(length(robjname) > 1) {
 
-      # values[[objname]] <- data.frame(get(robjname[1]))
       values[[objname]] <- data.frame(get(robjname[-which(robjname == "description")]))
       values[[paste0(objname,"_descr")]] <- get("description")
-    }
+      
+    } else {
 
-    values[[objname]] <- data.frame(get(robjname))  # only work with data.frames
+      values[[objname]] <- data.frame(get(robjname))  # only work with data.frames
+    }
   }
 
-  if(values[['datasetlist']][1] == '') {
+  if(length(values[['datasetlist']]) == 0 || values[['datasetlist']][1] == '') {
     values[['datasetlist']] <- c(objname)
   } else {
     values[['datasetlist']] <- unique(c(objname,values[['datasetlist']]))
@@ -268,8 +269,10 @@ output$packData <- renderUI({
 output$htmlDataExample <- reactive({
   if(is.null(input$datasets)) return()
 
-  # dat <- date2character()
   dat <- getdata()
+
+  # necessary when deleting a dataset
+  if(is.null(dat)) return()
 
   # Show only the first 10 rows
   nr <- min(10,nrow(dat))
@@ -279,7 +282,7 @@ output$htmlDataExample <- reactive({
 
   html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
   html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
-  # Encoding(html) <- 'UTF-8'
+  Encoding(html) <- 'UTF-8'
   html
 
 })

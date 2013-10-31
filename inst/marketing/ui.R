@@ -1,6 +1,7 @@
 shinyUI(
   pageWithSidebar(
 
+
     # Using a navbar rather than headerPanel to display app title
     headerPanel(''),
     sidebarPanel(

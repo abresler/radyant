@@ -63,6 +63,7 @@ date2character <- reactive({
 date2character_dat <- function(dat) {
 
   isDate <- c(sapply(dat, is.Date))
+	# needed because xtable doesn't like dates
 	dat[,isDate] <- sapply(dat[,isDate], as.character)
 	dat
 }

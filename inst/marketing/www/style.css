@@ -1,8 +1,11 @@
 label.radio { 
+  padding-left: 18px;
+  padding-right: 0px;
+  margin-left: 3px;
   display: inline-block; 
 }
 
-.radio input[type="radio"] { 
+.radio input[type="radio"] {
   float: none; 
 }
 
@@ -19,19 +22,12 @@ select {
 }
 
 textarea { 
-  /*width: 100%; */
   width: 650px; 
 }
 
 #tr_copyAndPaste {
   max-width: 185px; 
 }
-
-/*
-#man_data_descr { 
-  max-width: 600px; 
-}
-*/
 
 input[type="number"] {
   max-width: 185px; 
@@ -96,32 +92,3 @@ input[type="number"] {
 #fac_condFormat { 
   vertical-align: middle; 
 }
-
-
-/*.chart_container {
-  position: relative;
-  display: inline-block;
-  font-family: Arial, Helvetica, sans-serif;
-}
-.rChart {
-  display: inline-block;
-  margin-left: 40px;
-}
-.yAxis {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 40px;
-}
-.legend {
-  position: absolute;
-  top: 0;
-  right: -160px;
-  vertical-align: top;
-}
-.slider {
-  margin-left: 40px;
-  margin-top: 12px;
-}
-*/
-

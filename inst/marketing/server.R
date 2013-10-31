@@ -55,7 +55,8 @@ shinyServer(function(input, output, session) {
 			} else {
 				# html <- markdownToHTML(text = text)
 			 	# Encoding(html) <- 'UTF-8'
-				markdownToHTML(text = text)
+				# markdownToHTML(text = text)
+				markdownToHTML(text = text, stylesheet="www/fancyTab.css")
 			}
  		}
 	}
@@ -65,8 +66,8 @@ shinyServer(function(input, output, session) {
 	  fancyTab <- try(get(paste0(input$tool,'_fancy_tab'))(), silent = TRUE)
   	if(!is(fancyTab, 'try-error')) {
   		if(is.null(fancyTab)) return("")
-			# html <- markdownToHTML(text = fancyTab, stylesheet="www/fancyTab.css")
-			html <- markdownToHTML(text = fancyTab)
+			html <- markdownToHTML(text = fancyTab, stylesheet="www/fancyTab.css")
+			# html <- markdownToHTML(text = fancyTab)
 			html <- sub("<table>","<table class='table table-condensed'>", html)
 			# Encoding(html) <- 'UTF-8'
 			html

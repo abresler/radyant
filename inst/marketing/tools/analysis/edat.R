@@ -96,7 +96,7 @@ ui_compareMeans <- function() {
     conditionalPanel(condition = "input.analysistabs == 'Plots'",
 		  checkboxInput('cm_jitter', 'Jitter', value = TRUE)
 		)),
-  	helpModal('Compare means','compareMeans',includeMarkdown("tools/help/compareMeans.md"))
+  	helpModal('Compare means','compareMeans',includeHTML("tools/help/compareMeans.html"))
   )
 }
 
@@ -217,7 +217,7 @@ ui_singleProp <- function() {
   	  sliderInput('sp_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01),
     	numericInput("sp_compValue", "Comparison value:", 0.5, min = 0.01, max = 0.99, step = 0.01)
     )),
-	 	helpModal('Single proportion','singleProp',includeMarkdown("tools/help/singleProp.md"))
+	 	helpModal('Single proportion','singleProp',includeHTML("tools/help/singleProp.html"))
   )
 }
 
@@ -280,7 +280,7 @@ ui_compareProps <- function() {
       selectInput(inputId = "cp_alternative", label = "Alternative hypothesis", choices = alt, selected = "Two sided"),
       sliderInput('cp_sigLevel',"Significance level:", min = 0.85, max = 0.99, value = 0.95, step = 0.01)
     )),
-	 	helpModal('Compare proportions','compareProps',includeMarkdown("tools/help/compareProps.md"))
+	 	helpModal('Compare proportions','compareProps',includeHTML("tools/help/compareProps.html"))
  	)
 }
 
@@ -396,7 +396,8 @@ summary.crosstab <- function(result) {
 	# }
 
 	print(result$cst, digits = 2)
-	cat(paste("\n",sprintf("%.1f",100 * (sum(result$cst$expected < 5) / length(result$cst$expected))),"% of cells have expected values below 5\n\n"), sep = "")
+	# cat(paste("\n",sprintf("%.1f",100 * (sum(result$cst$expected < 5) / length(result$cst$expected))),"% of cells have expected values below 5\n\n"), sep = "")
+	cat(paste(sprintf("%.1f",100 * (sum(result$cst$expected < 5) / length(result$cst$expected))),"% of cells have expected values below 5\n\n"), sep = "")
 }
 
 plot.crosstab <- function(result) {
@@ -476,69 +477,5 @@ crosstab <- reactive({
 	nr.plot <- 1 + sum(c(input$ct_expected,input$ct_deviation, input$ct_std_residuals))
 
 	list('cst' = cst, 'table' = tab, plotHeight = 400 * nr.plot)
-})
-
-###############################
-# Correlation
-###############################
-
-output$cor_var <- renderUI({
-
-  vars <- varnames()
-  selectInput(inputId = "cor_var", label = "Select variables:", choices = vars, selected = NULL, multiple = TRUE)
-})
-
-ui_correlation <- function() {
-  list(wellPanel(
-	    uiOutput("cor_var"),
-		  selectInput(inputId = "cor_type", label = "Method", choices = c("pearson", "spearman"), selected = "pearson")
-	  ),
-	 	helpModal('Correlation','correlation',includeMarkdown("tools/help/correlation.md"))
-	)
-}
-
-summary.correlation <- function(dat) {
-
-	# cmat <- cor(dat, use="complete.obs", method = input$cor_type)
-	# print(as.dist(cmat), digits = 2)
-
-	cmat <- Hmisc::rcorr(as.matrix(dat), type = input$cor_type)
-	cat("Correlation matrix:\n")
-	print(as.dist(round(cmat$r,2)))
-	cat("\np-values:\n")
-	print(as.dist(round(cmat$P,2)))
-}
-
-plot.correlation <- function(dat) {
-	# based mostly on http://gallery.r-enthusiasts.com/RGraphGallery.php?graph=137
-	panel.plot <- function(x, y) {
-	    usr <- par("usr"); on.exit(par(usr))
-	    par(usr = c(0, 1, 0, 1))
-	    ct <- cor.test(x,y, method = input$cor_type)
-	    sig <- symnum(ct$p.value, corr = FALSE, na = FALSE,
-	                  cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
-	                  symbols = c("***", "**", "*", ".", " "))
-	    r <- ct$estimate
-	    rt <- format(r, digits=2)[1]
-	    cex <- 0.5/strwidth(rt)
-	    
-	    text(.5, .5, rt, cex=cex * abs(r))
-	    text(.8, .8, sig, cex=cex, col='blue')
-	}
-	panel.smooth <- function (x, y) {
-    points(x, y)
-    abline(lm(y~x), col="red")
-    lines(stats::lowess(y~x), col="blue")
-	}
-	pairs(dat, lower.panel=panel.smooth, upper.panel=panel.plot)
-}
-
-correlation <- reactive({
-	vars <- input$cor_var
-	if(is.null(vars) || (length(vars) < 2)) return("Please select two or more variables")
-	if(sum(vars %in% varnames()) != length(vars))  return("")
-
-	dat <- getdata()[,vars]
-	data.frame(lapply(dat,as.numeric))
 })
 

@@ -1,19 +1,26 @@
-The compare means t-test is used to compare the mean of a variable for one sample in our data to the mean of the same variable in one, or more, other samples. 
-
-This is important since we seldom have access to data for an entire population. The hypothesized value in the population is specified in the 'Comparsion value' box. 
+The compare means t-test is used to compare the mean of a variable for one sample in our data to the mean of the same variable in one, or more, other samples. This is important since we seldom have access to data for an entire population. The hypothesized value in the population is specified in the 'Comparsion value' box. 
 
 We can perform either a one-tailed test (i.e., less than or greater than) or two-tailed test (see 'Alternative hypothesis'). In marketing we often use one-tailed tests because we want to evaluate if the available data provide evidence that a variable or effect is larger (or smaller) in one sample than another.
 
-#### Example
+#### Example: Professor salaries
 
-We have access to data from a random sample of grocery stores in the UK. Management will consider entering this geographical market if consumer demand for the product category exceeds 100M units, or, approximately, 1750 units per store. The average demand per store in the sample is equal to 1953. While this number is larger than 1750 we need to determine if the difference could be attributed to sampling error. 
+We have access to the 2008-09 nine-month academic salary for Assistant Professors, Associate Professors and Professors in a college in the U.S. The data were collected as part of the on-going effort of the college's administration to monitor salary differences between male and female faculty members. A data frame with 397 observations on the following 6 variables.
 
-You can find the information on unit sales in each store in the store sample in the __demand_uk.rda__ dataset. The dataset contains one variable, 'demand_uk'. Our null-hypothesis is that the average demand for a store is equal to 1750 unit. This is the number we enter into the 'Comparison value' box. Because we want to determine if the available data provides sufficient support to reject the null-hypothesis in favor of the alternative that average store demand in the UK is larger than 1750 we choose the 'Greater than' option for the 'Alternative hypothesis' drop-down.
+- rank = a factor with levels AsstProf, AssocProf, and Prof
+- discipline = a factor with levels A (“theoretical” departments) or B (“applied” departments)
+- yrs.since.phd = years since PhD
+- yrs.service = years of service
+- sex = a factor with levels Female and Male
+- salary = nine-month salary, in dollars
 
-![Single mean - summary](figures/SingleMeanSummary.png)
+The data are part of the CAR package for R and are linked to the book:  Fox J. and Weisberg, S. (2011) An R Companion to Applied Regression, Second Edition Sage.
 
-Because the p-value is smaller than the conventional level of significance (i.e. 0.05) we can reject the null hypothesis based on the available sample. The data suggest that management should consider entering the UK market.
+We first select professor 'rank' and select 'salary' as the numerical variable to compare across ranks. Radyant will do a pair-wise comparison of salaries across the three levels. We are interested in a one-sided hypothesis. Specifically, we will invesigate, as we might expect, professors of higher rank earn a higher income compared to those of lower rank.
 
-In addition to the numerical output provided in the Summary tab we can also evaluate the hypothesis visually (see Plots tab). The settings in the side-panel are the same as before. The plot shows a histogram of the store sales data. The solid black line indicates the sample mean and the dashed red line the comparison value (i.e., unit sales under the null-hypothesis). The dashed black lines represent the confidence interval around the sample mean. Because the dashed red line does __not__ fall within the confidence interval (1897 to Inf.) we reject the null-hypothesis in favor of the alternative.
+![Compare means - summary](figures/CompareMeansSummary.png)
 
-![Single mean - plots](figures/SingleMeanPlots.png)
+Because the p-values are smaller than the conventional level of significance (i.e. 0.05) for each pair-wise comparison we can reject the null hypothesis based on the available sample. 
+
+In addition to the numerical output provided in the Summary tab we can also evaluate the hypothesis visually (see Plots tab). The settings in the side-panel are the same as before. The tab displays a set of box-plots and density-plots of the professor salaries. Consistent with the results shown in the Summary tab there is clear separation between the salaries across ranks. 
+
+![Compare means - plots](figures/CompareMeansPlots.png)

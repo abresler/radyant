@@ -55,7 +55,7 @@ ui_glmreg <- function() {
     ),
     actionButton("saveglmres", "Save residuals")
   	),
-		helpModal('Generalized Linear Models (GLM)','glmreg',includeMarkdown("tools/help/glmreg.md"))
+		helpModal('Generalized Linear Models (GLM)','glmreg',includeHTML("tools/help/glmreg.html"))
 	)
 }
 

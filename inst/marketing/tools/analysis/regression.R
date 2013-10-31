@@ -1,3 +1,68 @@
+###############################
+# Correlation
+###############################
+
+output$cor_var <- renderUI({
+
+  vars <- varnames()
+  selectInput(inputId = "cor_var", label = "Select variables:", choices = vars, selected = NULL, multiple = TRUE)
+})
+
+ui_correlation <- function() {
+  list(wellPanel(
+	    uiOutput("cor_var"),
+		  selectInput(inputId = "cor_type", label = "Method", choices = c("pearson", "spearman"), selected = "pearson")
+	  ),
+	 	helpModal('Correlation','correlation',includeHTML("tools/help/correlation.html"))
+	)
+}
+
+summary.correlation <- function(dat) {
+
+	# cmat <- cor(dat, use="complete.obs", method = input$cor_type)
+	# print(as.dist(cmat), digits = 2)
+
+	cmat <- Hmisc::rcorr(as.matrix(dat), type = input$cor_type)
+	cat("Correlation matrix:\n")
+	print(as.dist(round(cmat$r,2)))
+	cat("\np-values:\n")
+	print(as.dist(round(cmat$P,2)))
+}
+
+plot.correlation <- function(dat) {
+	# based mostly on http://gallery.r-enthusiasts.com/RGraphGallery.php?graph=137
+	panel.plot <- function(x, y) {
+	    usr <- par("usr"); on.exit(par(usr))
+	    par(usr = c(0, 1, 0, 1))
+	    ct <- cor.test(x,y, method = input$cor_type)
+	    sig <- symnum(ct$p.value, corr = FALSE, na = FALSE,
+	                  cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+	                  symbols = c("***", "**", "*", ".", " "))
+	    r <- ct$estimate
+	    rt <- format(r, digits=2)[1]
+	    cex <- 0.5/strwidth(rt)
+	    
+	    text(.5, .5, rt, cex=cex * abs(r))
+	    text(.8, .8, sig, cex=cex, col='blue')
+	}
+	panel.smooth <- function (x, y) {
+    points(x, y)
+    abline(lm(y~x), col="red")
+    lines(stats::lowess(y~x), col="blue")
+	}
+	pairs(dat, lower.panel=panel.smooth, upper.panel=panel.plot)
+}
+
+correlation <- reactive({
+	vars <- input$cor_var
+	if(is.null(vars) || (length(vars) < 2)) return("Please select two or more variables")
+	if(sum(vars %in% varnames()) != length(vars))  return("")
+
+	dat <- getdata()[,vars]
+	data.frame(lapply(dat,as.numeric))
+})
+
+
 ################################################################
 # OLS
 ################################################################
@@ -61,15 +126,11 @@ ui_regression <- function() {
     ),
     actionButton("saveres", "Save residuals")
 	  ),
-		helpModal('Regression','regression',includeMarkdown("tools/help/regression.md"))
+		helpModal('Regression','regression',includeHTML("tools/help/regression.html"))
 	)
 }
 
-# main functions called from radyant.R
-r_plots <- list("Coefficient plot" = "coef", "Actual vs Fitted" = 0, "Residuals vs Fitted" = 1, "Normal Q-Q" = 2)
-# r_plots <- list("Coefficient plot" = "coef", "Actual vs Fitted" = 0, "Residuals vs Fitted" = 1, "Normal Q-Q" = 2, "Scale-Location" = 3,
-# 	"Cook's distance" = 4, "Residuals vs Leverage" = 5, "Cook's distance vs Leverage" = 6
-# )
+
 
 summary.regression <- function(result) {
 	print(summary(result), digits = 3)
@@ -86,12 +147,100 @@ summary.regression <- function(result) {
 	}
 }
 
+# main functions called from radyant.R
+r_plots <- list("Histograms" = "histlist", "Correlations" = "correlations", "Scatter" = "scatterlist", "Dashboard" = "dashboard",
+		"Residual vs predictor" = "resid_vs_predictorlist", "Leverage plots" = "leverage_plots", "Coefficient plot" = "coef")
+	# "Actual vs Fitted" = 0, "Residuals vs Fitted" = 1, "Residual vs Row order" = 2, "Normal Q-Q" = 3)
+# r_plots <- list("Coefficient plot" = "coef", "Actual vs Fitted" = 0, "Residuals vs Fitted" = 1, "Normal Q-Q" = 2, "Scale-Location" = 3,
+# 	"Cook's distance" = 4, "Residuals vs Leverage" = 5, "Cook's distance vs Leverage" = 6
+# )
+
 plot.regression <- function(result) {
+
 	mod <- fortify(result)
+
+	# require(ggplot2)
+	# require(gridExtra)
+	# dat <- ideal
+	# head(ideal)
+	# result <- lm(y ~ x1 + x2 + x3, data = dat)
+
+	# mod <- fortify(result)
+	# str(result)
+	# head(mod)
+	# hist(mod$.hat)
+
+	# input <- list()
+	# input$reg_var1 <- "y"
+	# input$reg_var2 <- c("x1","x2","x3")
+	# vars <- c(input$reg_var1, input$reg_var2)
+	vars <- c(input$reg_var1, input$reg_var2)
+	dat <- mod[,vars]
+
+	# input$reg_plots = "histlist"
+	if(input$reg_plots == "histlist") {
+		plots <- list()
+		for(i in vars) plots[[i]] <- ggplot(dat, aes_string(x = i)) + geom_histogram()
+		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+	}
+
+	# input$reg_plots = "correlations"
+	if(input$reg_plots == "correlations") {
+		# from the EDAT menu
+		return(plot.correlation(dat))
+	}
+
+	# input$reg_plots = "dashboard"
+	if(input$reg_plots == "dashboard") {
+
+		plots <- list()
+
+		df <- data.frame(cbind(mod$.fitted,mod[1]))
+		colnames(df) <- c("x","y")
+		plots[[1]] <- ggplot(df, aes(x=x, y=y)) + geom_point() + stat_smooth(method="lm", se=TRUE) +
+			labs(list(title = "Actual vs Fitted", x = "Fitted values", y = "Actual values"))
+
+		plots[[2]] <- qplot(.fitted, .resid, data = mod) + geom_hline(yintercept = 0) + geom_smooth(se = FALSE) +
+			labs(list(title = "Residuals vs Fitted", x = "Fitted values", y = "Residuals"))
+
+		plots[[3]] <- qplot(y=.resid, x=seq_along(.resid), data = mod) + geom_point() + geom_smooth(se = FALSE) +
+			labs(list(title = "Residuals vs Row order", x = "Row order", y = "Residuals"))
+
+		plots[[4]] <- qplot(sample =.stdresid, data = mod, stat = "qq") + geom_abline() +
+			labs(list(title = "Normal Q-Q", x = "Theoretical quantiles", y = "Standardized residuals"))
+
+		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+
+	}
+
+	# input$reg_plots = "scatterlist"
+	if(input$reg_plots == "scatterlist") {
+		plots <- list()
+		# for(i in input$reg_var2) plots[[i]] <- ggplot(dat, aes_string(x=i, y=input$reg_var1)) + geom_point() + geom_smooth(method = "lm", size = .75, linetype = "dotdash")
+		for(i in input$reg_var2) plots[[i]] <- ggplot(dat, aes_string(x=i, y=input$reg_var1)) + geom_point() + geom_smooth(size = .75, linetype = "dotdash")
+		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+	}
+
+	# input$reg_plots = "resid_vs_predictorlist"
+	if(input$reg_plots == "resid_vs_predictorlist") {
+		plots <- list()
+		residuals <- mod$.resid
+		rdat <- cbind(residuals,dat[,input$reg_var2])
+		# for(i in input$reg_var2) plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(method = "lm", size = .75, linetype = "dotdash")
+		for(i in input$reg_var2) plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(se = FALSE)
+		p <- do.call(grid.arrange, c(plots, list(ncol = 2)))
+	}
+
+	# input$reg_plots = "leverage_plots"
+	if(input$reg_plots == "leverage_plots") {
+		return(leveragePlots(result, main = "", layout = c(ceiling(length(input$reg_var2)/2),2)))
+	}
+
 	if(input$reg_plots == "coef") {
 		return(coefplot(result, xlab="", ylab="", main="Coefficient plot", col.pts="blue", CI=2))
+	} 
 
-	} else if(input$reg_plots == 0) {
+	if(input$reg_plots == 0) {
 		df <- data.frame(cbind(mod$.fitted,mod[1]))
 		colnames(df) <- c("x","y")
 		p <- ggplot(df, aes(x=x, y=y)) + geom_point() + stat_smooth(method="lm", se=TRUE) +
@@ -102,31 +251,35 @@ plot.regression <- function(result) {
 			labs(list(title = "Residuals vs Fitted", x = "Fitted values", y = "Residuals"))
 
 	} else if(input$reg_plots == 2) {
-		p <- qplot(sample =.stdresid, data = mod, stat = "qq") +
-			geom_abline() + 
-			labs(list(title = "Normal Q-Q", x = "Theoretical quantiles", y = "Standardized residuals"))
+		p <- qplot(y=.resid, x=seq_along(.resid), data = mod) + geom_point() + geom_smooth(method = "lm", size = .75, linetype = "dotdash") +
+			labs(list(title = "Residuals vs Row order", x = "Row order", y = "Residuals"))
 
 	} else if(input$reg_plots == 3) {
+		p <- qplot(sample =.stdresid, data = mod, stat = "qq") + geom_abline() +
+			labs(list(title = "Normal Q-Q", x = "Theoretical quantiles", y = "Standardized residuals"))
+
+	} else if(input$reg_plots == 4) {
 		p <- qplot(.fitted, sqrt(abs(.stdresid)), data = mod) + geom_smooth(se = FALSE) +
 			labs(list(title = "Scale-Location", x = "Fitted values", y = "Sqrt. standardized residuals"))
 
-	} else if(input$reg_plots == 4) {
+	} else if(input$reg_plots == 5) {
 
 		p <- qplot(seq_along(.cooksd), .cooksd, data = mod, geom = "bar", stat="identity") +
 			labs(list(title = "Cook's distance", x = "Observation number", y = "Cook's distance"))
 
-	} else if(input$reg_plots == 5) {
+	} else if(input$reg_plots == 6) {
 		p <- qplot(.hat, .stdresid, data = mod, size = .cooksd) + geom_smooth(se = FALSE, size = 0.5) +
 			labs(list(title = "Residuals vs Leverage", x = "Leverage", y = "Standardized residuals", size = "Cook's distance"))
 
-	} else if(input$reg_plots == 6) {
+	} else if(input$reg_plots == 7) {
 		p <- ggplot(mod, aes(.hat, .cooksd)) + geom_vline(xintercept = 0, colour = NA) +
 			geom_abline(slope = seq(0, 3, by = 0.5), colour = "white") + geom_smooth(se = FALSE) +
 			geom_point() + labs(list(title = "Cook's distance vs Leverage", x = "Leverage", y = "Cook's distance"))
 		 	# p <- qplot(.hat, .cooksd, size = .cooksd / .hat, data = mod) + scale_area()
 	}
 
-	print(p)
+	# suppressWarnings(print(p))
+	suppressMessages(print(p))
 }
 
 # analysis reactive
@@ -151,6 +304,14 @@ regression <- reactive({
 	} else {
 		mod <- lm(formula, data = dat)
 	}
+
+	# length of plot window
+	nrVars <- length(input$reg_var2) + 1
+	if(nrVars > 4) {
+		mod$plotHeight <- 325 * ceiling(nrVars / 2)
+		mod$plotWidth <- 650
+	}
+
 	mod
 })
 

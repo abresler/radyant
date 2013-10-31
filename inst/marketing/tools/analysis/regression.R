@@ -233,7 +233,7 @@ plot.regression <- function(result) {
 
 	# input$reg_plots = "leverage_plots"
 	if(input$reg_plots == "leverage_plots") {
-		return(leveragePlots(result, main = "", layout = c(ceiling(length(input$reg_var2)/2),2)))
+		return(leveragePlots(result, main = "", ask=FALSE, layout = c(ceiling(length(input$reg_var2)/2),2)))
 	}
 
 	if(input$reg_plots == "coef") {

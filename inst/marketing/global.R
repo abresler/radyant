@@ -67,6 +67,11 @@ detach("package:Hmisc", unload=TRUE)
 
 # mtcars <- NULL
 robj <- load("data/mtcars.rda") 
+
+# setting up a few standard datasets to play with 
+# mtcars$vs <- as.factor(mtcars$vs)
+# mtcars$am <- as.factor(mtcars$am)
+
 values[["mtcars"]] <- data.frame(get(robj[1]))
 values[["mtcars_descr"]] <- get(robj[2])
 

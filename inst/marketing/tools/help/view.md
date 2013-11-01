@@ -1,3 +1,3 @@
-Show the data available in the Radyant app in a table format. Select which columns to view.
+Show the data available in the Radyant app in a table format. Select which columns to view. To sort on multiple columns press shift and then click on the 2nd, 3rd, etc. column you would like to sort by. 
 
-<!-- ![Single mean - summary](figures/SingleMeanSummary.png) -->
+There are different ways to select only a subset of the data to view. For variables that have a limited number of different values (e.g., a factor) you can type a value to view in the text box below the column. This way you can filter data across multiple columns. For continuous variables use the Subset box on the left. Here you can use > and < signs and even combine commands (e.g., x > 3 & y == 2). Type your filter statement and press enter to see the result on screen.

@@ -7,8 +7,8 @@ ui_View <- function() {
   list(wellPanel(
       uiOutput("columns"), 
      	# uiOutput("view_order"), checkboxInput("view_order_desc", "DESC", value = FALSE),
-      returnTextInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
-      uiOutput("nrRows")
+      returnTextInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", '')
+      # uiOutput("nrRows")
     ),
     helpModal('View','view',includeMarkdown("tools/help/view.md"))
   )
@@ -48,15 +48,16 @@ output$dataviewer <-renderDataTable({
   # }
 
   # Show only the selected columns and no more than 50 rows at a time
-  nr <- min(input$nrRows[2],nrow(dat))
-  dat <- data.frame(dat[input$nrRows[1]:nr, input$columns, drop = FALSE])
+  # nr <- min(input$nrRows[2],nrow(dat))
+  # dat <- data.frame(dat[input$nrRows[1]:nr, input$columns, drop = FALSE])
+  dat <- data.frame(dat[, input$columns, drop = FALSE])
   dat
 
   # html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
   # html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
   # html
 
-})
+}, options = list(bSortClasses = TRUE, aLengthMenu = c(15, 30, 45), iDisplayLength = 15))
 
 output$nrRows <- renderUI({
   if(is.null(input$datasets)) return()

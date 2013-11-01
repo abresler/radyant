@@ -65,6 +65,18 @@ update_app <- function(url) {
 options(repos = c(CRAN = "http://cran.rstudio.com"))
 libs <- c("shiny", "knitr", "Hmisc", "car", "tools", "gridExtra", "markdown", "R.utils", "psych", "rela", "arm", "plyr", "reshape2", "vegan", "ggplot2", "lubridate", "pander")
 
+
+
+
+
+# make sure they have .80 installed
+install.packages('shiny')
+
+
+
+
+
+
 available <- libs %in% rownames(installed.packages())
 inst.libs <- libs[!available]
 if(length(inst.libs) != 0) {

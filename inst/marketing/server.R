@@ -34,7 +34,9 @@ shinyServer(function(input, output, session) {
 		  	  tags$textarea(id="man_data_descr", rows="10", cols="12", dataDescriptionOutput('md'))
 		  	)
      	),
-      tabPanel("View", htmlOutput("dataviewer")),
+      # tabPanel("View", htmlOutput("dataviewer")),
+      tabPanel("View", dataTableOutput("dataviewer")),
+
       tabPanel("Visualize", plotOutput("visualize", width = "100%", height = "100%")),
       tabPanel("Explore", verbatimTextOutput("expl_data"), plotOutput("expl_viz", width = "100%", height = "100%")),
       # tabPanel("Merge", #   HTML('<label>Merge data.<br>In progress. Check back soon.</label>') # ),

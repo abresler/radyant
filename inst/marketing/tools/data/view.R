@@ -6,7 +6,7 @@ output$view_order <- renderUI({
 ui_View <- function() {
   list(wellPanel(
       uiOutput("columns"), 
-     	uiOutput("view_order"), checkboxInput("view_order_desc", "DESC", value = FALSE),
+     	# uiOutput("view_order"), checkboxInput("view_order_desc", "DESC", value = FALSE),
       returnTextInput("dv_select", "Subset (e.g., mpg > 20 & vs == 1)", ''), 
       uiOutput("nrRows")
     ),
@@ -15,7 +15,9 @@ ui_View <- function() {
 }
 
 # output$dataviewer <- renderTable({
-output$dataviewer <- reactive({
+# output$dataviewer <- reactive({
+output$dataviewer <-renderDataTable({
+
   if(is.null(input$datasets) || is.null(input$columns)) return()
 
   # dat <- getdata()
@@ -40,19 +42,19 @@ output$dataviewer <- reactive({
   }
 
   # order data
-  if(!is.null(input$view_order) && input$view_order != "None") {
-    indx <- order(dat[,input$view_order], decreasing = input$view_order_desc)
-    dat <- dat[indx,,drop = FALSE]
-  }
+  # if(!is.null(input$view_order) && input$view_order != "None") {
+  #   indx <- order(dat[,input$view_order], decreasing = input$view_order_desc)
+  #   dat <- dat[indx,,drop = FALSE]
+  # }
 
   # Show only the selected columns and no more than 50 rows at a time
   nr <- min(input$nrRows[2],nrow(dat))
   dat <- data.frame(dat[input$nrRows[1]:nr, input$columns, drop = FALSE])
+  dat
 
-  html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
-  html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
-  # Encoding(html) <- 'UTF-8'
-  html
+  # html <- print(xtable::xtable(dat), type='html', print.results = FALSE)
+  # html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
+  # html
 
 })
 

@@ -103,11 +103,24 @@ transform_main <- reactive({
 	}
 
 	if(input$tr_recode != '') {
+
+		# input <- list()
+		# input$tr_recode <- "'<25' = '<35'; '25-34' = '<35'; '35-44' = '35-54'; '45-54' = '35-54'; '55-64' = '>54'; '>64' = '>54'"
+		# dat <- tulsa_age
+		# input$tr_columns <- 'age'
+		# recom <- input$tr_recode
+		# recom <- gsub(" ", "", recom)
+		# recom <- gsub("\"","\'", recom)
+		# recode(dat[,input$tr_columns[1]],recom)
+		# do.call(car::recode, list(dat[,input$tr_columns[1]],recom))
+		# newvar <- try(do.call(car::recode, list(dat[,input$tr_columns[1]],parse(text = recom))), silent = TRUE)
+
 		recom <- input$tr_recode
 		recom <- gsub(" ", "", recom)
 		recom <- gsub("\"","\'", recom)
 
-		newvar <- try(do.call(car::recode, list(dat[,input$tr_columns[1]],parse(text = recom))), silent = TRUE)
+		# newvar <- try(do.call(car::recode, list(dat[,input$tr_columns[1]],parse(text = recom))), silent = TRUE)
+		newvar <- try(do.call(car::recode, list(dat[,input$tr_columns[1]],recom)), silent = TRUE)
 		if(!is(newvar, 'try-error')) {
 
 			cn <- c(colnames(dat),paste("rc",input$tr_columns[1], sep="."))

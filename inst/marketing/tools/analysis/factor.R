@@ -12,7 +12,7 @@ output$preFactor_vars <- renderUI({
 ui_preFactor <- function() {
   list(wellPanel(
   	uiOutput("preFactor_vars")),
-		helpModal('Pre-factor analysis','preFactor',includeMarkdown("tools/help/preFactor.md"))
+		helpModal('Pre-factor analysis','preFactor',includeHTML("tools/help/preFactor.html"))
 	)
 }
 
@@ -100,7 +100,7 @@ ui_fullFactor <- function() {
     radioButtons("fac_rotation", label = "Rotation:", fac_rotation, selected = 'Varimax'),
     actionButton("fac_savescores", "Save scores")
   	),
-		helpModal('Factor analysis','fullFactor',includeMarkdown("tools/help/fullFactor.md"))
+		helpModal('Factor analysis','fullFactor',includeHTML("tools/help/fullFactor.html"))
 	)
 }
 
@@ -212,43 +212,3 @@ observe({
 		changedata(facscores, paste0("fac",1:input$fac_number))
 	})
 })
-
-
-
-	# if("Save loadings" %in% state$opt) { #{{{
-	# 	file.name <- paste('loadings.',state$data,'.xls', sep = "")
-	# 	wb <- loadWorkbook(file.name, create = TRUE)
-
-	# 	createSheet(wb, name = 'loadings')
-	# 	clearSheet(wb, sheet = 'loadings')
-
-	# 	Variables <- rownames(df)
-	# 	df.loadings <- cbind(Variables,df)
-	# 	df.loadings[,'Communality'] <- NULL
-	# 	writeWorksheet(wb,df.loadings[,-1], sheet = 'loadings', rownames = 'Variables', startRow = 1, startCol = 1)
-
-	# 	max.loading <- createCellStyle(wb)
-	# 	setFillPattern(max.loading, fill = XLC$"FILL.SOLID_FOREGROUND")
-	# 	setFillForegroundColor(max.loading, color = XLC$"COLOR.SKY_BLUE")
-	# 	maxVal <- apply(abs(df.loadings[,-1]),1,max)
-	# 	maxValIndex <- which(abs(df.loadings[,-1]) == maxVal, arr.ind = TRUE)
-	# 	setCellStyle(wb, sheet = "loadings", row = maxValIndex[,'row']+1, col = maxValIndex[,'col']+1, cellstyle = max.loading)
-
-	# 	df.corr <- data.frame(cor(f.data))
-	# 	df.corr <- cbind(Variables,df.corr)
-	# 	createSheet(wb, name = 'correlations')
-	# 	clearSheet(wb, sheet = 'correlations')
-	# 	writeWorksheet(wb, df.corr, sheet = 'correlations', startRow = 1, startCol = 1)
-	# 	corr <- createCellStyle(wb)
-	# 	setFillPattern(corr, fill = XLC$"FILL.SOLID_FOREGROUND")
-	# 	setFillForegroundColor(corr, color = XLC$"COLOR.SKY_BLUE")
-	# 	corrIndex <- which(abs(df.corr[,-1]) > .3 & df.corr[,-1] != 1 , arr.ind = TRUE)
-	# 	setCellStyle(wb, sheet = "correlations", row = corrIndex[,'row']+1, col = corrIndex[,'col']+1, cellstyle = corr)
-	# 	saveWorkbook(wb)
-
-	# 	if(.Platform$OS.type == "unix") {
-	# 		execute(paste("browseURL(\"",getwd(),'/',file.name,"\", browser = '/usr/bin/open')",sep=''))
-	# 	} else {
-	# 		execute(paste("browseURL(\"",getwd(),'/',file.name,"\", browser = NULL)",sep=''))
-	# 	}
-	# } #}}}

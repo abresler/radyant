@@ -1,3 +1,4 @@
+# only write if running on developer computer
 if(file.exists("/Users/vnijs/radyant")) {
 	dbox_remote <- file.info(list.files(recursive = TRUE, include.dirs = TRUE))
 	save(dbox_remote, file = "dbox_remote.rda")
@@ -98,6 +99,7 @@ shinyServer(function(input, output, session) {
   		return(tabsetPanel(id = "analysistabs",
 	  	  tabPanel("Summary", HTML(fancyTableOutput()), verbatimTextOutput("summary")),
 	    	tabPanel("Plots", plotOutput("plots", height = "100%")))
+	    	# tabPanel("Help", includeHTML(paste0("tools/help/",input$tool,".html"))))
 		  )
 	  } else {
   		return(tabs)

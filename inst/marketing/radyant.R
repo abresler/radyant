@@ -5,13 +5,20 @@ changedata <- function(addCol = list(NULL), addColName = "") {
 	# change data as specified
 	if(addColName[1] == "") return()
   # isolate ensures no reactive dependencies are used
-  isolate({
+  # isolate({
   	if(length(addCol) == 1 && is.null(addCol[[1]])) {
   		return(values[[input$datasets]][,addColName] <- addCol)
   	} else if(nrow(getdata()) == nrow(addCol)) {
 	  	return(values[[input$datasets]][,addColName] <- addCol)
   	}
-  })
+  # })
+}
+
+changedata_names <- function(oldnames, newnames) {
+
+	upnames <- colnames(values[[input$datasets]])
+	upnames[which(upnames %in% oldnames)] <- newnames
+	return(colnames(values[[input$datasets]]) <- upnames)
 }
 
 inChecker <- function(tocheck) {

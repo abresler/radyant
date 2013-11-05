@@ -159,8 +159,10 @@ plot.regression <- function(result) {
 
 	mod <- fortify(result)
 
+
+
 	# require(ggplot2)
-	# require(gridExtra)
+	# require(gridextra)
 	# dat <- ideal
 	# head(ideal)
 	# result <- lm(y ~ x1 + x2 + x3, data = dat)
@@ -168,14 +170,40 @@ plot.regression <- function(result) {
 	# mod <- fortify(result)
 	# str(result)
 	# head(mod)
-	# hist(mod$.hat)
 
 	# input <- list()
 	# input$reg_var1 <- "y"
 	# input$reg_var2 <- c("x1","x2","x3")
 	# vars <- c(input$reg_var1, input$reg_var2)
+
+
+	# # input$reg_plots = "leverage_plots"
+	# require(car)
+	# leveragePlots(result)
+	# ?leveragePlot
+	# leveragePlot
+
+	# terms <- ~.
+
+	# result <- lm(y ~ x1 + x2 + x3 + x2:x3, data = dat)
+	# model <- result
+
+ #   vform <- update(formula(model), terms)
+ #   vform
+ #   terms.model <- attr(attr(model.frame(model), "terms"), "term.labels")
+ #   terms.model
+ #   terms.vform <- attr(terms(vform), "term.labels")
+ #   terms.vform
+ #   good <- terms.model[match(terms.vform, terms.model)]
+ #   good
+
+
+
+
+
+
 	vars <- c(input$reg_var1, input$reg_var2)
-	dat <- mod[,vars]
+	dat <- mod[,vars, drop = FALSE]
 
 	# input$reg_plots = "histlist"
 	if(input$reg_plots == "histlist") {
@@ -210,7 +238,7 @@ plot.regression <- function(result) {
 		plots[[4]] <- qplot(sample =.stdresid, data = mod, stat = "qq") + geom_abline() +
 			labs(list(title = "Normal Q-Q", x = "Theoretical quantiles", y = "Standardized residuals"))
 
-		p <- suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2))))
+		p <- suppressWarnings(suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2)))))
 
 	}
 
@@ -219,7 +247,7 @@ plot.regression <- function(result) {
 		plots <- list()
 		# for(i in input$reg_var2) plots[[i]] <- ggplot(dat, aes_string(x=i, y=input$reg_var1)) + geom_point() + geom_smooth(method = "lm", size = .75, linetype = "dotdash")
 		for(i in input$reg_var2) plots[[i]] <- ggplot(dat, aes_string(x=i, y=input$reg_var1)) + geom_point() + geom_smooth(size = .75, linetype = "dotdash")
-		p <- suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2))))
+		p <- suppressWarnings(suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2)))))
 	}
 
 	# input$reg_plots = "resid_vs_predictorlist"
@@ -227,9 +255,19 @@ plot.regression <- function(result) {
 		plots <- list()
 		residuals <- mod$.resid
 		rdat <- cbind(residuals,dat[,input$reg_var2])
+		rdat <- data.frame(rdat)
+		colnames(rdat) <- c('residuals',input$reg_var2)
 		# for(i in input$reg_var2) plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(method = "lm", size = .75, linetype = "dotdash")
-		for(i in input$reg_var2) plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(se = FALSE)
-		p <- suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2))))
+		# for(i in input$reg_var2) plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(se = FALSE)
+		for(i in input$reg_var2) {
+			# plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(se = FALSE)
+			if(getdata_class()[i] == 'factor') {
+				plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_boxplot(fill = 'blue', alpha = .3)
+			} else {
+				plots[[i]] <- ggplot(rdat, aes_string(x=i, y="residuals")) + geom_point() + geom_smooth(se = FALSE)
+			}
+		}
+		p <- suppressWarnings(suppressMessages(do.call(grid.arrange, c(plots, list(ncol = 2)))))
 	}
 
 	# input$reg_plots = "leverage_plots"
@@ -280,7 +318,7 @@ plot.regression <- function(result) {
 	}
 
 	# suppressWarnings(print(p))
-	suppressMessages(print(p))
+	suppressWarnings(suppressMessages(print(p)))
 }
 
 # analysis reactive

@@ -1,11 +1,3 @@
-# os_type <- .Platform$OS.type
-# if (os_type == 'windows') {
-#   Sys.setlocale(category = "LC_ALL","English_United States.1252")
-# } else {
-#   # Sys.setlocale(category = "LC_ALL","Japanese_Japan.932")
-#   Sys.setlocale(category = "LC_ALL","en_US.UTF-8")
-# }
-
 # avoid breaks in R-output print and show JSON packets transferred
 # over websockets
 # options(error = recover)

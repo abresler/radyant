@@ -163,8 +163,9 @@ transform_main <- reactive({
 		if(nrow(cpdat) == nrow(dat)) dat <- cbind(dat,cpdat)
 	}
 
-	if(input$tr_rename != '') {
+	if(!is.null(input$tr_columns) && input$tr_rename != '') {
 		rcom <- unlist(strsplit(gsub(" ","",input$tr_rename), ","))
+		rcom <- rcom[1:length(input$tr_columns)]
 		names(dat)[1:length(rcom)] <- rcom
 	}
 
@@ -175,6 +176,10 @@ transform_main <- reactive({
 
 		fullDat <- getdata()
 		newvar <- try(do.call(within, list(fullDat,parse(text = recom))), silent = TRUE)
+
+		# fullDat <- mtcars
+		# recom = "x = z + y"
+		# newvar <- try(do.call(within, list(fullDat,parse(text = recom))), silent = TRUE)
 
 		if(!is(newvar, 'try-error')) { 
 			nfull <- ncol(fullDat)
@@ -188,32 +193,23 @@ transform_main <- reactive({
 			dat <- cbind(dat,newvar)
 			colnames(dat) <- cn
 		} else if(is.null(input$tr_columns)) {
-			return()
+			# the 'create' command did not compile so if there were
+			# no variables selected show ... nothing
+			# print(paste0("Create command:", recom, "did not create a new variable. Please try again."))
+		 	# updateTextInput(session = session, inputId = "tr_transform", label = "Create (e.g., y = x - z):", '')
+			return(paste0("Create command: ", recom, " did not create a new variable. Please try again."))
+			# return()
 		}
 	}
 
-	# dat <- mtcar
-	# recom <- "t = mpg + cyl"
-	# do.call(within, list(dat, parse(text = recom)))
-
 	dat
 })
-
-output$transform_data <- renderTable({
-
-	dat <- transform_main()
-	if(is.null(dat)) return()
-
-	dat <- data.frame(date2character_dat(dat))
-	nr <- min(nrow(dat),10)
-	dat[1:nr,, drop = FALSE]
-})
-
 
 output$transform_data <- reactive({
 
 	dat <- transform_main()
 	if(is.null(dat)) return()
+	if(is.character(dat)) return(dat)
 
 	dat <- data.frame(date2character_dat(dat))
 	nr <- min(nrow(dat),10)
@@ -224,7 +220,6 @@ output$transform_data <- reactive({
 	html <- sub("<TABLE border=1>","<table class='table table-condensed table-hover'>", html)
   # Encoding(html) <- 'UTF-8'
   html
-
 
 })
 
@@ -256,8 +251,13 @@ observe({
 	if(is.null(input$addtrans) || input$addtrans == 0) return()
 	isolate({
 		dat <- transform_main()
+		if(is.null(dat)) return()
+		if(is.character(dat)) return(dat)
+
 		if(input$tr_changeType == 'remove') {
 			changedata(addColName = colnames(dat))
+		} else if(input$tr_changeType == 'rename') {
+			changedata_names(input$tr_columns, colnames(dat))
 		} else {
 			changedata(dat, colnames(dat))
 		}
@@ -270,3 +270,4 @@ observe({
 		updateSelectInput(session = session, inputId = "tr_transfunction", choices = trans_options, selected = "None")
 	})
 })
+

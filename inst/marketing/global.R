@@ -11,7 +11,9 @@ values <- reactiveValues()
 
 values[['running_app_local']] <- FALSE
 if(Sys.getenv('SHINY_PORT') == "") {
-  options(shiny.maxRequestSize=100000*1024^2)
+  # options(shiny.maxRequestSize=1000000*1024^2)
+  # no limit to filesize locally
+  options(shiny.maxRequestSize=-1)
   values[['running_app_local']] <- TRUE
 }
 

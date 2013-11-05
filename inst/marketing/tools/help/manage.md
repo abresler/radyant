@@ -20,6 +20,4 @@ Saving data from Radyant for use in Excel can again be achieved in two ways. Fir
 
 #### Remove data from memory
 
-If there are data files you no longer need to you can select them and click the 'Remove data' button. Note: It is not currently possible to delete a file you just uploaded until you upload another data set first. 
-
-<!-- ![Single mean - summary](figures/SingleMeanSummary.png) -->
+If there are data files you no longer need to you can select them and click the 'Remove data' button. Note that to delete a file you just uploaded your must currently either (1) upload another data set first or (2) refresh your browser. 

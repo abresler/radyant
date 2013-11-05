@@ -7,7 +7,7 @@ ui_Manage <- function() {
           checkboxInput('header', 'Header', TRUE),
           radioButtons('sep', '', c(Comma=',', Semicolon=';', Tab='\t'), 'Comma')
         ),
-        fileInput('uploadfile', '')
+        fileInput('uploadfile', '', multiple=TRUE)
       ),
       conditionalPanel(condition = "input.dataType == 'clipboard'",
         actionButton('loadClipData', 'Paste data')
@@ -123,7 +123,8 @@ observe({
     if(length(datasets) == length(input$removeDataset)) {
       datasets <- ""
     } else {
-      datasets <- datasets[-which(datasets == input$removeDataset)]
+      # datasets <- datasets[-which(datasets == input$removeDataset)]
+      datasets <- datasets[-which(datasets %in% input$removeDataset)]
     }
 
     values[['datasetlist']] <- datasets
@@ -191,13 +192,22 @@ loadPackData <- function(pFile) {
 output$datasets <- renderUI({
 
   inFile <- input$uploadfile
-  # if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath, input$dataType)
-  if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath)
+
+  # if(!is.null(inFile)) loadUserData(inFile$name, inFile$datapath)
+  if(!is.null(inFile)) {
+    # iterating through the files to upload
+    isolate({
+      for(i in 1:(dim(inFile)[1])) {
+        loadUserData(inFile[i,'name'], inFile[i,'datapath'])
+        # unlink(inFile[i,'datapath'], recursive = FALSE, force = TRUE)
+      }
+    })
+  }
 
   # if(input$xls_paste != '') {
- #  if(!is.null(input$xls_paste) && input$xls_paste != '') {
+  # if(!is.null(input$xls_paste) && input$xls_paste != '') {
   #   values[['xls_data']] <- as.data.frame(read.table(header=T, text=input$xls_paste, sep="\t"))
- #    values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
+  #   values[['datasetlist']] <- unique(c('xls_data',values[['datasetlist']]))
   # }
 
   # clean out the copy-and-paste box once the data has been stored

@@ -118,6 +118,7 @@ ui_regression <- function() {
   	),
     conditionalPanel(condition = "input.analysistabs == 'Summary'",
 	    uiOutput("reg_var3"),
+	    checkboxInput(inputId = "reg_outlier", label = "Outlier test", value = FALSE),
 	    checkboxInput(inputId = "reg_vif", label = "Calculate VIF-values", value = FALSE),
   	  checkboxInput(inputId = "reg_stepwise", label = "Select variables step-wise", value = FALSE)
   	),
@@ -130,10 +131,18 @@ ui_regression <- function() {
 	)
 }
 
-
-
 summary.regression <- function(result) {
-	print(summary(result), digits = 3)
+
+	# rounding to avoid scientific notation for the coefficients
+	res <- summary(result)
+	res$coefficients <- round(res$coefficients,3)
+	print(res)
+
+	# print(summary(result), digits = 3)
+	if(input$reg_outlier) {
+		print(outlierTest(result), digits = 3)
+		# cat("\n")
+	}
 	if(input$reg_vif) {
 		print(vif.regression(result))
 		# cat("\n")
@@ -272,7 +281,7 @@ plot.regression <- function(result) {
 
 	# input$reg_plots = "leverage_plots"
 	if(input$reg_plots == "leverage_plots") {
-		return(leveragePlots(result, main = "", ask=FALSE, layout = c(ceiling(length(input$reg_var2)/2),2)))
+		return(leveragePlots(result, main = "", ask=FALSE, id.n = 1, layout = c(ceiling(length(input$reg_var2)/2),2)))
 	}
 
 	if(input$reg_plots == "coef") {

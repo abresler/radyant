@@ -20,18 +20,46 @@ centerVar <- function(x) {
 	x
 }
 
+medianSplit <- function(x) cut(x, breaks=quantile(x,c(0,.5,1)), include.lowest=TRUE, labels=c("Below","Above"))
+
+decileSplit <- function(x) cut(x, breaks=quantile(x,seq(0,1,.1)), include.lowest=TRUE, labels=seq(1,10,1))
+
+shift <- function(x,shift_by){
+	# from http://ctszkin.com/2012/03/11/generating-a-laglead-variables/
+  stopifnot(is.numeric(shift_by))
+  stopifnot(is.numeric(x))
+
+  if (length(shift_by) > 1)
+    return(sapply(shift_by,shift, x = x))
+
+  # prefer to have positive number create lags as normal in ts-literature
+  shift_by <- -shift_by
+
+  out <- NULL
+  abs_shift_by = abs(shift_by)
+  if (shift_by > 0)
+    out <- c(tail(x,-abs_shift_by),rep(NA,abs_shift_by))
+  else if (shift_by < 0)
+    out <- c(rep(NA,abs_shift_by), head(x,-abs_shift_by))
+  else
+    out <- x
+  out
+}
+
 sq <<- function(x) x^2
 inv <<- function(x) 1/x
-st1 <<- standardize_1sd
+st <<- standardize_1sd
 st2 <<- rescale
 cent <<- centerVar 
-bin2 <<- function(x) cut(x,2)
-bin10 <<- function(x) cut(x,10)
+msp <<- medianSplit
+dec <<- decileSplit
+# lagx <<- shift
 fct <<- as.factor
-rfct <<- revFactorOrder
 num <<- as.numeric
 int <<- as.integer
 ch <<- as.character
+rfct <<- revFactorOrder
+
 # d <<- as.Date
 d_mdy <<- function(x) as.Date(mdy(as.character(x)))
 d_dmy <<- function(x) as.Date(dmy(as.character(x)))
@@ -42,7 +70,7 @@ d_ymd <<- function(x) as.Date(ymd(as.character(x)))
 # "Standardize (2-sd)" = "st2","Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As character" = "ch", 
 
 trans_options <- list("None" = "", "Log" = "log", "Square" = "sq", "Square-root" = "sqrt", "Center" = "cent", "Standardize" = "st", 
-	"Invert" = "inv", "Bin 2" = "bin2", "Bin10" = "bin10", "As factor" = "fct", "Rev factor order" = "rfct", "As number" = "num", "As integer" = "int", "As character" = "ch", 
+	"Invert" = "inv", "Median split" = "msp", "Deciles" = "dec", "As factor" = "fct",  "As number" = "num", "As integer" = "int", "As character" = "ch", "Rev factor order" = "rfct",
 	"As date (mdy)" = "d_mdy", "As date (dmy)" = "d_dmy", "As date (ymd)" = "d_ymd")
 
 ui_Transform <- function() {
